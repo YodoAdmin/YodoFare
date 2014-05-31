@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal" >
+	    
+	    <!-- Labels -->
+		<LinearLayout 
+		    android:orientation="vertical"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="center_horizontal">
+	    
+		    <TextView
+			    android:id="@+id/oldfee1Label"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="5dp"
+			    android:layout_marginTop="8dp"
+			    android:text="@string/old_fare_zone_1"
+			    android:textSize="@dimen/text_size_values" />
+		    
+		    <TextView
+			    android:id="@+id/oldfee2Label"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="5dp"
+			    android:layout_marginTop="8dp"
+			    android:text="@string/old_fare_zone_2"
+			    android:textSize="@dimen/text_size_values" />
+		    
+		    <TextView
+			    android:id="@+id/oldfee3Label"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="5dp"
+			    android:layout_marginTop="8dp"
+			    android:text="@string/old_fare_zone_3"
+			    android:textSize="@dimen/text_size_values" />
+		    
+		    <View
+	            android:layout_width="fill_parent"
+	            android:layout_height="1dp"
+	            android:layout_marginTop="10dp"
+	            android:layout_marginBottom="5dp"
+	            android:background="@android:color/darker_gray"/>
+		    
+		    <TextView
+			    android:id="@+id/adultfee1Label"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="5dp"
+			    android:layout_marginTop="8dp"
+			    android:text="@string/adult_fare_zone_1"
+			    android:textSize="@dimen/text_size_values" />
+		    
+		    <TextView
+			    android:id="@+id/adultfee2Label"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="5dp"
+			    android:layout_marginTop="8dp"
+			    android:text="@string/adult_fare_zone_2"
+			    android:textSize="@dimen/text_size_values" />
+		    
+		    <TextView
+			    android:id="@+id/adultfee3Label"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="5dp"
+			    android:layout_marginTop="8dp"
+			    android:text="@string/adult_fare_zone_3"
+			    android:textSize="@dimen/text_size_values" />
+		    
+		    <View
+	            android:layout_width="fill_parent"
+	            android:layout_height="1dp"
+	            android:layout_marginTop="10dp"
+	            android:layout_marginBottom="5dp"
+	            android:background="@android:color/darker_gray"/>
+		    
+			<TextView
+			    android:id="@+id/childfee1Label"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="5dp"
+			    android:layout_marginTop="8dp"
+			    android:text="@string/child_fare_zone_1"
+			    android:textSize="@dimen/text_size_values" />
+			
+			<TextView
+			    android:id="@+id/childfee2Label"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="5dp"
+			    android:layout_marginTop="8dp"
+			    android:text="@string/child_fare_zone_2"
+			    android:textSize="@dimen/text_size_values" />
+			
+			<TextView
+			    android:id="@+id/childfee3Label"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="5dp"
+			    android:layout_marginTop="8dp"
+			    android:text="@string/child_fare_zone_3"
+			    android:textSize="@dimen/text_size_values" />
+			
+			<View
+	            android:layout_width="fill_parent"
+	            android:layout_height="1dp"
+	            android:layout_marginTop="10dp"
+	            android:layout_marginBottom="5dp"
+	            android:background="@android:color/darker_gray"/>
+		    
+			
+			<TextView
+			    android:id="@+id/studentfee1Label"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="5dp"
+			    android:layout_marginTop="8dp"
+			    android:text="@string/student_fare_zone_1"
+			    android:textSize="@dimen/text_size_values" />
+			
+			<TextView
+			    android:id="@+id/studentfee2Label"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="5dp"
+			    android:layout_marginTop="8dp"
+			    android:text="@string/student_fare_zone_2"
+			    android:textSize="@dimen/text_size_values" />
+			
+			<TextView
+			    android:id="@+id/studentfee3Label"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="5dp"
+			    android:layout_marginTop="8dp"
+			    android:text="@string/student_fare_zone_3"
+			    android:textSize="@dimen/text_size_values" />
+		<!-- end Labels -->
+		</LinearLayout>	  
+		
+		<!-- Text Fields -->
+		<LinearLayout
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:layout_gravity="center_horizontal"
+		    android:orientation="vertical" >
+	   
+		    <EditText
+			    android:id="@+id/oldFee1Text"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:singleLine="true"
+			    android:inputType="numberDecimal"
+			    android:text="@string/zero"
+			    android:textSize="@dimen/text_size_values" />
+		    
+		    <EditText
+			    android:id="@+id/oldFee2Text"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:singleLine="true"
+			    android:inputType="numberDecimal"
+			    android:text="@string/zero"
+			    android:textSize="@dimen/text_size_values" />
+		    
+		    <EditText
+			    android:id="@+id/oldFee3Text"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:singleLine="true"
+			    android:inputType="numberDecimal"
+			    android:text="@string/zero"
+			    android:textSize="@dimen/text_size_values" />
+		    
+		    <View
+	            android:layout_width="fill_parent"
+	            android:layout_height="1dp"
+	            android:layout_marginTop="5dp"
+	            android:layout_marginBottom="5dp"
+	            android:background="@android:color/darker_gray"/>
+			
+			<EditText
+			    android:id="@+id/adultFee1Text"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:singleLine="true"
+			    android:inputType="numberDecimal"
+			    android:text="@string/zero"
+			    android:textSize="@dimen/text_size_values" />
+			
+			<EditText
+			    android:id="@+id/adultFee2Text"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:singleLine="true"
+			    android:inputType="numberDecimal"
+			    android:text="@string/zero"
+			    android:textSize="@dimen/text_size_values" />
+			
+			<EditText
+			    android:id="@+id/adultFee3Text"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:singleLine="true"
+			    android:inputType="numberDecimal"
+			    android:text="@string/zero"
+			    android:textSize="@dimen/text_size_values" />
+			
+			 <View
+	            android:layout_width="fill_parent"
+	            android:layout_height="1dp"
+	            android:layout_marginTop="5dp"
+	            android:layout_marginBottom="5dp"
+	            android:background="@android:color/darker_gray"/>
+			
+			<EditText
+			    android:id="@+id/childFee1Text"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:singleLine="true"
+			    android:inputType="numberDecimal"
+			    android:text="@string/zero"
+			    android:textSize="@dimen/text_size_values" />
+			
+			<EditText
+			    android:id="@+id/childFee2Text"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:singleLine="true"
+			    android:inputType="numberDecimal"
+			    android:text="@string/zero"
+			    android:textSize="@dimen/text_size_values" />
+			
+			<EditText
+			    android:id="@+id/childFee3Text"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:singleLine="true"
+			    android:inputType="numberDecimal"
+			    android:text="@string/zero"
+			    android:textSize="@dimen/text_size_values" />
+			
+			<View
+	            android:layout_width="fill_parent"
+	            android:layout_height="1dp"
+	            android:layout_marginTop="5dp"
+	            android:layout_marginBottom="5dp"
+	            android:background="@android:color/darker_gray"/>
+			
+			<EditText
+			    android:id="@+id/studentFee1Text"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:singleLine="true"
+			    android:inputType="numberDecimal"
+			    android:text="@string/zero"
+			    android:textSize="@dimen/text_size_values" />
+			
+			<EditText
+			    android:id="@+id/studentFee2Text"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:singleLine="true"
+			    android:inputType="numberDecimal"
+			    android:text="@string/zero"
+			    android:textSize="@dimen/text_size_values" />
+			
+			<EditText
+			    android:id="@+id/studentFee3Text"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:gravity="right"
+			    android:singleLine="true"
+			    android:inputType="numberDecimal"
+			    android:text="@string/zero"
+			    android:textSize="@dimen/text_size_values" />
+		<!-- end Text Fields -->
+		</LinearLayout>	  
+	
+	</LinearLayout>
+</ScrollView>

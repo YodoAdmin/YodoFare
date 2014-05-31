@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_settings">Configuración</string>
+    <string name="desc"></string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancelar</string>
+    <string name="next">Siguiente</string>
+    <string name="merchant">Walmart</string>
+    <string name="merch_pip_hint">Merch PIP</string>
+    <string name="pip_token">Inserte el token password</string>
+
+    <!-- Messages Text -->
+    <string name="no_wifi">Debe encender su wifi primero</string>
+    <string name="error">Esto es embarazoso! Ocurrio un error en el proceso</string>
+    <string name="no_internet">Lo sentimos, parece que no dispone de una una conexion a Internet</string>
+    <string name="not_available">Lo sentimos, está función aún no está disponible</string>
+    <string name="connected">Conectado</string>
+    <string name="loading">Cargando &#x2026;</string>
+    <string name="show_pass">Mostrar Contraseña</string>
+    <string name="input_pip">Frase de Identidad Merch (MIP)</string>
+    <string name="select_currency">Seleccione una Moneda</string>
+    <string name="barcode_scanner">Escanee el código</string>
+    <string name="not_support_bt">Este dispositivo no es compatible con Bluetooth y no puede utilizar los servicios de Yodo</string>
+    <string name="not_bt">Servicio de publicidad desactivado</string>
+    <string name="registering_merch">Registrando Merch</string>
+    <string name="null_response">Respuesta Nula</string>
+    
+    <!-- Values Labels -->
+    <string name="total_fare">Tarifa: </string>
+    <string name="balance">Balance: </string>
+    <string name="zero">0.00</string>
+    <string name="no_item">- no item -</string>
+    
+    <!-- Fee Labels -->
+    <string name="old_fare_zone_1">Tarifa Adulto Mayor Zona 1: </string>
+    <string name="old_fare_zone_2">Tarifa Adulto Mayor Zona 2: </string>
+    <string name="old_fare_zone_3">Tarifa Adulto Mayor Zona 3: </string>
+    
+    <string name="adult_fare_zone_1">Tarifa Adulto Zona 1: </string>
+    <string name="adult_fare_zone_2">Tarifa Adulto Zona 2: </string>
+    <string name="adult_fare_zone_3">Tarifa Adulto Zona 3: </string>
+
+    <string name="child_fare_zone_1">Tarifa Niño Zona 1: </string>
+    <string name="child_fare_zone_2">Tarifa Niño Zona 2: </string>
+    <string name="child_fare_zone_3">Tarifa Niño Zona 3: </string>
+
+    <string name="student_fare_zone_1">Tarifa Estudiante Zona 1: </string>
+    <string name="student_fare_zone_2">Tarifa Estudiante Zona 2: </string>
+    <string name="student_fare_zone_3">Tarifa Estudiante Zona 3: </string>
+    
+    <!-- Input Labels -->
+    <string name="clear">C</string>
+
+    <string name="value_1">1</string>
+    <string name="value_2">2</string>
+    <string name="value_3">3</string>
+    
+    <!-- Progress Dialog Messages -->
+    <string name="balance_message">Obteniendo Balance</string>
+    <string name="advertising_message">Obteniendo Publicidad</string>
+    <string name="advertising_loading">Cargando Publicidad</string>
+    
+    <!-- Balance Messages -->
+    <string name="yodo_cash">Yodo Cash</string>
+    <string name="yodo_debits">Yodo Debits</string>
+    <string name="yodo_cumulative_balance">Balance Acumulado:</string>
+    <string name="to_date">hasta la fecha:</string>
+    <string name="today">hoy:</string>
+    <string name="yodo_today_balance">Balance de Hoy:</string>
+    
+    <!-- Exchange Response -->
+    <string name="exchange_code">Código:</string>
+    <string name="exchange_auth">Número de Autorización:</string>
+    <string name="exchange_message">Mensaje:</string>
+    <string name="exchange_extra">Extra:</string>
+    
+    <!-- Preview Messages -->
+    <string name="ok_balance">La transacción puede realizarse con éxito</string>
+    <string name="no_balance">Lo sentimos, usted no tiene suficiente crédito</string>
+    
+    <!-- configurations -->
+    <string name="options">Opciones</string>
+    <string name="tools">Herramientas</string>
+    <string name="set_fee">Definir Tarifas</string>
+    <string name="set_currency">Definir Moneda</string>
+    <string name="change_language">Lenguages</string>
+    <string name="sel_language">Seleccione un lenguaje</string>
+    <string name="get_balance">Obtener Balance</string>
+    <string name="about">Acerca de</string>
+    <string name="exit_app">Salir</string>
+    <string name="ads_successfull">Imágenes cargadas satisfactoriamente</string>
+    
+    <!-- Tutorial Instructions -->
+    <string name="instructions_title">Tutorial</string>
+    <string name="instructions_message">Deslice el dedo hacia la izquierda para ocultar el panel</string>
+    
+</resources>

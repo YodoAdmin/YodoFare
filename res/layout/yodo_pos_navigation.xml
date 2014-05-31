@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="250dp"
+              android:layout_height="match_parent"
+              android:background="@drawable/background">
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp">
+
+        <TextView
+                android:id="@+id/optionsView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@android:color/white"
+                android:text="@string/options" />
+
+        <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:background="@android:color/darker_gray"/>
+
+        <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:padding="5dp"
+                android:drawablePadding="10dp"
+                android:drawableLeft="@android:drawable/ic_menu_sort_alphabetically"
+                android:text="@string/change_language"
+                android:singleLine="true"
+                android:background="?android:selectableItemBackground"
+                android:gravity="left|center_vertical"
+                android:onClick="changeLanguageClick"/>
+
+         <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:padding="5dp"
+                android:drawablePadding="15dp"
+                android:drawableLeft="@android:drawable/ic_menu_preferences"
+                android:text="@string/set_fee"
+                android:singleLine="true"
+                android:background="?android:selectableItemBackground"
+                android:gravity="left|center_vertical"
+                android:onClick="setFeeClick" />
+         
+         <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:drawablePadding="5dp"
+                android:drawableLeft="@drawable/currency"
+                android:text="@string/set_currency"
+                android:singleLine="true"
+                android:background="?android:selectableItemBackground"
+                android:gravity="left|center_vertical"
+                android:onClick="currencyPressed" />
+
+        <TextView
+                android:id="@+id/toolsView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:layout_marginTop="20dp"
+                android:textColor="@android:color/white"
+                android:text="@string/tools" />
+
+        <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:background="@android:color/darker_gray"/>
+        
+        <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:drawableLeft="@drawable/get_balance"
+                android:text="@string/get_balance"
+                android:singleLine="true"
+                android:background="?android:selectableItemBackground"
+                android:gravity="left|center_vertical"
+                android:onClick="historyPressed" />
+
+        <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:padding="5dp"
+                android:drawablePadding="10dp"
+                android:drawableLeft="@android:drawable/ic_dialog_info"
+                android:text="@string/about"
+                android:singleLine="true"
+                android:background="?android:selectableItemBackground"
+                android:gravity="left|center_vertical"
+                android:onClick="aboutClick" />
+
+        <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:padding="5dp"
+                android:drawablePadding="10dp"
+                android:drawableLeft="@android:drawable/ic_lock_power_off"
+                android:text="@string/exit_app"
+                android:singleLine="true"
+                android:background="?android:selectableItemBackground"
+                android:gravity="left|center_vertical"
+                android:onClick="exitClick" />
+
+
+    </LinearLayout>
+</ScrollView>
