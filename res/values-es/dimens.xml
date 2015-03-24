@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-	<dimen name="text_size_numbers">35sp</dimen>
-	<dimen name="text_size_values">35sp</dimen>
-	<dimen name="text_size_buttons">30sp</dimen>
-	<dimen name="text_size_input">40sp</dimen>
-</resources>

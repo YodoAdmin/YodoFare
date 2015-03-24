@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen 
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <EditTextPreference
+        android:title="@string/config_pref_username"
+        android:key="SPCurrentBeacon"
+        android:inputType="text"/>
+
+    <CheckBoxPreference
+        android:key="SPAdvertisingService"
+        android:title="@string/config_pref_advertising"
+        android:summary="@string/config_pref_advertising_summary" />
+
+    <PreferenceCategory android:title="@string/config_pref_category_old" >
+        
+        <EditTextPreference
+            android:title="@string/config_pref_zone_1"
+            android:key="SPOldZone1"
+            android:inputType="numberDecimal"
+            android:defaultValue="2.50"/>
+
+        <EditTextPreference
+            android:title="@string/config_pref_zone_2"
+            android:key="SPOldZone2"
+            android:inputType="numberDecimal"
+            android:defaultValue="2.50"/>
+
+        <EditTextPreference
+            android:title="@string/config_pref_zone_3"
+            android:key="SPOldZone3"
+            android:inputType="numberDecimal"
+            android:defaultValue="2.50"/>
+        
+	</PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/config_pref_category_adult" >
+
+        <EditTextPreference
+            android:title="@string/config_pref_zone_1"
+            android:key="SPAdultZone1"
+            android:inputType="numberDecimal"
+            android:defaultValue="4.50"/>
+
+        <EditTextPreference
+            android:title="@string/config_pref_zone_2"
+            android:key="SPAdultZone2"
+            android:inputType="numberDecimal"
+            android:defaultValue="4.50"/>
+
+        <EditTextPreference
+            android:title="@string/config_pref_zone_3"
+            android:key="SPAdultZone3"
+            android:inputType="numberDecimal"
+            android:defaultValue="4.50"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/config_pref_category_child" >
+
+        <EditTextPreference
+            android:title="@string/config_pref_zone_1"
+            android:key="SPChildZone1"
+            android:inputType="numberDecimal"
+            android:defaultValue="2.50"/>
+
+        <EditTextPreference
+            android:title="@string/config_pref_zone_2"
+            android:key="SPChildZone2"
+            android:inputType="numberDecimal"
+            android:defaultValue="2.50"/>
+
+        <EditTextPreference
+            android:title="@string/config_pref_zone_3"
+            android:key="SPChildZone3"
+            android:inputType="numberDecimal"
+            android:defaultValue="2.50"/>
+
+    </PreferenceCategory>
+	
+    <PreferenceCategory android:title="@string/config_pref_category_student" >
+
+        <EditTextPreference
+            android:title="@string/config_pref_zone_1"
+            android:key="SPStudentZone1"
+            android:inputType="numberDecimal"
+            android:defaultValue="3.00"/>
+
+        <EditTextPreference
+            android:title="@string/config_pref_zone_2"
+            android:key="SPStudentZone2"
+            android:inputType="numberDecimal"
+            android:defaultValue="3.00"/>
+
+        <EditTextPreference
+            android:title="@string/config_pref_zone_3"
+            android:key="SPStudentZone3"
+            android:inputType="numberDecimal"
+            android:defaultValue="3.00"/>
+        
+	</PreferenceCategory>
+
+</PreferenceScreen>

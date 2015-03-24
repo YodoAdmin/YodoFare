@@ -1,0 +1,114 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="AppTheme.Base">
+        <item name="android:alertDialogTheme">@style/CustomDialogTheme</item>
+    </style>
+
+    <style name="AppTheme.Base" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">@color/colorPrimaryRed</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryRedDark</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="colorAccent">@color/accent</item>
+    </style>
+
+    <!-- Widgets -->
+
+    <!-- ToolBar -->
+    <style name="ToolBarStyle" parent="Theme.AppCompat">
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
+    </style>
+
+    <!-- Custom Dialog -->
+    <style name="CustomDialogTheme" parent="@android:style/Theme.Holo.Light.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:windowTitleStyle">@style/CustomDialogWindowTitle</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="CustomDialogWindowTitle" parent="@style/CustomDialogTheme">
+        <item name="android:textAppearance">@style/TextAppearance.CustomDialogWindowTitle</item>
+    </style>
+
+    <style name="TextAppearance.CustomDialogWindowTitle" parent="@android:style/TextAppearance.Holo.DialogWindowTitle">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Text View Labels -->
+    <style name="LabelTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">@dimen/data_margin</item>
+        <item name="android:layout_marginTop">@dimen/data_marginTop</item>
+        <item name="android:layout_marginBottom">@dimen/data_margin</item>
+        <item name="android:textSize">@dimen/text_size_values</item>
+    </style>
+
+    <!-- Edit View Editable -->
+    <style name="EditTextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">@dimen/data_margin</item>
+        <item name="android:layout_marginTop">@dimen/data_margin</item>
+        <item name="android:layout_marginBottom">@dimen/data_margin</item>
+        <item name="android:gravity">end</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:text">@string/zero</item>
+        <item name="android:textSize">@dimen/text_size_values</item>
+        <item name="android:background">@drawable/show_text_field</item>
+    </style>
+
+    <!-- Image Styles -->
+    <style name="ImageButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:adjustViewBounds">true</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:background">@drawable/highlight_button</item>
+    </style>
+
+    <!--  Transparent dialog -->
+    <style name="TransparentProgressDialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowTitleStyle">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <!--  ImageView for Fee -->
+    <style name="FeeImageView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:onClick">feeSelectedClick</item>
+    </style>
+
+    <!--  Navigation Button -->
+    <style name="NavigationButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:drawablePadding">10dp</item>
+        <item name="android:background">@drawable/highlight_button</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">start|center_vertical</item>
+    </style>
+
+</resources>
