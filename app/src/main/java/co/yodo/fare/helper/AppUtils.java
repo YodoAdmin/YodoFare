@@ -1,6 +1,7 @@
 package co.yodo.fare.helper;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
@@ -575,6 +576,21 @@ public class AppUtils {
         LocationManager lm = (LocationManager) c.getSystemService(Context.LOCATION_SERVICE);
         String provider    = lm.getBestProvider( new Criteria(), true );
         return ( ( !provider.isEmpty() ) && !LocationManager.PASSIVE_PROVIDER.equals( provider ) );
+    }
+
+    /**
+     * Verify if a service is running
+     * @param c The Context of the Android system.
+     * @param serviceName The name of the service.
+     * @return Boolean true if is running otherwise false
+     */
+    public static boolean isMyServiceRunning(Context c, String serviceName) {
+        ActivityManager manager = (ActivityManager) c.getSystemService( Context.ACTIVITY_SERVICE );
+        for( ActivityManager.RunningServiceInfo service : manager.getRunningServices( Integer.MAX_VALUE ) )  {
+            if( serviceName.equals( service.service.getClassName() ) )
+                return true;
+        }
+        return false;
     }
 
     /**

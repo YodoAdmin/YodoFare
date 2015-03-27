@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.os.Parcelable;
 import android.provider.Settings;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.text.SpannableString;
@@ -64,6 +65,7 @@ import co.yodo.fare.net.YodoRequest;
 import co.yodo.fare.scanner.QRScanner;
 import co.yodo.fare.scanner.QRScannerFactory;
 import co.yodo.fare.scanner.QRScannerListener;
+import co.yodo.fare.service.LocationService;
 import co.yodo.fare.service.RESTService;
 
 public class FareActivity extends ActionBarActivity implements YodoRequest.RESTListener, QRScannerListener {
@@ -72,6 +74,9 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
 
     /** The context object */
     private Context ac;
+
+    /** The Local Broadcast Manager */
+    private LocalBroadcastManager lbm;
 
     /** Orientation detector */
     private OrientationEventListener mOrientationListener;
@@ -84,12 +89,13 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
     private SlidingPaneLayout mSlidingLayout;
     private Spinner mScannersSpinner;
     private TextView mTotalFareView;
+    private ImageView mLocationView;
     private View mCurrentFee;
     private View mCurrentZone;
 
     /** Popup Window for Tips */
     private PopupWindow mPopupMessage;
-    private Double equivalentTender;
+    private Double equivalentTotal;
 
     /** Messages Handler */
     private static YodoHandler handlerMessages;
@@ -123,12 +129,17 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
         super.onResume();
         registerBroadcasts();
 
-        AppUtils.setupAdvertising(ac, AppUtils.isAdvertisingServiceRunning(ac), false);
+        AppUtils.setupAdvertising( ac, AppUtils.isAdvertisingServiceRunning(ac), false );
 
         if( currentScanner != null && isScanning ) {
             isScanning = false;
             currentScanner.startScan();
         }
+
+        Intent iLoc = new Intent( ac, LocationService.class );
+        if( AppUtils.isMyServiceRunning( ac, LocationService.class.getName() ) )
+            stopService( iLoc );
+        startService( iLoc );
     }
 
     @Override
@@ -139,6 +150,11 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
         if( currentScanner != null && currentScanner.isScanning() ) {
             isScanning = true;
             currentScanner.close();
+        }
+
+        if( AppUtils.isMyServiceRunning( ac, LocationService.class.getName() ) ) {
+            Intent iLoc = new Intent( ac, LocationService.class );
+            stopService( iLoc );
         }
     }
 
@@ -164,11 +180,15 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
      * Initialized all the GUI main components
      */
     private void setupGUI() {
+        // get the context
         ac = FareActivity.this;
+        // get local broadcast
+        lbm = LocalBroadcastManager.getInstance( ac );
 
         // Globals
         mSlidingLayout   = (SlidingPaneLayout) findViewById( R.id.sliding_panel_layout );
         mScannersSpinner = (Spinner) findViewById( R.id.scannerSpinner );
+        mLocationView    = (ImageView) findViewById( R.id.locationIconView );
         mTotalFareView   = (TextView) findViewById( R.id.totalFareText );
 
         // Popup
@@ -263,7 +283,7 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
         mTotalFareView.setOnLongClickListener( new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                //setupPopup( v );
+                setupPopup( v );
                 return false;
             }
         });
@@ -299,13 +319,12 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
         LayoutInflater layoutInflater = (LayoutInflater) getSystemService( Context.LAYOUT_INFLATER_SERVICE );
         View layout = layoutInflater.inflate( R.layout.popup_window, viewGroup );
 
-        TextView cashTender     = (TextView) layout.findViewById( R.id.cashTenderText );
+        TextView cashTotal      = (TextView) layout.findViewById( R.id.cashTotalText );
         ProgressBar progressBar = (ProgressBar) layout.findViewById( R.id.progressBarPopUp );
-        cashTender.setText( String.format( Locale.US, "%.2f", equivalentTender ) );
-        AppUtils.setCurrencyIcon( ac, cashTender, true );
+        cashTotal.setText( String.format( Locale.US, "%.2f", equivalentTotal ) );
 
-        if( equivalentTender == null ) {
-            cashTender.setVisibility( View.GONE );
+        if( equivalentTotal == null ) {
+            cashTotal.setVisibility( View.GONE );
             progressBar.setVisibility( View.VISIBLE );
         }
 
@@ -665,13 +684,11 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
         IntentFilter filter = new IntentFilter();
         filter.addAction( BroadcastMessage.ACTION_NEW_LOCATION );
 
-        registerReceiver( mLauncherBroadcastReceiver, filter );
-        AppUtils.Logger( TAG, "Broadcast registered" );
+        lbm.registerReceiver( mFareBroadcastReceiver, filter );
     }
 
     private void unregisterBroadcasts() {
-        unregisterReceiver( mLauncherBroadcastReceiver );
-        AppUtils.Logger( TAG, "Broadcast unregistered" );
+        lbm.unregisterReceiver( mFareBroadcastReceiver );
     }
 
     @Override
@@ -806,19 +823,20 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
      * The broadcast receiver for the location service, it will receive all the
      * updates from the location service and send it to the gateway.
      */
-    private BroadcastReceiver mLauncherBroadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mFareBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context c, Intent i) {
-
             String action = i.getAction();
+            AppUtils.Logger(TAG, ">> FareActivity >> Event");
 			/* Broadcast: ACTION_NEW_LOCATION */
 			/* ****************************** */
             if( action.equals( BroadcastMessage.ACTION_NEW_LOCATION ) ) {
-                AppUtils.Logger(TAG, ">> LauncherActivity >> ACTION_NEW_LOCATION");
+                AppUtils.Logger(TAG, ">> FareActivity >> ACTION_NEW_LOCATION");
 
                 Parcelable p = i.getParcelableExtra( BroadcastMessage.EXTRA_NEW_LOCATION );
                 if( p != null && p instanceof Location ) {
                     location = (Location) p;
+                    mLocationView.setImageResource( R.drawable.location );
                 }
             }
         }
@@ -841,8 +859,7 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
-            equivalentTender = null;
+            equivalentTotal = null;
         }
 
         @Override
@@ -862,36 +879,31 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
                         JSONObject temp = json.getJSONObject( i );
                         JSONObject c    = (JSONObject) temp.get( TAG );
                         String currency = (String) c.get( CURRENCY_TAG );
-                        Double rate     = (Double) c.get( RATE_TAG );
+                        Double rate     = Double.parseDouble( (String) c.get( RATE_TAG ) );
 
                         if( currency.equals( currencies[ AppConfig.DEFAULT_CURRENCY ] ) )
-                            cad_currency = 1.0 /  rate;
+                            cad_currency = rate;
 
                         if( currency.equals( currencies[ AppUtils.getCurrency( ac ) ]) )
-                            current_currency =  rate;
+                            current_currency = rate;
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
 
-                String totalFare = mTotalFareView.getText().toString();
-                double temp_tender = Double.parseDouble( mTotalFareView.getText().toString() );
-
+                double temp_total = Double.parseDouble( mTotalFareView.getText().toString() );
                 if( cad_currency != null ) {
                     if( URL_CURRENCY.equals( currencies[ AppUtils.getCurrency( ac ) ] ) ) {
-                        equivalentTender = temp_tender / cad_currency;
+                        equivalentTotal = temp_total / cad_currency;
                     } else if( current_currency != null ) {
-                        equivalentTender = temp_tender / ( cad_currency * current_currency );
+                        equivalentTotal = ( temp_total * current_currency ) / cad_currency;
                     }
 
-                    /*equivalentTender = Math.floor( equivalentTender * 100 ) / 100;
-                    double total = equivalentTender - Double.valueOf( totalPurchase ) - Double.valueOf( cashBack );
-                    //total = Math.floor( total * 100 ) / 100;
-
+                    equivalentTotal = Math.floor( equivalentTotal * 100 ) / 100;
                     if( mPopupMessage.isShowing() ) {
                         mPopupMessage.getContentView().findViewById( R.id.progressBarPopUp ).setVisibility( View.GONE );
-                        mPopupMessage.getContentView().findViewById( R.id.cashTenderText ).setVisibility( View.VISIBLE );
-                    }*/
+                        mPopupMessage.getContentView().findViewById( R.id.cashTotalText ).setVisibility( View.VISIBLE );
+                    }
                 }
             }
         }

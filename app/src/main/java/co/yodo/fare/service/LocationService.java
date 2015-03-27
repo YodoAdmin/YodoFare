@@ -84,7 +84,7 @@ public class LocationService extends Service implements LocationListener {
 	@Override
 	public void onLocationChanged(Location location) {
         if( isBetterLocation( lastKnownLocation, location ) ) {
-            AppUtils.Logger( TAG, " >> NEW LOCATION SENT: " + location.toString() );
+            AppUtils.Logger( TAG, ">> NEW LOCATION SENT: " + location.toString() );
             Intent i = new Intent( BroadcastMessage.ACTION_NEW_LOCATION );
             i.putExtra( BroadcastMessage.EXTRA_NEW_LOCATION, location );
             lbm.sendBroadcast( i );

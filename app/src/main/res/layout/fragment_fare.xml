@@ -31,6 +31,14 @@
             android:layout_marginBottom="@dimen/data_vertical_margin"
             android:layout_gravity="center_horizontal">
 
+            <ImageView
+                android:id="@+id/locationIconView"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="@string/desc"
+                android:src="@drawable/no_location"/>
+
             <TextView
                 style="@style/LabelTextView"
                 android:textStyle="bold|italic"
@@ -49,7 +57,7 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="5dp"
+            android:layout_height="3dp"
             android:layout_margin="5dp"
             android:background="@android:color/black"/>
 
