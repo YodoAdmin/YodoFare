@@ -1,16 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen 
-    xmlns:android="http://schemas.android.com/apk/res/android" >
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:robobunny="http://robobunny.com">
 
     <EditTextPreference
         android:title="@string/config_pref_username"
         android:key="SPCurrentBeacon"
         android:inputType="text"/>
 
+    <co.yodo.fare.helper.SeekBarPreference
+        android:title="@string/config_pref_dismiss"
+        android:key="SPDismissTime"
+        android:max="10"
+        android:defaultValue="5"
+        robobunny:min="1"
+        robobunny:unitsRight=" second(s)" />
+
     <CheckBoxPreference
         android:key="SPAdvertisingService"
         android:title="@string/config_pref_advertising"
         android:summary="@string/config_pref_advertising_summary" />
+
+    <CheckBoxPreference
+        android:key="SPLiveScan"
+        android:title="@string/config_pref_live_scan"
+        android:summary="@string/config_pref_live_scan_summary" />
 
     <PreferenceCategory android:title="@string/config_pref_category_old" >
         

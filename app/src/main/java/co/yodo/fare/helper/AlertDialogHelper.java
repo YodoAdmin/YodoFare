@@ -3,6 +3,7 @@ package co.yodo.fare.helper;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Handler;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +19,6 @@ import co.yodo.fare.R;
  * Helper to create alert dialogs
  */
 public class AlertDialogHelper {
-
     /**
      * Shows an alert dialog for a list
      * @param c The context of the application
@@ -27,7 +27,7 @@ public class AlertDialogHelper {
      * @param current Current selected
      * @param clickListener Action for the selection
      */
-    public static void showAlertDialog(final Context c, final String title,
+    public static AlertDialog showAlertDialog(final Context c, final String title,
                                        final CharSequence[] values, final int current,
                                        final DialogInterface.OnClickListener clickListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder( c );
@@ -40,6 +40,7 @@ public class AlertDialogHelper {
 
         final AlertDialog alertDialog = builder.create();
         alertDialog.show();
+        return alertDialog;
     }
 
     /**
@@ -50,7 +51,7 @@ public class AlertDialogHelper {
      * @param current Current selected
      * @param clickListener Action for the selection
      */
-    public static void showAlertDialog(final Context c, final String title,
+    public static AlertDialog showAlertDialog(final Context c, final String title,
                                        final ListAdapter adapter, final int current,
                                        final DialogInterface.OnClickListener clickListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder( c );
@@ -63,6 +64,7 @@ public class AlertDialogHelper {
 
         final AlertDialog alertDialog = builder.create();
         alertDialog.show();
+        return alertDialog;
     }
 
     /**
@@ -72,7 +74,7 @@ public class AlertDialogHelper {
      * @param input An EditText to receive data
      * @param clickListener Action for the selection
      */
-    public static void showAlertDialog(final Context c, final String title, final EditText input,
+    public static AlertDialog showAlertDialog(final Context c, final String title, final EditText input,
                                        final DialogInterface.OnClickListener clickListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder( c );
         builder.setIcon( R.drawable.icon );
@@ -85,6 +87,7 @@ public class AlertDialogHelper {
 
         final AlertDialog alertDialog = builder.create();
         alertDialog.show();
+        return alertDialog;
     }
 
     /**
@@ -93,7 +96,7 @@ public class AlertDialogHelper {
      * @param message The message of the dialog
      * @param clickListener Action for the selection
      */
-    public static void showAlertDialog(final Context c, final int message,
+    public static AlertDialog showAlertDialog(final Context c, final int message,
                                        final DialogInterface.OnClickListener clickListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder( c );
         builder.setMessage( message );
@@ -104,6 +107,7 @@ public class AlertDialogHelper {
 
         final AlertDialog alertDialog = builder.create();
         alertDialog.show();
+        return alertDialog;
     }
 
     /**
@@ -113,7 +117,7 @@ public class AlertDialogHelper {
      * @param message A message to show
      * @param clickListener click for the negative button
      */
-    public static void showAlertDialog(final Context c, final String title, final String message,
+    public static AlertDialog showAlertDialog(final Context c, final String title, final String message,
                                        final DialogInterface.OnClickListener clickListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder( c );
         builder.setIcon( R.drawable.icon );
@@ -125,6 +129,19 @@ public class AlertDialogHelper {
 
         final AlertDialog alertDialog = builder.create();
         alertDialog.show();
+
+        if( AppUtils.isLiveScan( c ) ) {
+            final int TIME_TO_DISMISS = AppUtils.getDismissTime( c ) * 1000;
+            final Handler t = new Handler();
+            t.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    alertDialog.dismiss();
+                }
+            }, TIME_TO_DISMISS );
+        }
+
+        return alertDialog;
     }
 
     /**
@@ -133,7 +150,7 @@ public class AlertDialogHelper {
      * @param title The title of the dialog
      * @param view The view of the dialog
      */
-    public static void showAlertDialog(final Context c, final String title, final View view) {
+    public static AlertDialog showAlertDialog(final Context c, final String title, final View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder( c );
         builder.setIcon( R.drawable.icon );
         builder.setTitle( title );
@@ -144,6 +161,7 @@ public class AlertDialogHelper {
 
         final AlertDialog alertDialog = builder.create();
         alertDialog.show();
+        return alertDialog;
     }
 
     /**
@@ -155,7 +173,7 @@ public class AlertDialogHelper {
      * @param remember The boolean to include a checkbox to remember the password
      * @param clickListener Action attached to the dialog
      */
-    public static void showAlertDialog(final Context c, final String title,
+    public static AlertDialog showAlertDialog(final Context c, final String title,
                                        final EditText input, final boolean show,
                                        final boolean remember, final CheckBox rememberPassword,
                                        final DialogInterface.OnClickListener clickListener) {
@@ -199,5 +217,6 @@ public class AlertDialogHelper {
 
         final AlertDialog alertDialog = builder.create();
         alertDialog.show();
+        return alertDialog;
     }
 }

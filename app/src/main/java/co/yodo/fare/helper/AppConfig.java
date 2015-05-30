@@ -70,6 +70,11 @@ public class AppConfig {
     */
     public static final String SPREF_CURRENT_SCANNER = "SPCurrentScanner";
 
+    /* The current time to dismiss the response message.
+    * type -- Integer
+    */
+    public static final String SPREF_CURRENT_DISMISS_TIME = "SPDismissTime";
+
     /* Advertising service status.
 	 * type -- Boolean
 	 *
@@ -78,6 +83,15 @@ public class AppConfig {
 	 * false -- Service not running
 	 */
     public static final String SPREF_ADVERTISING_SERVICE = "SPAdvertisingService";
+
+    /* Live Scan status.
+	 * type -- Boolean
+	 *
+	 * __Values__
+	 * true  -- Live Scan On
+	 * false -- Live Scan Off
+	 */
+    public static final String SPREF_LIVE_SCAN = "SPLiveScan";
 
     /* The values to get the different zones */
     public static final int ZONE_1 = 1;
@@ -130,6 +144,13 @@ public class AppConfig {
 	 */
     public static final Integer DEFAULT_SCANNER = 0;
 
+    /*
+	 * Default value for the time to dismiss the response message
+	 *
+	 * Default: 5 seconds
+	 */
+    public static final Integer DEFAULT_DISMISS_TIME = 5;
+
     /* Bluetooth Yodo POS name */
     public static final String YODO_POS = "Yodo-Merch-";
 
@@ -142,4 +163,8 @@ public class AppConfig {
     public static final String DEFAULT_ADULT_FEE   = "4.50";
     public static final String DEFAULT_CHILD_FEE   = "2.50";
     public static final String DEFAULT_STUDENT_FEE = "3.00";
+
+    /* Type of transaction sounds  */
+    public static final int ERROR      = 0;
+    public static final int SUCCESSFUL = 1;
 }

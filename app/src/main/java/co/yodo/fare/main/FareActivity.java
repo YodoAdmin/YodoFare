@@ -605,7 +605,8 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
             return;
         }
 
-        AppUtils.rotateImage( v );
+        if( v != null)
+            AppUtils.rotateImage( v );
 
         currentScanner = QRScannerFactory.getInstance(
                 this,
@@ -713,8 +714,6 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
                     if( todayData != null )
                         balanceDialog();
                 } else if( code.equals( ServerResponse.ERROR_FAILED ) ) {
-                    AppUtils.errorSound( ac );
-
                     Message msg = new Message();
                     msg.what = YodoHandler.SERVER_ERROR;
                     message  = response.getMessage();
@@ -741,17 +740,21 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
 
             case EXCH_MERCH_REQUEST:
             case ALT_MERCH_REQUEST:
+                // Returns the selected fare to adult
+                resetClick( null );
+                // Handle the response message
                 code = response.getCode();
                 final String ex_authNumber = response.getAuthNumber();
                 final String ex_message    = response.getMessage();
 
                 if( code.equals( ServerResponse.AUTHORIZED ) ) {
+                    AppUtils.startSound( ac, AppConfig.SUCCESSFUL );
                     message = getString( R.string.exchange_auth ) + " " + ex_authNumber + "\n" +
                             getString( R.string.exchange_message ) + " " + ex_message;
 
                     AlertDialogHelper.showAlertDialog( ac, response.getCode(), message, null );
                 } else {
-                    AppUtils.errorSound( ac );
+                    AppUtils.startSound( ac, AppConfig.ERROR );
 
                     Message msg = new Message();
                     msg.what = YodoHandler.SERVER_ERROR;
@@ -764,6 +767,11 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
 
                     handlerMessages.sendMessage( msg );
                 }
+
+                if( AppUtils.isLiveScan( ac ) ) {
+                    yodoPayClick( null );
+                }
+
                 break;
         }
     }
@@ -814,7 +822,8 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
                 break;
 
             default:
-                ToastMaster.makeText( FareActivity.this, R.string.exchange_error, Toast.LENGTH_LONG ).show();
+                AppUtils.startSound( ac, AppConfig.ERROR );
+                ToastMaster.makeText( FareActivity.this, R.string.exchange_error, Toast.LENGTH_SHORT ).show();
                 break;
         }
     }

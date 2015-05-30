@@ -27,7 +27,8 @@ public class ZBarScanner extends QRScanner {
 	private static final String TAG = ZBarScanner.class.getName();
 
     /** Camera */
-	private Camera mCamera;
+    private static int mCameraId;
+	private static Camera mCamera;
     private CameraPreview mPreview;
     
     /** GUI Controllers */
@@ -82,7 +83,7 @@ public class ZBarScanner extends QRScanner {
                 return;
             }
 
-			mPreview = new CameraPreview( this.act, mCamera, previewCb );
+			mPreview = new CameraPreview( this.act, mCamera, mCameraId, previewCb );
 			preview.addView( mPreview );
 			
 			opPanel.setVisibility( View.GONE );
@@ -120,10 +121,10 @@ public class ZBarScanner extends QRScanner {
     public static Camera getCameraInstance(boolean frontFacing) {
     	Camera c = null;
         try {
+            int facing = Camera.CameraInfo.CAMERA_FACING_BACK;
             if( frontFacing )
-                c = openFrontFacingCamera();
-            else
-                c = openBackFacingCamera();
+                facing = Camera.CameraInfo.CAMERA_FACING_FRONT;
+            c = openCamera( facing );
         } catch( Exception e ) {
             AppUtils.Logger( TAG, "Exception = " + e );
         }
@@ -161,7 +162,7 @@ public class ZBarScanner extends QRScanner {
             int result = scanner.scanImage( barcode );
                 
             if( result != 0 ) {
-            	previewing = false;
+                previewing = false;
                 mCamera.setPreviewCallback( null );
                 mCamera.stopPreview();
                     
@@ -173,56 +174,32 @@ public class ZBarScanner extends QRScanner {
         			if( listener != null )
         				listener.onNewData( scanData );
                 }
+
                 releaseCamera();
             }
     	}
     };
-    
-    /**
-     * tries to open the front camera
-     * @return Camera
-     */
-    private static Camera openFrontFacingCamera() {
-        int cameraCount = 0;
-        Camera cam = null;
-        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
-        cameraCount = Camera.getNumberOfCameras();
-        
-        for( int camIdx = 0; camIdx < cameraCount; camIdx++ ) {
-            Camera.getCameraInfo( camIdx, cameraInfo );
-            if( cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
-                try {
-                    cam = Camera.open( camIdx );
-                } catch( RuntimeException e ) {
-                	AppUtils.Logger( TAG, "Camera failed to open: " + e.getLocalizedMessage() );
-                }
-            }
-        }
-        
-        if( cam == null )
-        	cam = Camera.open();
-
-        return cam;
-    }
 
     /**
-     * tries to open the back camera
+     * tries to open the camera
+     * @param facing Front or Back camera
      * @return Camera
      */
-    private static Camera openBackFacingCamera() {
-        int cameraCount = 0;
+    private static Camera openCamera(int facing) {
+        int cameraCount;
         Camera cam = null;
         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
         cameraCount = Camera.getNumberOfCameras();
 
         for( int camIdx = 0; camIdx < cameraCount; camIdx++ ) {
             Camera.getCameraInfo( camIdx, cameraInfo );
-            if( cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK ) {
-                try {
+            try {
+                if( cameraInfo.facing == facing ) {
+                    mCameraId = camIdx;
                     cam = Camera.open( camIdx );
-                } catch( RuntimeException e ) {
-                    AppUtils.Logger( TAG, "Camera failed to open: " + e.getLocalizedMessage() );
                 }
+            } catch( RuntimeException e ) {
+                AppUtils.Logger( TAG, "Camera failed to open: " + e.getLocalizedMessage() );
             }
         }
 

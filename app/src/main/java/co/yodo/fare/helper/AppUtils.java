@@ -258,7 +258,28 @@ public class AppUtils {
      */
     public static Boolean isAdvertisingServiceRunning(Context c) {
         SharedPreferences config = getSPrefConfig(c);
-        return config.getBoolean(AppConfig.SPREF_ADVERTISING_SERVICE, false);
+        return config.getBoolean( AppConfig.SPREF_ADVERTISING_SERVICE, false );
+    }
+
+    /**
+     * It gets the status of the live scan.
+     * @param c The Context of the Android system.
+     * @return true  Live scan is on.
+     *         false Live scan is off.
+     */
+    public static Boolean isLiveScan(Context c) {
+        SharedPreferences config = getSPrefConfig(c);
+        return config.getBoolean( AppConfig.SPREF_LIVE_SCAN, false );
+    }
+
+    /**
+     * It gets the current time to dismiss the response message
+     * @param c The Context of the Android system.
+     * @return int It returns the time.
+     */
+    public static int getDismissTime(Context c) {
+        SharedPreferences config = getSPrefConfig( c );
+        return config.getInt( AppConfig.SPREF_CURRENT_DISMISS_TIME, AppConfig.DEFAULT_DISMISS_TIME );
     }
 
     /**
@@ -282,7 +303,7 @@ public class AppUtils {
      */
     public static long getCurrencyTimestamp(Context c) {
         SharedPreferences config = getSPrefConfig( c );
-        return config.getLong(AppConfig.SPREF_TIMESTAMP_CURRENCY, 0);
+        return config.getLong( AppConfig.SPREF_TIMESTAMP_CURRENCY, 0 );
     }
 
     /**
@@ -532,16 +553,30 @@ public class AppUtils {
     /**
      * Plays a sound of error
      * @param c The Context of the Android system.
+     * @param type The kind of sound 0 - error and 1 - successful
      */
-    public static void errorSound(Context c) {
-        MediaPlayer mp = MediaPlayer.create(c, R.raw.error);
-        mp.setOnCompletionListener( new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                mp.release();
-            }
-        });
-        mp.start();
+    public static void startSound(Context c, int type) {
+        MediaPlayer mp = null;
+
+        switch( type ) {
+            case AppConfig.ERROR:
+                mp = MediaPlayer.create( c, R.raw.error );
+                break;
+
+            case AppConfig.SUCCESSFUL:
+                mp = MediaPlayer.create( c, R.raw.successful );
+                break;
+        }
+
+        if( mp != null ) {
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mp.release();
+                }
+            });
+            mp.start();
+        }
     }
 
     public static void setLanguage(Context c) {
@@ -656,7 +691,7 @@ public class AppUtils {
         }
 
         if( AppConfig.FDEBUG ) {
-            SimpleDateFormat sdf = new SimpleDateFormat( "yyyyMMdd_HHmmss" );
+            SimpleDateFormat sdf = new SimpleDateFormat( "yyyyMMdd_HHmmss", Locale.US );
             String currentDate   = sdf.format( new Date() );
 
             if( text == null )
