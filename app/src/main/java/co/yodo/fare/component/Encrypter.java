@@ -1,5 +1,9 @@
 package co.yodo.fare.component;
 
+import android.app.Activity;
+import android.content.res.AssetManager;
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
@@ -8,13 +12,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import android.app.Activity;
-import android.content.res.AssetManager;
-import android.util.Log;
+
+import co.yodo.fare.service.RESTService;
 
 /**
  * @author renatomarroquin
@@ -26,7 +30,14 @@ public class Encrypter {
 	 * Public key generated with: openssl rsa -in 11.private.pem -pubout -outform DER -out 11.public.der
 	 * This key is created using the private key generated using openssl in unix environments
 	*/
-	private static String PUBLIC_KEY = "YodoKey/12.public.der";
+    private static String PUBLIC_KEY;
+
+    static {
+        if( RESTService.getSwitch().equals( "D" ) )
+            PUBLIC_KEY = "YodoKey/Dev/12.public.der";
+        else
+            PUBLIC_KEY = "YodoKey/Prod/12.public.der";
+    }
 	
 	/**
 	 * Cipher instance used for encryption
@@ -72,7 +83,6 @@ public class Encrypter {
 			X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(encodedKey);
 			KeyFactory kf = KeyFactory.getInstance(KEY_INSTANCE);
 			pkPublic = kf.generatePublic(publicKeySpec);
-			    
 		} catch(Exception e){
 			Log.e(parent.getClass().toString(), "Error Reading Public Key - SKSCreater");
 		}
@@ -90,22 +100,13 @@ public class Encrypter {
 			cipher = Cipher.getInstance(CIPHER_INSTANCE);
 			cipher.init(Cipher.ENCRYPT_MODE, pubKey);
 			this.cipherData = cipher.doFinal(this.sUnEncryptedString.getBytes());
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			Log.e(parent.getClass().toString() , "Error Encrypting string - SKSCreater");
-		} catch (NoSuchPaddingException e) {
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) {
 			e.printStackTrace();
 			Log.e(parent.getClass().toString() , "Error Encrypting string - SKSCreater");
 		} catch (InvalidKeyException e) {
 			e.printStackTrace();
-		} catch (IllegalBlockSizeException e) {
-			e.printStackTrace();
-			Log.e(parent.getClass().toString() , "Error Encrypting string - SKSCreater");
-		} catch (BadPaddingException e) {
-			e.printStackTrace();
-			Log.e(parent.getClass().toString() , "Error Encrypting string - SKSCreater");
 		}
-	}
+    }
 	
 	/**
 	 * Receives an encrypted byte array and returns a string of

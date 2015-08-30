@@ -30,6 +30,7 @@ public class ServerResponse implements Serializable {
     public static final String ACCOUNT      = "account";
     public static final String PURCHASE     = "purchase";
     public static final String AMOUNT_DELTA = "amount_delta";
+    public static final String BALANCE      = "balance";
 
 	private String code;
 	private String authNumber;
@@ -89,6 +90,6 @@ public class ServerResponse implements Serializable {
                " AuthNumber : " + this.authNumber + "\n" +
                " Message : " + this.message + "\n" +
                " Time : " + this.rtime + "\n" +
-               " Params : " + Arrays.asList(this.params);
+               " Params : " + Arrays.asList( this.params );
 	}
 }

@@ -8,7 +8,7 @@ import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
@@ -16,7 +16,7 @@ import co.yodo.fare.R;
 import co.yodo.fare.helper.AppConfig;
 import co.yodo.fare.helper.AppUtils;
 
-public class SettingsActivity extends ActionBarActivity {
+public class SettingsActivity extends AppCompatActivity {
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +43,8 @@ public class SettingsActivity extends ActionBarActivity {
         Toolbar toolbar = (Toolbar) findViewById( R.id.toolbar );
 
         setSupportActionBar( toolbar );
-        getSupportActionBar().setDisplayHomeAsUpEnabled( true );
+        if( getSupportActionBar() != null )
+            getSupportActionBar().setDisplayHomeAsUpEnabled( true );
 
         getFragmentManager().beginTransaction().replace( R.id.content, new PrefsFragmentInner() ).commit();
     }

@@ -12,7 +12,7 @@ import co.yodo.fare.helper.AppUtils;
 
 public class HardwareScanner extends QRScanner {
 	/** DEBUG */
-	private static final String TAG = HardwareScanner.class.getName();
+	private static final String TAG = HardwareScanner.class.getSimpleName();
 	
 	/** GUI Controllers */
 	private AlertDialog inputDialog;

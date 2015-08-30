@@ -54,7 +54,6 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
         switch( type ) {
             case ERROR_NO_INTERNET:
                 handlerMessages.sendEmptyMessage( YodoHandler.NO_INTERNET );
-
                 break;
 
             case ERROR_GENERAL:

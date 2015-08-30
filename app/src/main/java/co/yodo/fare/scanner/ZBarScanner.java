@@ -24,7 +24,7 @@ import co.yodo.fare.scanner.ZBarUtils.CameraPreview;
 
 public class ZBarScanner extends QRScanner {
 	/** DEBUG */
-	private static final String TAG = ZBarScanner.class.getName();
+	public static final String TAG = "ZBarScanner";
 
     /** Camera */
     private static int mCameraId;

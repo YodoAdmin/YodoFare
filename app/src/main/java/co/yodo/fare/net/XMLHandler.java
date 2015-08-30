@@ -5,6 +5,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import co.yodo.fare.data.ServerResponse;
+import co.yodo.fare.helper.AppUtils;
 
 /**
  * Created by luis on 15/12/14.
@@ -31,6 +32,7 @@ public class XMLHandler extends DefaultHandler {
     private static final String ACCOUNT_ELEM      = "account";
     private static final String PURCHASE_ELEM     = "purchase_price";
     private static final String AMOUNT_DELTA_ELEM = "amount_delta";
+    private static final String BALANCE_ELEM      = "balance";
 
     /** Parser Elements */
     private Boolean currentElement = false;
@@ -99,6 +101,9 @@ public class XMLHandler extends DefaultHandler {
         }
         else if( localName.equalsIgnoreCase( AMOUNT_DELTA_ELEM ) ) {
             response.addParam( ServerResponse.AMOUNT_DELTA, currentValue );
+        }
+        else if( localName.equalsIgnoreCase( BALANCE_ELEM ) ) {
+            response.addParam( ServerResponse.BALANCE, currentValue );
         }
     }
 

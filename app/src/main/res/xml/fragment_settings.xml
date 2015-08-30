@@ -25,7 +25,15 @@
         android:key="SPLiveScan"
         android:title="@string/config_pref_live_scan"
         android:summary="@string/config_pref_live_scan_summary" />
-
+     <!--
+    <ListPreference
+        android:key="SPCurrentScannerEngine"
+        android:title="@string/config_pref_scanner"
+        android:summary="%s"
+        android:entries="@array/scanner_array"
+        android:entryValues="@array/scanner_values"
+        android:defaultValue="ZBarScanner"/>
+    -->
     <PreferenceCategory android:title="@string/config_pref_category_old" >
         
         <EditTextPreference

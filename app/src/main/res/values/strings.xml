@@ -5,7 +5,7 @@
     <string name="app_name">YodoFare</string>
     <string name="action_settings">Settings</string>
     <string name="version_tag">Version:</string>
-    <string name="version">0.0.6</string>
+    <string name="version">0.1.0</string>
     <string name="desc">Desc</string>
     <string name="register">REGISTER</string>
     <string name="loading">Loading</string>
@@ -34,6 +34,7 @@
     <string name="exchange_code">Code:</string>
     <string name="exchange_auth">Authorization Number:</string>
     <string name="exchange_message">Message:</string>
+    <string name="exchange_balance">Balance:</string>
     <string name="exchange_extra">Extra:</string>
     <string name="exchange_error">Invalid SKS size</string>
 
@@ -106,6 +107,17 @@
         <item>euro</item>
     </string-array>
 
+    <string-array name="scanner_values">
+        <item>ZBarScanner</item>
+        <item>ZxingScanner</item>
+    </string-array>
+
+    <!-- Scanner engines -->
+    <string-array name="scanner_array">
+        <item>ZBar</item>
+        <item>Zxing</item>
+    </string-array>
+
     <!-- Preferences Categories -->
     <string name="config_pref_category_old">Senior Fare</string>
     <string name="config_pref_category_adult">Adult Fare</string>
@@ -113,6 +125,7 @@
     <string name="config_pref_category_student">Student Fare</string>
 
     <!-- Preferences Options -->
+    <string name="config_pref_scanner">Scanner Engine</string>
     <string name="config_pref_username">Y-Beacon Name</string>
     <string name="config_pref_dismiss">Time to dismiss the response</string>
     <string name="config_pref_advertising">Promotion Service</string>
@@ -130,5 +143,6 @@
     <!-- ACRA -->
     <string name="crash_toast_text">Ooooops ! I crashed, but a report has been sent to my developer to help fix the issue !</string>
     <string name="title_activity_fare">FareActivity</string>
+    <string name="title_activity_camera_preview">CameraPreview</string>
 
 </resources>

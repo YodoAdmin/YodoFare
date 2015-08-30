@@ -168,7 +168,17 @@ public class AppUtils {
      */
     public static int getScanner(Context c) {
         SharedPreferences config = getSPrefConfig( c );
-        return config.getInt(AppConfig.SPREF_CURRENT_SCANNER, AppConfig.DEFAULT_SCANNER);
+        return config.getInt( AppConfig.SPREF_CURRENT_SCANNER, AppConfig.DEFAULT_SCANNER );
+    }
+
+    /**
+     * It gets the scanner engine position.
+     * @param c The Context of the Android system.
+     * @return int It returns the scanner .
+     */
+    public static String getScannerEngine(Context c) {
+        SharedPreferences config = getSPrefConfig( c );
+        return config.getString( AppConfig.SPREF_SCANNER_ENGINE, AppConfig.DEFAULT_ENGINE );
     }
 
     /**

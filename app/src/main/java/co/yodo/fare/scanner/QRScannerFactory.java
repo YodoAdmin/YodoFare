@@ -5,10 +5,11 @@ import android.app.Activity;
 public class QRScannerFactory {
 	public enum SupportedScanners {
 		Hardware   ( "Barcode Scanner" ),
-		ZBarScanner1( "Camera Front" ),
-        ZBarScanner2( "Camera Back" );
+		SoftScanner1( "Camera Front" ),
+        SoftScanner2( "Camera Back" );
 		
 		private String value;
+        public static final long length = values().length;
 		
 		SupportedScanners(String value) {
 			this.value = value;
@@ -28,13 +29,19 @@ public class QRScannerFactory {
 				qrscanner = HardwareScanner.getInstance( activity );
 			break;
 			
-			case ZBarScanner1:
-				qrscanner = ZBarScanner.getInstance( activity );
+			case SoftScanner1:
+                /*if( AppUtils.getScannerEngine( activity ).equals( ZBarScanner.TAG  ) )
+                    qrscanner = ZBarScanner.getInstance( activity );
+                else*/
+                    qrscanner = ZxingScanner.getInstance( activity );
                 qrscanner.setFrontFaceCamera( true );
 			break;
 
-            case ZBarScanner2:
-                qrscanner = ZBarScanner.getInstance( activity );
+            case SoftScanner2:
+                /*if( AppUtils.getScannerEngine( activity ).equals( ZBarScanner.TAG  ) )
+                    qrscanner = ZBarScanner.getInstance( activity );
+                else*/
+                    qrscanner = ZxingScanner.getInstance( activity );
                 qrscanner.setFrontFaceCamera( false );
             break;
 		}

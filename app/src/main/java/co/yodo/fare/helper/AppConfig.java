@@ -6,7 +6,7 @@ package co.yodo.fare.helper;
  */
 public class AppConfig {
     /** DEBUG flag: to print the logs in console */
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     /** FILE flag: to print the logs in a file */
     public static final boolean FDEBUG = false;
@@ -69,6 +69,11 @@ public class AppConfig {
     * type -- Integer
     */
     public static final String SPREF_CURRENT_SCANNER = "SPCurrentScanner";
+
+    /* The current scanner engine.
+    * type -- Integer
+    */
+    public static final String SPREF_SCANNER_ENGINE = "SPScannerEngine";
 
     /* The current time to dismiss the response message.
     * type -- Integer
@@ -143,6 +148,13 @@ public class AppConfig {
 	 * Default: position 0 (BarcodeScanner)
 	 */
     public static final Integer DEFAULT_SCANNER = 0;
+
+    /*
+	 * Default value string of the engine
+	 *
+	 * Default: ZBarScanner (ZBar)
+	 */
+    public static final String DEFAULT_ENGINE = "ZBarScanner";
 
     /*
 	 * Default value for the time to dismiss the response message

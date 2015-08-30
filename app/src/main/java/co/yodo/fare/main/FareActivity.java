@@ -16,7 +16,7 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SlidingPaneLayout;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.view.Gravity;
@@ -39,15 +39,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
-import java.util.Locale;
 
 import co.yodo.fare.R;
 import co.yodo.fare.adapter.CurrencyAdapter;
@@ -68,7 +66,7 @@ import co.yodo.fare.scanner.QRScannerListener;
 import co.yodo.fare.service.LocationService;
 import co.yodo.fare.service.RESTService;
 
-public class FareActivity extends ActionBarActivity implements YodoRequest.RESTListener, QRScannerListener {
+public class FareActivity extends AppCompatActivity implements YodoRequest.RESTListener, QRScannerListener {
     /** DEBUG */
     private static final String TAG = FareActivity.class.getSimpleName();
 
@@ -95,14 +93,14 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
 
     /** Popup Window for Tips */
     private PopupWindow mPopupMessage;
-    private Double equivalentTotal;
+    private BigDecimal equivalentTotal;
 
     /** Messages Handler */
     private static YodoHandler handlerMessages;
 
     /** Balance Temp */
-    private HashMap<String, String> historyData;
-    private HashMap<String, String> todayData;
+    private HashMap<String, String> historyData = null;
+    private HashMap<String, String> todayData = null;
 
     /** Location */
     private Location location;
@@ -112,13 +110,13 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
     private boolean isScanning = false;
 
     /** Total to pay */
-    private double mCurrentTotal = 0.00;
+    private BigDecimal mCurrentTotal = BigDecimal.ZERO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags( WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN );
-        setContentView(R.layout.activity_fare);
+        setContentView( R.layout.activity_fare );
 
         setupGUI();
         updateData();
@@ -129,7 +127,7 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
         super.onResume();
         registerBroadcasts();
 
-        AppUtils.setupAdvertising( ac, AppUtils.isAdvertisingServiceRunning(ac), false );
+        AppUtils.setupAdvertising( ac, AppUtils.isAdvertisingServiceRunning( ac ), false );
 
         if( currentScanner != null && isScanning ) {
             isScanning = false;
@@ -219,8 +217,14 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
                 QRScannerFactory.SupportedScanners.values()
         );
 
+        int position = AppUtils.getScanner( ac );
+        if( position >= QRScannerFactory.SupportedScanners.length ) {
+            position = AppConfig.DEFAULT_SCANNER;
+            AppUtils.saveScanner( ac, position );
+        }
+
         mScannersSpinner.setAdapter( adapter );
-        mScannersSpinner.setSelection( AppUtils.getScanner( ac ) );
+        mScannersSpinner.setSelection( position );
 
         handlerMessages = new YodoHandler( FareActivity.this );
         YodoRequest.getInstance().setListener( this );
@@ -228,13 +232,13 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
         if( AppUtils.isFirstLogin( ac ) ) {
             mSlidingLayout.openPane();
 
-            new ShowcaseView.Builder( this )
+            /*new ShowcaseView.Builder( this )
                     .setTarget( new ViewTarget( R.id.optionsView, this ) )
                     .setContentTitle( R.string.tutorial_title )
                     .setContentText( R.string.tutorial_message )
-                    .build();
+                    .build();*/
 
-            AppUtils.saveFirstLogin(ac, false);
+            AppUtils.saveFirstLogin( ac, false );
         }
 
         if( !AppUtils.isLocationEnabled( ac ) ) {
@@ -321,7 +325,7 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
 
         TextView cashTotal      = (TextView) layout.findViewById( R.id.cashTotalText );
         ProgressBar progressBar = (ProgressBar) layout.findViewById( R.id.progressBarPopUp );
-        cashTotal.setText( String.format( Locale.US, "%.2f", equivalentTotal ) );
+        cashTotal.setText( equivalentTotal.setScale( 2, RoundingMode.DOWN ).toString() );
 
         if( equivalentTotal == null ) {
             cashTotal.setVisibility( View.GONE );
@@ -355,28 +359,32 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
         TextView debitsText  = ( (TextView) layout.findViewById( R.id.yodoDebitsTextView ) );
         TextView balanceText = ( (TextView) layout.findViewById( R.id.yodoBalanceTextView ) );
 
-        Double total = 0.0, result;
+        BigDecimal total = BigDecimal.ZERO;
 
-        result = Double.valueOf( historyData.get( ServerResponse.DEBIT ) );
-        debitsText.setText( String.format( "%.2f", result ) );
-        total -= result;
+        BigDecimal result = new BigDecimal( historyData.get( ServerResponse.DEBIT ) );
+        debitsText.setText( result.setScale( 2, RoundingMode.DOWN ).toString() );
+        total = total.subtract( result );
 
-        result = Double.valueOf( historyData.get( ServerResponse.CREDIT ) );
-        creditsText.setText( String.format( "%.2f", result ) );
-        total += result;
+        result = new BigDecimal( historyData.get( ServerResponse.CREDIT ) );
+        creditsText.setText( result.setScale( 2, RoundingMode.DOWN ).toString() );
+        total = total.add( result );
 
-        balanceText.setText( String.format( "%.2f", total * -1 ) );
-        total = 0.0;
+        balanceText.setText(
+                total.negate().setScale( 2, RoundingMode.DOWN ).toString()
+        );
+        total = BigDecimal.ZERO;
 
-        result = Double.valueOf( todayData.get( ServerResponse.DEBIT ) );
-        todayDebitsText.setText( String.format( "%.2f", result ) );
-        total -= result;
+        result = new BigDecimal( todayData.get( ServerResponse.DEBIT ) );
+        todayDebitsText.setText( result.setScale( 2, RoundingMode.DOWN ).toString() );
+        total = total.subtract( result );
 
-        result = Double.valueOf( todayData.get( ServerResponse.CREDIT ) );
-        todayCreditsText.setText( String.format( "%.2f", result ) );
-        total += result;
+        result = new BigDecimal( todayData.get( ServerResponse.CREDIT ) );
+        todayCreditsText.setText( result.setScale( 2, RoundingMode.DOWN ).toString() );
+        total = total.add( result );
 
-        todayBalanceText.setText( String.format( "%.2f", total * -1 ) );
+        todayBalanceText.setText(
+                total.negate().setScale( 2, RoundingMode.DOWN ).toString()
+        );
 
         AlertDialogHelper.showAlertDialog( ac, getString( R.string.yodo_title ), layout );
         todayData = historyData = null;
@@ -461,7 +469,7 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
         mSlidingLayout.closePane();
 
         Intent intent = new Intent( ac, SettingsActivity.class );
-        startActivity(intent);
+        startActivity( intent );
     }
 
     /**
@@ -575,8 +583,10 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
 
         mCurrentZone = zone;
 
-        Double total = mCurrentTotal + Double.parseDouble( getFare( tempZone ) );
-        mTotalFareView.setText( String.format( Locale.US, "%.2f", total ) );
+        mTotalFareView.setText(
+                mCurrentTotal.add( new BigDecimal( getFare( tempZone ) ) )
+                        .setScale( 2, RoundingMode.DOWN ).toString()
+        );
     }
 
     /**
@@ -584,7 +594,7 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
      * @param v The View, not used
      */
     public void resetClick(View v) {
-        mCurrentTotal = 0.00;
+        mCurrentTotal = BigDecimal.ZERO;
         feeSelectedClick( findViewById( R.id.adultFeeView ) );
     }
 
@@ -592,7 +602,7 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
      *  @param v The View, used to get the amount
      */
     public void addClick(View v) {
-        mCurrentTotal = Double.valueOf( mTotalFareView.getText().toString() );
+        mCurrentTotal = new BigDecimal( mTotalFareView.getText().toString() );
     }
 
     /**
@@ -613,7 +623,8 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
                 (QRScannerFactory.SupportedScanners) mScannersSpinner.getSelectedItem()
         );
 
-        currentScanner.startScan();
+        if( currentScanner != null )
+            currentScanner.startScan();
     }
 
     /**
@@ -708,11 +719,13 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
 
             case QUERY_BAL_REQUEST:
                 code = response.getCode();
-
+                AppUtils.Logger( TAG, "History ");
                 if( code.equals( ServerResponse.AUTHORIZED ) ) {
                     historyData = response.getParams();
-                    if( todayData != null )
+                    if( todayData != null ) {
+                        AppUtils.Logger( TAG, "Entro en history ");
                         balanceDialog();
+                    }
                 } else if( code.equals( ServerResponse.ERROR_FAILED ) ) {
                     Message msg = new Message();
                     msg.what = YodoHandler.SERVER_ERROR;
@@ -730,11 +743,13 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
 
             case QUERY_DAY_REQUEST:
                 code = response.getCode();
-
+                AppUtils.Logger( TAG, "Today ");
                 if( code.equals( ServerResponse.AUTHORIZED ) ) {
                     todayData = response.getParams();
-                    if( historyData != null )
+                    if( historyData != null ) {
+                        AppUtils.Logger( TAG, "Entro en today ");
                         balanceDialog();
+                    }
                 }
                 break;
 
@@ -746,11 +761,16 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
                 code = response.getCode();
                 final String ex_authNumber = response.getAuthNumber();
                 final String ex_message    = response.getMessage();
+                final String ex_balance    = response.getParam( ServerResponse.BALANCE );
 
                 if( code.equals( ServerResponse.AUTHORIZED ) ) {
                     AppUtils.startSound( ac, AppConfig.SUCCESSFUL );
                     message = getString( R.string.exchange_auth ) + " " + ex_authNumber + "\n" +
                             getString( R.string.exchange_message ) + " " + ex_message;
+
+                    if( ex_balance != null )
+                        message += "\n" + getString( R.string.exchange_balance ) + " " +
+                                new BigDecimal( ex_balance ).setScale( 2, RoundingMode.DOWN );
 
                     AlertDialogHelper.showAlertDialog( ac, response.getCode(), message, null );
                 } else {
@@ -768,9 +788,8 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
                     handlerMessages.sendMessage( msg );
                 }
 
-                if( AppUtils.isLiveScan( ac ) ) {
+                if( AppUtils.isLiveScan( ac ) )
                     yodoPayClick( null );
-                }
 
                 break;
         }
@@ -824,6 +843,10 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
             default:
                 AppUtils.startSound( ac, AppConfig.ERROR );
                 ToastMaster.makeText( FareActivity.this, R.string.exchange_error, Toast.LENGTH_SHORT ).show();
+
+                if( AppUtils.isLiveScan( ac ) )
+                    yodoPayClick( null );
+
                 break;
         }
     }
@@ -882,33 +905,35 @@ public class FareActivity extends ActionBarActivity implements YodoRequest.RESTL
         @Override
         protected void onPostExecute(JSONArray json) {
             if( json != null ) {
-                Double cad_currency = null, current_currency = null;
+                BigDecimal cad_currency = null, current_currency = null;
                 for( int i = 0; i < json.length(); i++ ) {
                     try {
                         JSONObject temp = json.getJSONObject( i );
                         JSONObject c    = (JSONObject) temp.get( TAG );
                         String currency = (String) c.get( CURRENCY_TAG );
-                        Double rate     = Double.parseDouble( (String) c.get( RATE_TAG ) );
+                        String rate     = (String) c.get( RATE_TAG );
 
                         if( currency.equals( currencies[ AppConfig.DEFAULT_CURRENCY ] ) )
-                            cad_currency = rate;
+                            cad_currency = new BigDecimal( rate );
 
                         if( currency.equals( currencies[ AppUtils.getCurrency( ac ) ]) )
-                            current_currency = rate;
+                            current_currency = new BigDecimal( rate );
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
 
-                double temp_total = Double.parseDouble( mTotalFareView.getText().toString() );
+                // Get raw value, in order to transform
+                BigDecimal temp_tender = new BigDecimal( mTotalFareView.getText().toString() );
+
                 if( cad_currency != null ) {
                     if( URL_CURRENCY.equals( currencies[ AppUtils.getCurrency( ac ) ] ) ) {
-                        equivalentTotal = temp_total / cad_currency;
+                        equivalentTotal = temp_tender.multiply( cad_currency );
                     } else if( current_currency != null ) {
-                        equivalentTotal = ( temp_total * current_currency ) / cad_currency;
+                        BigDecimal currency_rate = cad_currency.divide( current_currency, 2 );
+                        equivalentTotal = temp_tender.multiply( currency_rate );
                     }
 
-                    equivalentTotal = Math.floor( equivalentTotal * 100 ) / 100;
                     if( mPopupMessage.isShowing() ) {
                         mPopupMessage.getContentView().findViewById( R.id.progressBarPopUp ).setVisibility( View.GONE );
                         mPopupMessage.getContentView().findViewById( R.id.cashTotalText ).setVisibility( View.VISIBLE );
