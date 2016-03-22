@@ -5,13 +5,13 @@ import android.app.Activity;
 public class QRScannerFactory {
 	public enum SupportedScanners {
 		Hardware   ( "Barcode Scanner" ),
-		SoftScanner1( "Camera Front" ),
-        SoftScanner2( "Camera Back" );
+		CameraFront( "Camera Front" ),
+		CameraBack ( "Camera Back" );
 		
 		private String value;
         public static final long length = values().length;
 		
-		SupportedScanners(String value) {
+		SupportedScanners( String value ) {
 			this.value = value;
 		}
 		
@@ -20,47 +20,47 @@ public class QRScannerFactory {
 		    return value;
 		}
 	}
-	
-	public static QRScanner getInstance(Activity activity, SupportedScanners scanner) {
-		QRScanner qrscanner = null;
 
-		switch( scanner ) {
-			case Hardware:
-				qrscanner = HardwareScanner.getInstance( activity );
-			break;
-			
-			case SoftScanner1:
-                /*if( AppUtils.getScannerEngine( activity ).equals( ZBarScanner.TAG  ) )
-                    qrscanner = ZBarScanner.getInstance( activity );
-                else*/
-                    qrscanner = ZxingScanner.getInstance( activity );
-                qrscanner.setFrontFaceCamera( true );
-			break;
+	/** QR Scanners */
+	private final HardwareScanner hardwareScanner;
+	private final ScanditScanner softwareScanner;
 
-            case SoftScanner2:
-                /*if( AppUtils.getScannerEngine( activity ).equals( ZBarScanner.TAG  ) )
-                    qrscanner = ZBarScanner.getInstance( activity );
-                else*/
-                    qrscanner = ZxingScanner.getInstance( activity );
-                qrscanner.setFrontFaceCamera( false );
-            break;
+	public QRScannerFactory( Activity activity ) throws ClassCastException{
+		if( activity instanceof QRScanner.QRScannerListener ) {
+			hardwareScanner = new HardwareScanner( activity );
+			softwareScanner = new ScanditScanner( activity );
+			hardwareScanner.setListener( (QRScanner.QRScannerListener) activity );
+			softwareScanner.setListener( (QRScanner.QRScannerListener) activity );
+		} else {
+			throw new ClassCastException( activity.getLocalClassName() + " does not implement the QRScannerListener" );
 		}
-
-        if( qrscanner != null && activity instanceof QRScannerListener )
-            qrscanner.setListener( (QRScannerListener) activity );
-
-		return qrscanner;
 	}
-	
-	public static void destroy() {
-        QRScanner qrscanner = HardwareScanner.getInstance();
-		
-		if( qrscanner != null )
-			qrscanner.destroy();
-		
-		qrscanner = ZBarScanner.getInstance();
-		
-		if( qrscanner != null )
-			qrscanner.destroy();
+
+	/**
+	 * Gets the requested scanner
+	 * @param scanner Could be hardware, front and back software
+	 * @return The QR scanner
+	 */
+	public QRScanner getScanner( SupportedScanners scanner ) {
+		switch( scanner ) {
+			case CameraFront:
+				softwareScanner.setFrontFaceCamera( true );
+				return softwareScanner;
+
+			case CameraBack:
+				softwareScanner.setFrontFaceCamera( false );
+				return softwareScanner;
+
+			default:
+				return hardwareScanner;
+		}
+	}
+
+	/**
+	 * Release the resources from both scanners
+	 */
+	public void destroy() {
+		hardwareScanner.destroy();
+		softwareScanner.destroy();
 	}
 }

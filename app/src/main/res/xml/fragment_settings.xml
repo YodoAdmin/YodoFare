@@ -3,6 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:robobunny="http://robobunny.com">
 
+    <ListPreference
+        android:key="SPCurrentLanguage"
+        android:title="@string/config_pref_languages"
+        android:summary="%s"
+        android:entries="@array/languages_array"
+        android:entryValues="@array/languages_array_values"
+        android:defaultValue="en"/>
+
     <EditTextPreference
         android:title="@string/config_pref_username"
         android:key="SPCurrentBeacon"

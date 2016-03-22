@@ -1,16 +1,14 @@
 package co.yodo.fare.component;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.BadPaddingException;
@@ -63,11 +61,8 @@ public class Encrypter {
 	 * Function that opens the public key and returns the java object that contains it
 	 * @param parent		Parent activity of SKSCreater
 	 * @return				The public key specified in $keyFileName
-	 * @throws IOException
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidKeySpecException
 	 */
-	static PublicKey readKeyFromFile(Activity parent){
+	static PublicKey readKeyFromFile( Context parent ){
 		AssetManager as;
 		InputStream inFile;
 		byte[] encodedKey;
@@ -77,10 +72,10 @@ public class Encrypter {
 			as = parent.getResources().getAssets();   
 			inFile = as.open(PUBLIC_KEY);
 			encodedKey = new byte[inFile.available()];
-			inFile.read(encodedKey);
+			inFile.read( encodedKey );
 			inFile.close();
 			
-			X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(encodedKey);
+			X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec( encodedKey );
 			KeyFactory kf = KeyFactory.getInstance(KEY_INSTANCE);
 			pkPublic = kf.generatePublic(publicKeySpec);
 		} catch(Exception e){
@@ -93,8 +88,8 @@ public class Encrypter {
 	 * Encrypts a string and returns a byte array containing the encrypted string
 	 * @return Byte array containing the encrypted string
 	 */
-	public void rsaEncrypt(Activity parent) {
-		PublicKey pubKey = readKeyFromFile(parent);
+	public void rsaEncrypt( Context parent ) {
+		PublicKey pubKey = readKeyFromFile( parent );
 		Cipher cipher;
 		try {
 			cipher = Cipher.getInstance(CIPHER_INSTANCE);

@@ -5,7 +5,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import co.yodo.fare.data.ServerResponse;
-import co.yodo.fare.helper.AppUtils;
 
 /**
  * Created by luis on 15/12/14.
@@ -25,6 +24,7 @@ public class XMLHandler extends DefaultHandler {
     private static final String PARAMS_ELEM       = "params";
     private static final String DEBIT_ELEM        = "MerchantDebitWTCost";
     private static final String CREDIT_ELEM       = "MerchantCreditWTCost";
+    private static final String CURRENCY_ELEM     = "DefaultCurrency";
     private static final String SETTLEMENT_ELEM   = "Settlement";
     private static final String EQUIPMENT_ELEM    = "Equipments";
     private static final String LEASE_ELEM        = "Lease";
@@ -42,10 +42,10 @@ public class XMLHandler extends DefaultHandler {
     public static ServerResponse response = null;
 
     @Override
-    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+    public void startElement( String uri, String localName, String qName, Attributes attributes ) throws SAXException {
         currentElement = true;
 
-        if(localName.equalsIgnoreCase(ROOT_ELEMENT)) {
+        if( localName.equalsIgnoreCase( ROOT_ELEMENT ) ) {
             /** Start */
             response = new ServerResponse();
         }
@@ -83,6 +83,9 @@ public class XMLHandler extends DefaultHandler {
         }
         else if( localName.equalsIgnoreCase( SETTLEMENT_ELEM ) ) {
             response.addParam( ServerResponse.SETTLEMENT, currentValue );
+        }
+        else if( localName.equalsIgnoreCase( CURRENCY_ELEM ) ) {
+            response.addParam( ServerResponse.CURRENCY, currentValue );
         }
         else if( localName.equalsIgnoreCase( EQUIPMENT_ELEM ) ) {
             response.addParam( ServerResponse.EQUIPMENT, currentValue );

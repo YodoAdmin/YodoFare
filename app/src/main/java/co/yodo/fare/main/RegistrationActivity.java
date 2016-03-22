@@ -1,9 +1,11 @@
 package co.yodo.fare.main;
 
 import android.content.Context;
-import android.os.Message;
-import android.support.v7.app.ActionBarActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Message;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,7 +20,7 @@ import co.yodo.fare.data.ServerResponse;
 import co.yodo.fare.helper.AppUtils;
 import co.yodo.fare.net.YodoRequest;
 
-public class RegistrationActivity extends ActionBarActivity implements YodoRequest.RESTListener {
+public class RegistrationActivity extends AppCompatActivity implements YodoRequest.RESTListener {
     /** The context object */
     private Context ac;
 
@@ -29,12 +31,11 @@ public class RegistrationActivity extends ActionBarActivity implements YodoReque
     private static YodoHandler handlerMessages;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_registration);
+    protected void onCreate( Bundle savedInstanceState ) {
+        super.onCreate( savedInstanceState );
+        setContentView( R.layout.activity_registration );
 
         setupGUI();
-        updateData();
     }
 
     @Override
@@ -45,7 +46,7 @@ public class RegistrationActivity extends ActionBarActivity implements YodoReque
                 finish();
                 break;
         }
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected( item );
     }
 
     private void setupGUI() {
@@ -61,19 +62,16 @@ public class RegistrationActivity extends ActionBarActivity implements YodoReque
         Toolbar mActionBarToolbar = (Toolbar) findViewById( R.id.registrationBar );
 
         setSupportActionBar( mActionBarToolbar );
-        getSupportActionBar().setDisplayHomeAsUpEnabled( true );
-    }
-
-    private void updateData() {
-        if( AppUtils.isLoggedIn( ac ) )
-            finish();
+        ActionBar actionbar = getSupportActionBar();
+        if( actionbar != null )
+            actionbar.setDisplayHomeAsUpEnabled( true );
     }
 
     /**
      * Realize a registration request
      * @param v View of the button, not used
      */
-    public void registrationClick(View v) {
+    public void registrationClick( View v ) {
         String token = password.getText().toString();
         if( token.isEmpty() ) {
             Animation shake = AnimationUtils.loadAnimation( this, R.anim.shake );
@@ -95,12 +93,12 @@ public class RegistrationActivity extends ActionBarActivity implements YodoReque
         }
     }
 
-    public void showPasswordClick(View v) {
-        AppUtils.showPassword((CheckBox) v, password);
+    public void showPasswordClick( View v ) {
+        AppUtils.showPassword( (CheckBox) v, password );
     }
 
     @Override
-    public void onResponse(YodoRequest.RequestType type, ServerResponse response) {
+    public void onResponse( YodoRequest.RequestType type, ServerResponse response ) {
         YodoRequest.getInstance().destroyProgressDialog();
 
         switch( type ) {
@@ -118,8 +116,8 @@ public class RegistrationActivity extends ActionBarActivity implements YodoReque
                 String code = response.getCode();
 
                 if( code.equals( ServerResponse.AUTHORIZED_REGISTRATION ) ) {
-                    AppUtils.saveLoginStatus( ac, true );
-                    setResult( RESULT_OK );
+                    Intent intent = new Intent( ac, SplashActivity.class );
+                    startActivity( intent );
                     finish();
                 } else {
                     Message msg = new Message();

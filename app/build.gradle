@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 23
+    buildToolsVersion "22.0.1"
 
     defaultConfig {
         applicationId "co.yodo.fare"
         minSdkVersion 15
-        targetSdkVersion 21
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
     }
@@ -19,11 +19,19 @@ android {
     }
 }
 
+repositories {
+    flatDir{
+        dirs 'libs'
+    }
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:22.2.1'
-    compile 'com.journeyapps:zxing-android-embedded:3.0.1@aar'
-    compile 'com.google.zxing:core:3.2.0'
-    compile files('libs/zbar.jar')
-    compile files('libs/acra-4.5.0.jar')
+    compile 'com.android.support:appcompat-v7:23.0.1'
+    compile 'com.android.support:support-v4:23.0.1'
+    compile 'com.android.support:design:23.0.1'
+    compile 'com.android.volley:volley:1.0.0'
+    compile 'com.google.android.gms:play-services-location:8.3.0'
+    compile 'org.greenrobot:eventbus:3.0.0'
+    compile(name:'ScanditBarcodeScanner', ext:'aar')
 }

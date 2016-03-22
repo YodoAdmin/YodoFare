@@ -128,6 +128,7 @@
 
                 <ImageView
                     style="@style/ImageButton"
+                    android:id="@+id/ivYodoGear"
                     android:src="@drawable/yodo_gear"
                     android:contentDescription="@string/desc"
                     android:background="@null"
@@ -148,30 +149,7 @@
         android:layout_marginLeft="15dp"
         android:layout_marginStart="15dp"
         android:layout_weight="1"
-        android:visibility="gone" >
-
-        <FrameLayout
-            android:id="@+id/cameraPreview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <com.journeyapps.barcodescanner.CompoundBarcodeView
-            android:id="@+id/barcode_scanner"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-        </com.journeyapps.barcodescanner.CompoundBarcodeView>
-
-        <TextView
-            android:id="@+id/textViewOverlayText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="10dp"
-            android:gravity="bottom|center_horizontal"
-            android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:text="@string/place_qrcode" />
-
-    </RelativeLayout>
+        android:visibility="gone" />
     <!-- End Preview Camera Layout -->
 
     <!-- Operations Layout -->

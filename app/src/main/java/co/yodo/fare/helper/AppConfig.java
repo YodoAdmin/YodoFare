@@ -6,12 +6,13 @@ package co.yodo.fare.helper;
  */
 public class AppConfig {
     /** DEBUG flag: to print the logs in console */
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     /** FILE flag: to print the logs in a file */
     public static final boolean FDEBUG = false;
 
     /** Name of the log file */
+    @SuppressWarnings( "unused" )
     public static final String LOG_FILE = "log.file";
 
     /** ID of the shared preferences file */
@@ -21,6 +22,11 @@ public class AppConfig {
      * Keys used with the Shared Preferences (SP) and default values.
      * {{ ======================================================================
      */
+
+    /* Login status.
+	 * type -- String
+	 */
+    public static final String SPREF_HARDWARE_TOKEN = "SPHardwareToken";
 
     /* Login status.
 	 * type -- Boolean
@@ -65,15 +71,15 @@ public class AppConfig {
     */
     public static final String SPREF_CURRENT_CURRENCY = "SPCurrentCurrency";
 
+    /* The current currency.
+    * type -- Integer
+    */
+    public static final String SPREF_MERCHANT_CURRENCY = "SPMerchantCurrency";
+
     /* The current scanner position.
     * type -- Integer
     */
     public static final String SPREF_CURRENT_SCANNER = "SPCurrentScanner";
-
-    /* The current scanner engine.
-    * type -- Integer
-    */
-    public static final String SPREF_SCANNER_ENGINE = "SPScannerEngine";
 
     /* The current time to dismiss the response message.
     * type -- Integer
@@ -131,9 +137,9 @@ public class AppConfig {
     /*
 	 * Default value position for the language
 	 *
-	 * Default: position 0 (English)
+	 * Default: en (English)
 	 */
-    public static final Integer DEFAULT_LANGUAGE = 0;
+    public static final String DEFAULT_LANGUAGE = "en";
 
     /*
 	 * Default value position for the currency
@@ -148,13 +154,6 @@ public class AppConfig {
 	 * Default: position 0 (BarcodeScanner)
 	 */
     public static final Integer DEFAULT_SCANNER = 0;
-
-    /*
-	 * Default value string of the engine
-	 *
-	 * Default: ZBarScanner (ZBar)
-	 */
-    public static final String DEFAULT_ENGINE = "ZBarScanner";
 
     /*
 	 * Default value for the time to dismiss the response message

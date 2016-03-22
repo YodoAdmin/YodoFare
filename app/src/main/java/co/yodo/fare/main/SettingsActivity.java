@@ -1,6 +1,7 @@
 package co.yodo.fare.main;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -19,8 +20,8 @@ import co.yodo.fare.helper.AppUtils;
 public class SettingsActivity extends AppCompatActivity {
 
     @Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	protected void onCreate( Bundle savedInstanceState ) {
+		super.onCreate( savedInstanceState );
         AppUtils.setLanguage( SettingsActivity.this );
         setContentView( R.layout.activity_settings );
 
@@ -129,9 +130,16 @@ public class SettingsActivity extends AppCompatActivity {
                 ETP_ADVERTISING.setEnabled( false );
         }
 
-        private void updateStatus(String key) {
+        private void updateStatus( String key ) {
             if( key.equals( AppConfig.SPREF_ADVERTISING_SERVICE ) )
                 AppUtils.setupAdvertising( c, AppUtils.isAdvertisingServiceRunning( c ), true );
+
+            if( key.equals( AppConfig.SPREF_CURRENT_LANGUAGE ) ) {
+                Intent i = new Intent( getActivity(), FareActivity.class );
+                i.setFlags( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
+                startActivity( i );
+                getActivity().finish();
+            }
         }
 
         @Override

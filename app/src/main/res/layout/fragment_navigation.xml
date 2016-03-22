@@ -30,13 +30,6 @@
 
         <Button
             style="@style/NavigationButton"
-            android:drawableLeft="@drawable/set_language"
-            android:drawableStart="@drawable/set_language"
-            android:text="@string/set_language"
-            android:onClick="setLanguageClick"/>
-
-        <Button
-            style="@style/NavigationButton"
             android:drawableLeft="@drawable/set_currency"
             android:drawableStart="@drawable/set_currency"
             android:text="@string/set_currency"

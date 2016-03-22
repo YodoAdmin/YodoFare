@@ -12,15 +12,13 @@ import co.yodo.fare.helper.AppUtils;
 
 public class HardwareScanner extends QRScanner {
 	/** DEBUG */
+	@SuppressWarnings( "unused" )
 	private static final String TAG = HardwareScanner.class.getSimpleName();
 	
 	/** GUI Controllers */
 	private AlertDialog inputDialog;
-	
-	/** Instance */
-	private static volatile HardwareScanner instance = null;
 
-	private HardwareScanner(Activity activity) {
+	public HardwareScanner( Activity activity ) {
 		super( activity );
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder( activity );
@@ -35,18 +33,16 @@ public class HardwareScanner extends QRScanner {
 	            
 				if( event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER ) {
 					String scanData = input.getText().toString();
-					
-					if( scanData != null ) {
-                        inputDialog.dismiss();
 
-						AppUtils.Logger(TAG, scanData);
-                        AppUtils.hideSoftKeyboard( act );
+					inputDialog.dismiss();
 
-                        if( listener != null )
-                            listener.onNewData( scanData );
+					AppUtils.Logger(TAG, scanData);
+					AppUtils.hideSoftKeyboard( act );
 
-                        input.setText( "" );
-					}
+					if( listener != null )
+                        listener.onNewData( scanData );
+
+					input.setText( "" );
 					return true;
 	            }
 				return false;
@@ -61,18 +57,9 @@ public class HardwareScanner extends QRScanner {
         inputDialog = builder.create();
         inputDialog.getWindow().setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN );
 	}
-	
-	public static HardwareScanner getInstance(Activity activity) {
-		synchronized( HardwareScanner.class ) {
-			if(instance == null)
-				instance = new HardwareScanner( activity );
-		}
-		return instance;
-	}
-	
-	public static HardwareScanner getInstance() {
-		return instance;
-	}
+
+	@Override
+	public void setFrontFaceCamera( boolean frontFacing ) {}
 	
 	@Override
 	public void startScan() {
@@ -80,7 +67,7 @@ public class HardwareScanner extends QRScanner {
 	}
 
     @Override
-    public void close() {
+    public void stopScan() {
         inputDialog.dismiss();
     }
 	
@@ -90,12 +77,10 @@ public class HardwareScanner extends QRScanner {
 	}
 
     @Override
-    public void setFrontFaceCamera(boolean frontFacing) {}
-
-    @Override
 	public void destroy() {
+		super.destroy();
+		// Set to null all the variables
         inputDialog.dismiss();
         inputDialog = null;
-		instance    = null;
 	}
 }

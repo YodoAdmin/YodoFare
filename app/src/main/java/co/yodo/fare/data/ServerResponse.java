@@ -1,7 +1,7 @@
 package co.yodo.fare.data;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class ServerResponse implements Serializable {
@@ -20,9 +20,9 @@ public class ServerResponse implements Serializable {
 
     /** Param keys */
     public static final String PARAMS       = "params";
-    public static final String LOGO         = "logo";
     public static final String CREDIT       = "credit";
     public static final String DEBIT        = "debit";
+    public static final String CURRENCY     = "currency";
     public static final String SETTLEMENT   = "settlement";
     public static final String EQUIPMENT    = "equipments";
     public static final String LEASE        = "lease";
@@ -42,7 +42,7 @@ public class ServerResponse implements Serializable {
         params = new HashMap<>();
     }
 
-	public void setCode(String code) {
+	public void setCode( String code ) {
 		this.code = code;
 	}
 
@@ -50,7 +50,7 @@ public class ServerResponse implements Serializable {
 		return this.code;
 	}
 
-	public void setAuthNumber(String authNumber) {
+	public void setAuthNumber( String authNumber ) {
 		this.authNumber = authNumber;
 	}
 
@@ -58,7 +58,7 @@ public class ServerResponse implements Serializable {
 		return this.authNumber;
 	}
 
-	public void setMessage(String message) {
+	public void setMessage( String message ) {
 		this.message = message;
 	}
 
@@ -66,7 +66,7 @@ public class ServerResponse implements Serializable {
 		return this.message;
 	}
 
-	public void setRTime(long rtime) {
+	public void setRTime( long rtime ) {
 		this.rtime = rtime;
 	}
 
@@ -74,11 +74,11 @@ public class ServerResponse implements Serializable {
 		return this.rtime;
 	}
 
-    public void addParam(String key, String value) {
+    public void addParam( String key, String value ) {
         params.put( key, value );
     }
 
-    public String getParam(String key) {
+    public String getParam( String key ) {
         return params.get(key);
     }
 
@@ -90,6 +90,6 @@ public class ServerResponse implements Serializable {
                " AuthNumber : " + this.authNumber + "\n" +
                " Message : " + this.message + "\n" +
                " Time : " + this.rtime + "\n" +
-               " Params : " + Arrays.asList( this.params );
+               " Params : " + Collections.singletonList( this.params );
 	}
 }

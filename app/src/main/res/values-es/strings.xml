@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Main Strings -->
+    <string name="app_name">YodoFare</string>
+    <string name="action_settings">Configuración</string>
+    <string name="version_tag">Version:</string>
+    <string name="desc">Desc</string>
+    <string name="register">REGISTRAR</string>
+    <string name="loading">Cargando</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancelar</string>
+
+    <!-- Error Messages -->
+    <string name="error">Esto es embarazoso! Ocurrio un error en el proceso</string>
+    <string name="no_balance">Lo sentimos, parece que no dispone de un balance</string>
+    <string name="message.no_internet">Lo sentimos, parece que no dispone de una conexion a Internet</string>
+    <string name="message.no_gps_support">Lo sentimos, parece que no dispone de soporte para localización</string>
+    <string name="message.no_hardware">Debe encender su bluetooth primero</string>
+    <string name="message.no_camera">Esta cámara no existe</string>
+    <string name="message.play_services">Google Play Services debe ser instaladohaha</string>
+
+    <!-- General Messages -->
+    <string name="input_pip">Merch Identity Phrase (MIP)</string>
+    <string name="show_pass">Mostrar Contraseña</string>
+    <string name="remember_pass">Recordar Contraseña</string>
+    <string name="merch_pip_hint">Código de Activación</string>
+    <string name="barcode_scanner">Escanee el código</string>
+    <string name="message.gps_enable">El GPS no está habilitado. Desea ir a configuraciones?</string>
+    <string name="about_message">Porfavor use el siguiente correo para contactarnos. Haremos todo lo posible para responderle rápidamente. Nosotros no venderemos o distribuiremos la información que usted nos provee.</string>
+    <string name="about_email">support@yodo.co</string>
+    <string name="register_hint">Ingrese su código de activación. Debe estar registrado como merchant antes de la activación. Contacto: support@yodo.co</string>
+
+    <!-- Exchange Response -->
+    <string name="exchange_code">Código:</string>
+    <string name="exchange_auth">Número de Autorización:</string>
+    <string name="exchange_message">Mensaje:</string>
+    <string name="exchange_balance">Balance:</string>
+    <string name="exchange_extra">Extra:</string>
+    <string name="exchange_error">Tamaño SKS inválido</string>
+
+    <!-- Balance Messages -->
+    <string name="yodo_title">Merchant Balance Report</string>
+    <string name="yodo_cash">Yodo Cash</string>
+    <string name="yodo_debits">Yodo Debits</string>
+    <string name="yodo_cumulative_balance">Balance Acumulado:</string>
+    <string name="to_date">hasta la fecha:</string>
+    <string name="today">hoy:</string>
+    <string name="yodo_today_balance">Balance de Hoy:</string>
+
+    <!-- Labels -->
+    <string name="imei">IMEI:</string>
+    <string name="label.currency">Moneda:</string>
+    <string name="server_switch">Switch:</string>
+
+    <!-- Activity titles -->
+    <string name="title_activity_fare">Yodo Fare</string>
+    <string name="title_activity_settings">Yodo Configuración</string>
+    <string name="title_activity_registration">Yodo Registro</string>
+
+    <!-- configuration labels -->
+    <string name="option_label">Opciones</string>
+    <string name="tools_label">Herramientas</string>
+
+    <!-- configuration options -->
+    <string name="set_language">Lenguajes</string>
+    <string name="set_currency">Moneda</string>
+    <string name="settings">Configuración</string>
+    <string name="adv_service">Servicio de Publicidad</string>
+    <string name="get_balance">Obtener Balance</string>
+    <string name="about">Acerca de Yodo</string>
+
+    <!-- Messages for the permissions -->
+    <string name="message.permission.read_phone_state">Permiso requerido para identificar el dispositivo y permitir acceso a los servicios Yodo</string>
+    <string name="message.permission.location">Permiso requerido para usa los servicios de ubicación sobre las transacciones</string>
+    <string name="message.permission.camera">Permiso requerido para usar la cámara y permitir capturar las credenciales de pago</string>
+
+    <!-- Preview Messages -->
+    <string name="place_qrcode">Ubique el código SKS en esta ventana</string>
+
+    <!-- Values Labels -->
+    <string name="total_fare">Tarifa: </string>
+    <string name="zero">0.00</string>
+    <string name="no_item">- no item -</string>
+
+    <!-- Languages -->
+    <string-array name="languages_array">
+        <item>Inglés</item>
+        <item>Español</item>
+    </string-array>
+
+    <!-- Preferences Categories -->
+    <string name="config_pref_category_old">Tarifa Adulto Mayor</string>
+    <string name="config_pref_category_adult">Tarifa Adulto</string>
+    <string name="config_pref_category_child">Tarifa Niño</string>
+    <string name="config_pref_category_student">Tarifa Estudiante</string>
+
+    <!-- Preferences Options -->
+    <string name="config_pref_languages">Lenguaje</string>
+    <string name="config_pref_username">Nombre Y-Beacon</string>
+    <string name="config_pref_dismiss">Tiempo para desaparecer la respuesta</string>
+    <string name="config_pref_advertising">Servicio de Promoción</string>
+    <string name="config_pref_advertising_summary">Envía promociones a clientes cercanos</string>
+    <string name="config_pref_live_scan">Scan en Vivo</string>
+    <string name="config_pref_live_scan_summary">Mantiene la cámara abierta después de las transacciones</string>
+    <string name="config_pref_zone_1">Zona 1</string>
+    <string name="config_pref_zone_2">Zona 2</string>
+    <string name="config_pref_zone_3">Zona 3</string>
+
+    <!-- Tutorial Instructions -->
+    <string name="tutorial_title">Navegador &amp; items</string>
+    <string name="tutorial_message">Deslice el dedo hacia la izquierda para ocultar el panel</string>
+
+    <!-- ACRA -->
+    <string name="crash_toast_text">Ooooops ! Fallé, pero un reporte ha sido enviado a mi desarrollador para ayudar a resolver el problema!</string>
+
+</resources>
