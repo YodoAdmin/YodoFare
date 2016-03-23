@@ -140,29 +140,29 @@ public class ServerRequest {
      * @param iAlterReqType Sub-type of the request
      * @return	String	Request for getting the Alternate Transaction
      */
-    public static String createAlternateRequest(String pUsrData, int iAlterReqType){
+    public static String createAlternateRequest( String pUsrData, int iAlterReqType ){
         StringBuilder sAlternateRequest = new StringBuilder();
         sAlternateRequest.append( PROTOCOL_VERSION ).append( REQ_SEP );
         sAlternateRequest.append( ALTER_REQ ).append( REQ_SEP );
 
         switch( iAlterReqType ) {
-            //RT = 7, ST = 1
+            // RT = 7, ST = 1
             case 1: sAlternateRequest.append( ALTER_VISA_CRED_SUBREQ ).append( REQ_SEP );
                 break;
 
-            //RT = 7, ST = 2
+            // RT = 7, ST = 2
             case 2: sAlternateRequest.append( ALTER_PUB_TRANSIT_SUBREQ ).append( REQ_SEP );
                 break;
 
-            //RT = 7, ST = 3
+            // RT = 7, ST = 3
             case 3: sAlternateRequest.append( ALTER_HEART_SUBREQ ).append( REQ_SEP );
                 break;
 
-            //RT = 7, ST = 4
+            // RT = 7, ST = 4
             case 4: sAlternateRequest.append( ALTER_VISA_PREP_SUBREQ ).append( REQ_SEP );
                 break;
 
-            //RT = 7, ST = 5
+            // RT = 7, ST = 5
             case 5: sAlternateRequest.append( ALTER_PAYPAL_SUBREQ ).append( REQ_SEP );
                 break;
         }

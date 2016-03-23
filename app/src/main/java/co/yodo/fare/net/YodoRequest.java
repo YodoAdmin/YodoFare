@@ -16,14 +16,22 @@ import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -58,15 +66,16 @@ public class YodoRequest extends ResultReceiver {
 
     /** ID for each request */
     public enum RequestType {
-        ERROR_NO_INTERNET ( "-1" ), // ERROR NO INTERNET
-        ERROR_GENERAL     ( "00" ), // ERROR GENERAL
-        AUTH_REQUEST      ( "01" ), // RT=0, ST=4
-        QUERY_BAL_REQUEST ( "02" ), // RT=4, ST=3
-        QUERY_DAY_REQUEST ( "03" ), // RT=4, ST=3
-        QUERY_CUR_REQUEST ( "04" ), // RT=4, ST=3
-        REG_MERCH_REQUEST ( "05 "), // RT=9, ST=1
-        EXCH_MERCH_REQUEST( "06" ),	// RT=1, ST=1
-        ALT_MERCH_REQUEST ( "07" );	// RT=7
+        ERROR_NO_INTERNET  ( "-1" ), // ERROR NO INTERNET
+        ERROR_GENERAL      ( "00" ), // ERROR GENERAL
+        AUTH_REQUEST       ( "01" ), // RT=0, ST=4
+        QUERY_BAL_REQUEST  ( "02" ), // RT=4, ST=3
+        QUERY_DAY_REQUEST  ( "03" ), // RT=4, ST=3
+        QUERY_CUR_REQUEST  ( "04" ), // RT=4, ST=3
+        REG_MERCH_REQUEST  ( "05 "), // RT=9, ST=1
+        EXCH_MERCH_REQUEST ( "06" ),	// RT=1, ST=1
+        ALT_MERCH_REQUEST  ( "07" ),	// RT=7
+        CURRENCIES_REQUEST ( "08" );	// Not from protocol
 
         private final String name;
 
@@ -74,6 +83,7 @@ public class YodoRequest extends ResultReceiver {
             name = s;
         }
 
+        @SuppressWarnings( "unused" )
         public boolean equalsName(String otherName) {
             return ( otherName != null ) && name.equals( otherName );
         }
@@ -176,7 +186,7 @@ public class YodoRequest extends ResultReceiver {
                 Integer.parseInt( ServerRequest.AUTH_HW_MERCH_SUBREQ )
         );
 
-        sendRequest( context, pRequest, RequestType.AUTH_REQUEST );
+        sendXMLRequest( context, pRequest, RequestType.AUTH_REQUEST );
     }
 
     public void requestHistory(Activity activity, String hardwareToken, String pip) {
@@ -242,7 +252,7 @@ public class YodoRequest extends ResultReceiver {
                 Integer.parseInt( ServerRequest.QUERY_ACC_SUBREQ )
         );
 
-        sendRequest( context, pRequest, RequestType.QUERY_CUR_REQUEST );
+        sendXMLRequest( context, pRequest, RequestType.QUERY_CUR_REQUEST );
     }
 
     public void requestRegistration( Activity activity, String hardwareToken, String token ) {
@@ -323,7 +333,7 @@ public class YodoRequest extends ResultReceiver {
         String clientData  = client.substring( 0, client.length() - 1 );
         String accountType = client.substring( client.length() - 1 );
 
-        if( !AppUtils.isNumber(accountType) ) {
+        if( !AppUtils.isNumber( accountType ) ) {
             instance.send( RESTService.STATUS_FAILED, null );
             return;
         }
@@ -360,6 +370,57 @@ public class YodoRequest extends ResultReceiver {
         activity.startService( intent );
     }
 
+    /**
+     * Looks for the currencies file in the storage,
+     * if it exists but it is to old, delete it and request
+     * if it doesn't exists, request
+     * else use the file
+     * @param ctx The activity context
+     */
+    @SuppressWarnings( "ResultOfMethodCallIgnored" )
+    public void requestCurrencies( Context ctx ) {
+        // Life time of the file
+        final int MAX_AGE = 6 * 60 * 60 * 1000; // 6 hours (1000 = 1 sec)
+
+        //Find the dir to save cached files
+        File cacheDir = ctx.getCacheDir();
+        File file = new File( cacheDir, "currencies.json" );
+
+        AppUtils.Logger( TAG, file.lastModified() + "" );
+        AppUtils.Logger( TAG, System.currentTimeMillis() + "" );
+
+        boolean exists = file.exists();
+        if( !exists || file.lastModified() + MAX_AGE < System.currentTimeMillis() ) {
+            file.delete();
+            sendArrayRequest( ctx, "currency/index.json", RequestType.CURRENCIES_REQUEST );
+        } else {
+            try {
+                FileInputStream fin   = new FileInputStream( file );
+                BufferedReader reader = new BufferedReader( new InputStreamReader( fin ) );
+                StringBuilder sb      = new StringBuilder();
+                String line;
+
+                while( ( line = reader.readLine() ) != null )
+                    sb.append( line ).append( "\n" );
+
+                reader.close();
+                fin.close();
+                // Transform the text to JSONArray
+                JSONArray array = new JSONArray( sb.toString() );
+                if( array.length() <= 0 )
+                    file.delete();
+
+                // Send response
+                JSONHandler handler = new JSONHandler( ctx );
+                ServerResponse response = handler.parseCurrencies(  array );
+                AppUtils.Logger( TAG, response.toString() );
+                externalListener.onResponse( RequestType.CURRENCIES_REQUEST, response );
+            } catch ( IOException | JSONException e ) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Override
     protected void onReceiveResult(int resultCode, Bundle resultData) {
         if( resultCode == RESTService.STATUS_FAILED ) {
@@ -386,6 +447,7 @@ public class YodoRequest extends ResultReceiver {
     //private static final String IP 	         = "http://50.56.180.133";  // Production
     private static final String IP 			 = "http://198.101.209.120";  // Development
     private static final String YODO_ADDRESS = "/yodo/yodoswitchrequest/getRequest/";
+    private static final String YODO         = "/yodo/";
 
     /** Timeout 10 seconds */
     private final static int TIMEOUT = 10000;
@@ -407,13 +469,57 @@ public class YodoRequest extends ResultReceiver {
     public RequestQueue getRequestQueue( Context context ) {
         // lazy initialize the request queue, the queue instance will be
         // created when it is accessed for the first time
-        if (mRequestQueue == null) {
+        if( mRequestQueue == null ) {
             mRequestQueue = Volley.newRequestQueue( context );
         }
         return mRequestQueue;
     }
 
-    private void sendRequest( final Context activity, final String pRequest, final RequestType type ) {
+    private void sendArrayRequest( final Context ctx, final String pRequest, final RequestType type ) {
+        final JsonArrayRequest httpRequest = new JsonArrayRequest( Request.Method.GET, IP + YODO + pRequest, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse( JSONArray json ) {
+                        //Find the dir to save cached files
+                        File cacheDir = ctx.getCacheDir();
+                        File file = new File( cacheDir, "currencies.json" );
+
+                        try {
+                            FileWriter writer = new FileWriter( file.getAbsolutePath() );
+                            writer.write( json.toString() );
+                            writer.flush();
+                            writer.close();
+                        } catch( IOException e ) {
+                            e.printStackTrace();
+                            if( file.exists() )
+                                // noinspection ResultOfMethodCallIgnored
+                                file.delete();
+                        }
+
+                        JSONHandler handler = new JSONHandler( ctx );
+                        ServerResponse response = handler.parseCurrencies( json );
+                        AppUtils.Logger( TAG, response.toString() );
+                        externalListener.onResponse( type, response );
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse( VolleyError error ) {
+                        error.printStackTrace();
+
+                        if( error instanceof TimeoutError || error instanceof NoConnectionError )
+                            externalListener.onResponse( RequestType.ERROR_NO_INTERNET, null );
+                        else
+                            externalListener.onResponse( RequestType.ERROR_GENERAL, null );
+                    }
+                }
+        );
+        httpRequest.setTag( "GET" );
+        httpRequest.setRetryPolicy( retryPolicy );
+        getRequestQueue( ctx ).add( httpRequest );
+    }
+
+    private void sendXMLRequest( final Context ctx, final String pRequest, final RequestType type ) {
         final StringRequest httpRequest = new StringRequest( Request.Method.GET, IP + YODO_ADDRESS + pRequest,
                 new Response.Listener<String>() {
                     @Override
@@ -439,7 +545,7 @@ public class YodoRequest extends ResultReceiver {
                     @Override
                     public void onErrorResponse( VolleyError error ) {
                         error.printStackTrace();
-
+                        // depending on the error, return an alert to the activity
                         if( error instanceof TimeoutError || error instanceof NoConnectionError )
                             externalListener.onResponse( RequestType.ERROR_NO_INTERNET, null );
                         else
@@ -449,7 +555,7 @@ public class YodoRequest extends ResultReceiver {
         );
         httpRequest.setTag( "GET" );
         httpRequest.setRetryPolicy( retryPolicy );
-        getRequestQueue( activity ).add( httpRequest );
+        getRequestQueue( ctx ).add( httpRequest );
     }
 
     public static String getSwitch() {

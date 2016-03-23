@@ -54,7 +54,7 @@ public class XMLHandler extends DefaultHandler {
     /** Called when tag closing ( ex:- <name>AndroidPeople</name>
      * -- </name> )*/
     @Override
-    public void endElement(String uri, String localName, String qName) throws SAXException {
+    public void endElement( String uri, String localName, String qName ) throws SAXException {
         currentElement = false;
 
         /** set value */
@@ -113,7 +113,7 @@ public class XMLHandler extends DefaultHandler {
     /** Called to get tag characters ( ex:- <name>AndroidPeople</name>
      * -- to get AndroidPeople Character ) */
     @Override
-    public void characters(char[] ch, int start, int length) throws SAXException {
+    public void characters( char[] ch, int start, int length ) throws SAXException {
         if( currentElement ) {
             currentValue = new String( ch, start, length );
             currentElement = false;

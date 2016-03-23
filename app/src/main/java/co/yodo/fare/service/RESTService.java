@@ -15,12 +15,10 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import co.yodo.fare.component.JsonParser;
 import co.yodo.fare.data.ServerResponse;
 import co.yodo.fare.helper.AppUtils;
 import co.yodo.fare.net.XMLHandler;
@@ -82,6 +80,11 @@ public class RESTService extends IntentService {
         String pRequest         = extras.getString( EXTRA_PARAMS );
         ResultReceiver receiver = extras.getParcelable( EXTRA_RESULT_RECEIVER );
 
+        if( receiver == null ) {
+            AppUtils.Logger( TAG, "You did not pass the receiver with the Intent." );
+            return;
+        }
+
         try {
             // Handling XML
             SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -105,26 +108,12 @@ public class RESTService extends IntentService {
             receiver.send( STATUS_FAILED, null );
             return;
         }
-
         ServerResponse response = XMLHandler.response;
-
-        long currentTime    = response.getRTime() * 1000;
-        long lastUpdateTime = AppUtils.getCurrencyTimestamp( ac ) * 1000;
-
-        // Update four times a day
-        if( TimeUnit.MILLISECONDS.toHours( currentTime - lastUpdateTime ) > 6 ) {
-            JsonParser.deleteFile( ac );
-            AppUtils.saveCurrencyTimestamp( ac, response.getRTime() );
-        }
-
+        // Send the result as a bundle
         Bundle resultData = new Bundle();
         resultData.putSerializable( ACTION_RESULT, action );
         resultData.putSerializable( EXTRA_RESULT, response );
         receiver.send( STATUS_SUCCESS, resultData );
-    }
-
-    public static String getRoot() {
-        return IP;
     }
 
     public static String getSwitch() {

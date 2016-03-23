@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Message;
 import android.provider.Settings;
@@ -40,9 +39,6 @@ import android.widget.Toast;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -51,7 +47,6 @@ import java.util.HashMap;
 import co.yodo.fare.R;
 import co.yodo.fare.adapter.CurrencyAdapter;
 import co.yodo.fare.component.ClearEditText;
-import co.yodo.fare.component.JsonParser;
 import co.yodo.fare.component.ToastMaster;
 import co.yodo.fare.component.YodoHandler;
 import co.yodo.fare.data.Currency;
@@ -259,8 +254,10 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
                 switch( event.getAction() ) {
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
-                        if( mPopupMessage != null )
+                        if( mPopupMessage != null ) {
                             mPopupMessage.dismiss();
+                            equivalentTotal = null;
+                        }
                         break;
                 }
                 return false;
@@ -274,8 +271,6 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
     private void updateData() {
         // Get the saved hardware token
         hardwareToken = AppUtils.getHardwareToken( ac );
-        // Get the current balance
-        new getCurrentBalance().execute();
         // Mock location
         mLocation = new Location( "flp" );
         mLocation.setLatitude( 0.00 );
@@ -334,24 +329,31 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
      * Setup a PopupWindow below a View
      * @param v The view for te popup
      */
-    private void setupPopup(View v) {
+    private void setupPopup( View v ) {
+        // Setup the popup
         LinearLayout viewGroup = (LinearLayout) findViewById( R.id.popup_window );
         LayoutInflater layoutInflater = (LayoutInflater) getSystemService( Context.LAYOUT_INFLATER_SERVICE );
         View layout = layoutInflater.inflate( R.layout.popup_window, viewGroup );
 
         TextView cashTotal      = (TextView) layout.findViewById( R.id.cashTotalText );
         ProgressBar progressBar = (ProgressBar) layout.findViewById( R.id.progressBarPopUp );
-        cashTotal.setText( equivalentTotal.setScale( 2, RoundingMode.DOWN ).toString() );
 
-        if( equivalentTotal == null ) {
+        cashTotal.setVisibility( View.GONE );
+        progressBar.setVisibility( View.VISIBLE );
+        /*if( equivalentTotal == null ) {
             cashTotal.setVisibility( View.GONE );
             progressBar.setVisibility( View.VISIBLE );
-        }
+        } else {
+            cashTotal.setText( equivalentTotal.setScale( 2, RoundingMode.DOWN ).toString() );
+        }*/
 
         mPopupMessage.setWidth( mTotalFareView.getWidth() );
         mPopupMessage.setHeight( LinearLayout.LayoutParams.WRAP_CONTENT );
         mPopupMessage.setContentView( layout );
         mPopupMessage.showAtLocation( v, Gravity.CENTER, 0, 0 );
+
+        // Request the fare value in the rate of the merchant currency
+        YodoRequest.getInstance().requestCurrencies( ac );
     }
 
     /**
@@ -426,12 +428,12 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
 
         DialogInterface.OnClickListener onClick = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
-                AppUtils.saveCurrency(ac, item);
+                AppUtils.saveCurrency( ac, item );
 
                 Drawable icon = AppUtils.getDrawableByName( ac, icons[ item ] );
                 icon.setBounds( 0, 0, mTotalFareView.getLineHeight(), (int) ( mTotalFareView.getLineHeight() * 0.9 ) );
                 mTotalFareView.setCompoundDrawables( icon, null, null, null );
-                new getCurrentBalance().execute();
+                //new getCurrencyFare().execute();
 
                 dialog.dismiss();
             }
@@ -734,6 +736,38 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
                 }
                 break;
 
+            case CURRENCIES_REQUEST:
+                final String sMerchRate = response.getParam( ServerResponse.MERCH_RATE );
+                final String sFareRate  = response.getParam( ServerResponse.FARE_RATE );
+
+                if( sMerchRate != null && sFareRate != null ) {
+                    // List of Currencies
+                    String[] currencies = ac.getResources().getStringArray( R.array.currency_array );
+                    // Get the rates in BigDecimals
+                    BigDecimal merchRate = new BigDecimal( sMerchRate );
+                    BigDecimal fareRate = new BigDecimal( sFareRate );
+                    // Get raw value, in order to transform
+                    BigDecimal temp_fare = new BigDecimal( mTotalFareView.getText().toString() );
+
+                    // Transform the currencies using the rate
+                    if( AppConfig.URL_CURRENCY.equals( currencies[ AppUtils.getCurrency( ac ) ] ) ) {
+                        equivalentTotal = temp_fare.multiply( merchRate );
+                    } else {
+                        BigDecimal currency_rate = merchRate.divide( fareRate, 2 );
+                        equivalentTotal = temp_fare.multiply( currency_rate );
+                    }
+                    // If the popup is showing, then use the new value
+                    if( mPopupMessage.isShowing() ) {
+                        // Disappear the progress bar and show the value
+                        mPopupMessage.getContentView().findViewById( R.id.progressBarPopUp ).setVisibility( View.GONE );
+                        TextView value = (TextView) mPopupMessage.getContentView().findViewById( R.id.cashTotalText );
+                        value.setVisibility( View.VISIBLE );
+                        value.setText( equivalentTotal.setScale( 2, RoundingMode.DOWN ).toString() );
+                    }
+                }
+
+                break;
+
             case EXCH_MERCH_REQUEST:
             case ALT_MERCH_REQUEST:
                 // Returns the selected fare to adult
@@ -828,75 +862,6 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
                     showCamera();
 
                 break;
-        }
-    }
-
-    private class getCurrentBalance extends AsyncTask<String, String, JSONArray> {
-        /** JSON Url */
-        private String url = RESTService.getRoot() + "/yodo/currency/index.json";
-
-        /** JSON Tags */
-        private String TAG = "YodoCurrency";
-        private String CURRENCY_TAG = "currency";
-        private String RATE_TAG     = "rate";
-
-        /** Currencies */
-        private String[] currencies = ac.getResources().getStringArray( R.array.currency_array );
-        private String URL_CURRENCY  = "EUR";
-        //private String BASE_CURRENCY = "CAD";
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            equivalentTotal = null;
-        }
-
-        @Override
-        protected JSONArray doInBackground(String... arg0) {
-            // instantiate our json parser
-            JsonParser jParser = new JsonParser( ac );
-            // get json string from url
-            return jParser.getJSONFromUrl( url );
-        }
-
-        @Override
-        protected void onPostExecute(JSONArray json) {
-            if( json != null ) {
-                BigDecimal cad_currency = null, current_currency = null;
-                for( int i = 0; i < json.length(); i++ ) {
-                    try {
-                        JSONObject temp = json.getJSONObject( i );
-                        JSONObject c    = (JSONObject) temp.get( TAG );
-                        String currency = (String) c.get( CURRENCY_TAG );
-                        String rate     = (String) c.get( RATE_TAG );
-
-                        if( currency.equals( currencies[ AppConfig.DEFAULT_CURRENCY ] ) )
-                            cad_currency = new BigDecimal( rate );
-
-                        if( currency.equals( currencies[ AppUtils.getCurrency( ac ) ]) )
-                            current_currency = new BigDecimal( rate );
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                // Get raw value, in order to transform
-                BigDecimal temp_tender = new BigDecimal( mTotalFareView.getText().toString() );
-
-                if( cad_currency != null ) {
-                    if( URL_CURRENCY.equals( currencies[ AppUtils.getCurrency( ac ) ] ) ) {
-                        equivalentTotal = temp_tender.multiply( cad_currency );
-                    } else if( current_currency != null ) {
-                        BigDecimal currency_rate = cad_currency.divide( current_currency, 2 );
-                        equivalentTotal = temp_tender.multiply( currency_rate );
-                    }
-
-                    if( mPopupMessage.isShowing() ) {
-                        mPopupMessage.getContentView().findViewById( R.id.progressBarPopUp ).setVisibility( View.GONE );
-                        mPopupMessage.getContentView().findViewById( R.id.cashTotalText ).setVisibility( View.VISIBLE );
-                    }
-                }
-            }
         }
     }
 

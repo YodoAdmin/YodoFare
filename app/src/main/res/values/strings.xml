@@ -75,6 +75,7 @@
     <string name="message.permission.read_phone_state">Permission required to identify the device in order to access Yodo\'s cloud service</string>
     <string name="message.permission.location">Permission required to use Location services so fare transactions can be geo-tagged</string>
     <string name="message.permission.camera">Permission required to use the camera in order to capture payment credentials</string>
+    <string name="message.permission.write_external_storage">Permission required to store the currency rates</string>
 
     <!-- Preview Messages -->
     <string name="place_qrcode">Place your SKS code entirely in this window</string>

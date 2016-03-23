@@ -15,6 +15,9 @@ public class AppConfig {
     @SuppressWarnings( "unused" )
     public static final String LOG_FILE = "log.file";
 
+    /** Name of the main folder */
+    public static final String FOLDER = "Yodo";
+
     /** ID of the shared preferences file */
     public static final String SHARED_PREF_FILE = "YodoFareSharedPref";
 
@@ -27,15 +30,6 @@ public class AppConfig {
 	 * type -- String
 	 */
     public static final String SPREF_HARDWARE_TOKEN = "SPHardwareToken";
-
-    /* Login status.
-	 * type -- Boolean
-	 *
-	 * __Values__
-	 * true  -- Application registered and authorized
-	 * false -- Application not registered or authorized
-	 */
-    public static final String SPREF_LOGIN_STATE = "SPLoginState";
 
     /* First Login status.
 	 * type -- Boolean
@@ -164,6 +158,9 @@ public class AppConfig {
 
     /* Bluetooth Yodo POS name */
     public static final String YODO_POS = "Yodo-Merch-";
+
+    /* Currency of the URL where we are getting the rates */
+    public static final String URL_CURRENCY  = "EUR";
 
     /* SKS Sizes */
     public static final int SKS_SIZE = 256;
