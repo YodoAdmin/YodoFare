@@ -14,6 +14,7 @@ import com.scandit.barcodepicker.ScanditLicense;
 import com.scandit.recognition.Barcode;
 
 import co.yodo.fare.R;
+import co.yodo.fare.helper.AppUtils;
 
 /**
  * Created by luis on 10/01/16.
@@ -46,6 +47,7 @@ public class ScanditScanner extends QRScanner implements OnScanListener {
 
     public ScanditScanner( Activity activity ) {
         super( activity );
+        AppUtils.Logger( TAG, ">> Created" );
         ScanditLicense.setAppKey( sScanditSdkAppKey );
         // Setup GUI
         opPanel = (TableLayout) act.findViewById( R.id.operationsPanel );
@@ -61,6 +63,8 @@ public class ScanditScanner extends QRScanner implements OnScanListener {
     private void initializeBarcodeScanning() {
         settings = ScanSettings.create();
         settings.setSymbologyEnabled( Barcode.SYMBOLOGY_QR, true );
+        /*settings.setCodeDuplicateFilter( -1 );
+        settings.setMaxNumberOfCodesPerFrame( 1 );*/
         settings.setCameraFacingPreference( ScanSettings.CAMERA_FACING_BACK );
         BarcodePicker picker = new BarcodePicker( act, settings );
         // Create layout parameters to scale it to match the parent
@@ -88,6 +92,7 @@ public class ScanditScanner extends QRScanner implements OnScanListener {
     public void startScan() {
         if( !previewing ) {
             mBarcodePicker.startScanning();
+            mBarcodePicker.resumeScanning();
 
             opPanel.setVisibility( View.GONE );
             pvPanel.setVisibility( View.VISIBLE );
@@ -131,7 +136,7 @@ public class ScanditScanner extends QRScanner implements OnScanListener {
 
     @Override
     public void didScan( ScanSession session ) throws NullPointerException {
-        for( Barcode code : session.getNewlyRecognizedCodes() ) {
+        for( Barcode code : session.getAllRecognizedCodes() ) {
             String trimmed = code.getData().replaceAll( "\\s+", "" );
             listener.onNewData( trimmed );
         }

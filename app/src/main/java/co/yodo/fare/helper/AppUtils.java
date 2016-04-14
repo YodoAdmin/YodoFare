@@ -696,6 +696,14 @@ public class AppUtils {
         return ( ( !provider.isEmpty() ) && !LocationManager.PASSIVE_PROVIDER.equals( provider ) );
     }
 
+    /**
+     * Requests a permission for the use of a phone's characteristic (e.g. Camera, Phone info, etc)
+     * @param ac The application context
+     * @param message A message to request the permission
+     * @param permission The permission
+     * @param requestCode The request code for the result
+     * @return If the permission was already allowed or not
+     */
     public static boolean requestPermission( final Activity ac, final int message, final String permission, final int requestCode ) {
         // Assume thisActivity is the current activity
         int permissionCheck = ContextCompat.checkSelfPermission( ac, permission );

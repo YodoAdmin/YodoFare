@@ -189,7 +189,7 @@ public class YodoRequest extends ResultReceiver {
         sendXMLRequest( context, pRequest, RequestType.AUTH_REQUEST );
     }
 
-    public void requestHistory(Activity activity, String hardwareToken, String pip) {
+    public void requestHistory( Activity activity, String hardwareToken, String pip ) {
         String sEncryptedMerchData, pRequest;
 
         // Encrypting to create request

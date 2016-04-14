@@ -201,16 +201,17 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
         mScannersSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected( AdapterView<?> parentView, View selectedItemView, int position, long id ) {
-                if( mSlidingLayout.isOpen() )
-                    mSlidingLayout.closePane();
-
-                ( (TextView) parentView.getChildAt( 0 ) ).setTextColor( Color.WHITE );
+                AppUtils.Logger( TAG, "Entro" );
+                TextView spinnerText = (TextView) parentView.getChildAt( 0 );
+                if( spinnerText != null ) {
+                    spinnerText.setTextColor( Color.WHITE );
+                    AppUtils.Logger( TAG, spinnerText.getText().toString() );
+                }
                 AppUtils.saveScanner( ac, position );
-                AppUtils.Logger(TAG, ((TextView) selectedItemView).getText().toString());
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+            public void onNothingSelected( AdapterView<?> parent ) {
             }
         });
         // Create the adapter for the supported qr scanners
@@ -230,11 +231,6 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
         mScannersSpinner.setSelection( position );
         // Start the messages handler
         handlerMessages = new YodoHandler( FareActivity.this );
-        // If it is the first login, show the navigation panel
-        if( AppUtils.isFirstLogin( ac ) ) {
-            mSlidingLayout.openPane();
-            AppUtils.saveFirstLogin( ac, false );
-        }
         // Reset all the values
         resetClick( null );
         // Set the currency icon
@@ -263,6 +259,11 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
                 return false;
             }
         } );
+        // If it is the first login, show the navigation panel
+        if( AppUtils.isFirstLogin( ac ) ) {
+            mSlidingLayout.openPane();
+            AppUtils.saveFirstLogin( ac, false );
+        }
     }
 
     /**
@@ -691,7 +692,7 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
     }
 
     @Override
-    public void onResponse(YodoRequest.RequestType type, ServerResponse response) {
+    public void onResponse( YodoRequest.RequestType type, ServerResponse response ) {
         YodoRequest.getInstance().destroyProgressDialog();
         String code, message;
 
@@ -814,6 +815,7 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
     public void onNewData( String data ) {
         String totalPurchase = mTotalFareView.getText().toString();
         final String[] currency = getResources().getStringArray( R.array.currency_array );
+        AppUtils.Logger( TAG, data );
 
         switch( data.length() ) {
             case AppConfig.SKS_SIZE:
