@@ -129,8 +129,8 @@ public class AlertDialogHelper {
         final AlertDialog alertDialog = builder.create();
         alertDialog.show();
 
-        if( AppUtils.isLiveScan( c ) ) {
-            final int TIME_TO_DISMISS = AppUtils.getDismissTime( c ) * 1000;
+        if( PrefUtils.isLiveScan( c ) ) {
+            final int TIME_TO_DISMISS = PrefUtils.getDismissTime( c ) * 1000;
             final Handler t = new Handler();
             t.postDelayed(new Runnable() {
                 @Override
@@ -197,7 +197,7 @@ public class AlertDialogHelper {
         }
 
         if( remember ) {
-            String password = AppUtils.getPassword( c );
+            String password = PrefUtils.getPassword( c );
 
             if( password != null ) {
                 input.setText( password );

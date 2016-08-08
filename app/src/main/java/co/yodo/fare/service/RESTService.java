@@ -20,7 +20,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import co.yodo.fare.data.ServerResponse;
-import co.yodo.fare.helper.AppUtils;
+import co.yodo.fare.helper.PrefUtils;
 import co.yodo.fare.net.XMLHandler;
 
 /**
@@ -35,8 +35,8 @@ public class RESTService extends IntentService {
     private Context ac;
 
     /** Switch server IP address */
-    //private static final String IP 	         = "http://50.56.180.133";  // Production
-    private static final String IP 			 = "http://198.101.209.120";  // Development
+    private static final String IP 	         = "http://50.56.180.133";  // Production
+    //private static final String IP 			 = "http://198.101.209.120";  // Development
     private static final String YODO_ADDRESS = "/yodo/yodoswitchrequest/getRequest/";
 
     /** It is the ID of the application (the package) used for the extras */
@@ -72,7 +72,7 @@ public class RESTService extends IntentService {
         Bundle extras = intent.getExtras();
 
         if( extras == null || !extras.containsKey( EXTRA_RESULT_RECEIVER ) ) {
-            AppUtils.Logger(TAG, "You did not pass extras or data with the Intent.");
+            PrefUtils.Logger(TAG, "You did not pass extras or data with the Intent.");
             return;
         }
 
@@ -81,7 +81,7 @@ public class RESTService extends IntentService {
         ResultReceiver receiver = extras.getParcelable( EXTRA_RESULT_RECEIVER );
 
         if( receiver == null ) {
-            AppUtils.Logger( TAG, "You did not pass the receiver with the Intent." );
+            PrefUtils.Logger( TAG, "You did not pass the receiver with the Intent." );
             return;
         }
 
@@ -100,11 +100,11 @@ public class RESTService extends IntentService {
             xr.setContentHandler( new XMLHandler() );
             xr.parse( new InputSource( sourceUrl.getInputStream() ) );
         } catch(ConnectTimeoutException | SocketTimeoutException | SocketException e) {
-            AppUtils.Logger( TAG, "Timeout Exception = " + e );
+            PrefUtils.Logger( TAG, "Timeout Exception = " + e );
             receiver.send( STATUS_NO_INTERNET, null );
             return;
         } catch(Exception e) {
-            AppUtils.Logger( TAG, "XML Parsing Exception = " + e );
+            PrefUtils.Logger( TAG, "XML Parsing Exception = " + e );
             receiver.send( STATUS_FAILED, null );
             return;
         }

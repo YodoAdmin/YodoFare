@@ -44,7 +44,7 @@ import co.yodo.fare.R;
 import co.yodo.fare.component.Encrypter;
 import co.yodo.fare.component.TransparentProgressDialog;
 import co.yodo.fare.data.ServerResponse;
-import co.yodo.fare.helper.AppUtils;
+import co.yodo.fare.helper.PrefUtils;
 import co.yodo.fare.service.RESTService;
 
 /**
@@ -333,7 +333,7 @@ public class YodoRequest extends ResultReceiver {
         String clientData  = client.substring( 0, client.length() - 1 );
         String accountType = client.substring( client.length() - 1 );
 
-        if( !AppUtils.isNumber( accountType ) ) {
+        if( !PrefUtils.isNumber( accountType ) ) {
             instance.send( RESTService.STATUS_FAILED, null );
             return;
         }
@@ -386,8 +386,8 @@ public class YodoRequest extends ResultReceiver {
         File cacheDir = ctx.getCacheDir();
         File file = new File( cacheDir, "currencies.json" );
 
-        AppUtils.Logger( TAG, file.lastModified() + "" );
-        AppUtils.Logger( TAG, System.currentTimeMillis() + "" );
+        PrefUtils.Logger( TAG, file.lastModified() + "" );
+        PrefUtils.Logger( TAG, System.currentTimeMillis() + "" );
 
         boolean exists = file.exists();
         if( !exists || file.lastModified() + MAX_AGE < System.currentTimeMillis() ) {
@@ -413,7 +413,7 @@ public class YodoRequest extends ResultReceiver {
                 // Send response
                 JSONHandler handler = new JSONHandler( ctx );
                 ServerResponse response = handler.parseCurrencies(  array );
-                AppUtils.Logger( TAG, response.toString() );
+                PrefUtils.Logger( TAG, response.toString() );
                 externalListener.onResponse( RequestType.CURRENCIES_REQUEST, response );
             } catch ( IOException | JSONException e ) {
                 e.printStackTrace();
@@ -435,7 +435,7 @@ public class YodoRequest extends ResultReceiver {
             externalListener.onResponse( action , response );
 
             if( response != null )
-                AppUtils.Logger( TAG, response.toString() );
+                PrefUtils.Logger( TAG, response.toString() );
         }
     }
 
@@ -444,8 +444,8 @@ public class YodoRequest extends ResultReceiver {
     ///////////////////////////////////////////////////////
 
     /** Switch server IP address */
-    //private static final String IP 	         = "http://50.56.180.133";  // Production
-    private static final String IP 			 = "http://198.101.209.120";  // Development
+    private static final String IP 	         = "http://50.56.180.133";  // Production
+    //private static final String IP 			 = "http://198.101.209.120";  // Development
     private static final String YODO_ADDRESS = "/yodo/yodoswitchrequest/getRequest/";
     private static final String YODO         = "/yodo/";
 
@@ -498,7 +498,7 @@ public class YodoRequest extends ResultReceiver {
 
                         JSONHandler handler = new JSONHandler( ctx );
                         ServerResponse response = handler.parseCurrencies( json );
-                        AppUtils.Logger( TAG, response.toString() );
+                        PrefUtils.Logger( TAG, response.toString() );
                         externalListener.onResponse( type, response );
                     }
                 },
@@ -534,7 +534,7 @@ public class YodoRequest extends ResultReceiver {
                             xr.setContentHandler( new XMLHandler() );
                             xr.parse( new InputSource( new StringReader( xml ) ) );
 
-                            AppUtils.Logger( TAG, XMLHandler.response.toString() );
+                            PrefUtils.Logger( TAG, XMLHandler.response.toString() );
                             externalListener.onResponse( type, XMLHandler.response );
                         } catch( ParserConfigurationException | SAXException | IOException e ) {
                             e.printStackTrace();

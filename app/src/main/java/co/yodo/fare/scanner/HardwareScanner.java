@@ -8,7 +8,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 
 import co.yodo.fare.R;
-import co.yodo.fare.helper.AppUtils;
+import co.yodo.fare.helper.PrefUtils;
 
 public class HardwareScanner extends QRScanner {
 	/** DEBUG */
@@ -36,8 +36,8 @@ public class HardwareScanner extends QRScanner {
 
 					inputDialog.dismiss();
 
-					AppUtils.Logger(TAG, scanData);
-					AppUtils.hideSoftKeyboard( act );
+					PrefUtils.Logger(TAG, scanData);
+					PrefUtils.hideSoftKeyboard( act );
 
 					if( listener != null )
                         listener.onNewData( scanData );

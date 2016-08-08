@@ -4,7 +4,7 @@
     android:id="@+id/sliding_panel_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="co.yodo.fare.main.FareActivity">
+    tools:context="co.yodo.fare.ui.FareActivity">
 
     <!-- The navigation drawer -->
     <include layout="@layout/fragment_navigation" />

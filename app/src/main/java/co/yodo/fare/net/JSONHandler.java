@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 import co.yodo.fare.R;
 import co.yodo.fare.data.ServerResponse;
-import co.yodo.fare.helper.AppUtils;
+import co.yodo.fare.helper.PrefUtils;
 
 /**
  * Created by luis on 19/01/16.
@@ -26,8 +26,8 @@ public class JSONHandler {
 
     public JSONHandler( Context ctx ) {
         String[] currencies = ctx.getResources().getStringArray( R.array.currency_array );
-        FARE_CURRENCY = currencies[ AppUtils.getCurrency( ctx ) ];
-        MERCHANT_CURRENCY = AppUtils.getMerchantCurrency( ctx );
+        FARE_CURRENCY = currencies[ PrefUtils.getTenderCurrency( ctx ) ];
+        MERCHANT_CURRENCY = PrefUtils.getMerchantCurrency( ctx );
     }
 
     /**

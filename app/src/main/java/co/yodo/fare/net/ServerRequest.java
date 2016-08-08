@@ -1,6 +1,6 @@
 package co.yodo.fare.net;
 
-import co.yodo.fare.helper.AppUtils;
+import co.yodo.fare.helper.PrefUtils;
 
 public class ServerRequest {
 	/** DEBUG */
@@ -60,7 +60,7 @@ public class ServerRequest {
 		}
 		sAuthenticationRequest.append( pUsrData );
 		
-		AppUtils.Logger( TAG, "Authentication Request: " + sAuthenticationRequest.toString() );
+		PrefUtils.Logger( TAG, "Authentication Request: " + sAuthenticationRequest.toString() );
 		return sAuthenticationRequest.toString();
 	}
 
@@ -86,7 +86,7 @@ public class ServerRequest {
         }
         sQueryRequest.append( pUsrData );
 
-        AppUtils.Logger( TAG, "Third Party Balance Request: " + sQueryRequest.toString() );
+        PrefUtils.Logger( TAG, "Third Party Balance Request: " + sQueryRequest.toString() );
         return sQueryRequest.toString();
     }
 
@@ -108,7 +108,7 @@ public class ServerRequest {
         }
         sRegistrationRequest.append(pUsrData);
 
-        AppUtils.Logger( TAG, "Registration Request: " + sRegistrationRequest.toString() );
+        PrefUtils.Logger( TAG, "Registration Request: " + sRegistrationRequest.toString() );
         return sRegistrationRequest.toString();
     }
 
@@ -130,7 +130,7 @@ public class ServerRequest {
         }
         sExchangeRequest.append( pUsrData );
 
-        AppUtils.Logger( TAG, "Exchange Request: " + sExchangeRequest.toString() );
+        PrefUtils.Logger( TAG, "Exchange Request: " + sExchangeRequest.toString() );
         return sExchangeRequest.toString();
     }
 
@@ -168,7 +168,7 @@ public class ServerRequest {
         }
         sAlternateRequest.append( pUsrData );
 
-        AppUtils.Logger( TAG, "Alternate Request: " + sAlternateRequest.toString() );
+        PrefUtils.Logger( TAG, "Alternate Request: " + sAlternateRequest.toString() );
         return sAlternateRequest.toString();
     }
 }

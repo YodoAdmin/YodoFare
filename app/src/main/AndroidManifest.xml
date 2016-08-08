@@ -18,7 +18,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" android:name=".YodoApplication">
         <activity
-            android:name=".main.SplashActivity"
+            android:name=".ui.SplashActivity"
             android:label="@string/app_name"
             android:screenOrientation="sensorLandscape"
             android:theme="@style/SplashTheme" >
@@ -29,19 +29,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".main.FareActivity"
+            android:name=".ui.FareActivity"
             android:label="@string/title_activity_fare"
             android:screenOrientation="sensorLandscape"
             android:windowSoftInputMode="adjustNothing" >
         </activity>
         <activity
-            android:name=".main.RegistrationActivity"
+            android:name=".ui.RegistrationActivity"
             android:label="@string/title_activity_registration"
             android:screenOrientation="sensorLandscape"
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
-            android:name=".main.SettingsActivity"
+            android:name=".ui.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:theme="@style/AppTheme.Settings">
         </activity>

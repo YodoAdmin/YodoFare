@@ -14,7 +14,7 @@ import com.google.android.gms.location.LocationServices;
 
 import org.greenrobot.eventbus.EventBus;
 
-import co.yodo.fare.helper.AppUtils;
+import co.yodo.fare.helper.PrefUtils;
 
 /**
  * Service to obtain the location of the device, this service in particular
@@ -50,7 +50,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onCreate() {
-        AppUtils.Logger( TAG, ">> Created" );
+        PrefUtils.Logger( TAG, ">> Created" );
         super.onCreate();
     }
 
@@ -77,7 +77,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 	@Override
 	public void onDestroy() {
         super.onDestroy();
-        AppUtils.Logger( TAG, ">> Destroyed" );
+        PrefUtils.Logger( TAG, ">> Destroyed" );
         // Disconnect from the Google API
         if( mGoogleApiClient != null && mGoogleApiClient.isConnected() ) {
             mGoogleApiClient.disconnect();
@@ -179,13 +179,13 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onConnectionSuspended( int i ) {
-        AppUtils.Logger( TAG, "GoogleApiClient connection has been suspended" );
+        PrefUtils.Logger( TAG, "GoogleApiClient connection has been suspended" );
         mGoogleApiClient.connect();
     }
 
     @Override
     public void onConnectionFailed( ConnectionResult connectionResult ) {
-        AppUtils.Logger( TAG, "GoogleApiClient connection has failed" );
+        PrefUtils.Logger( TAG, "GoogleApiClient connection has failed" );
         stopSelf();
     }
 	
@@ -202,7 +202,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             // Save the location as last registered
             lastRegisteredLocation = location;
             // Print location for debugging
-            AppUtils.Logger( TAG, location.toString() );
+            PrefUtils.Logger( TAG, location.toString() );
         }
 	}
 }

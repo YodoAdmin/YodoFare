@@ -74,6 +74,7 @@
     <string name="message.permission.read_phone_state">Permiso requerido para identificar el dispositivo y permitir acceso a los servicios Yodo</string>
     <string name="message.permission.location">Permiso requerido para usa los servicios de ubicación sobre las transacciones</string>
     <string name="message.permission.camera">Permiso requerido para usar la cámara y permitir capturar las credenciales de pago</string>
+    <string name="message.permission.write_external_storage">Permiso requerido para almacenar los tipos de cambio</string>
 
     <!-- Preview Messages -->
     <string name="place_qrcode">Ubique el código SKS en esta ventana</string>

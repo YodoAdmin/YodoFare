@@ -6,7 +6,7 @@ package co.yodo.fare.helper;
  */
 public class AppConfig {
     /** DEBUG flag: to print the logs in console */
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     /** FILE flag: to print the logs in a file */
     public static final boolean FDEBUG = false;
@@ -44,11 +44,6 @@ public class AppConfig {
 	 * type -- Integer
 	 */
     public static final String SPREF_CURRENT_LANGUAGE = "SPCurrentLanguage";
-
-    /* The timestamp of the latest currency update.
-	 * type -- Integer
-	 */
-    public static final String SPREF_TIMESTAMP_CURRENCY = "SPTimestampCurrency";
 
     /* The current beacon.
     * type -- String
@@ -136,11 +131,9 @@ public class AppConfig {
     public static final String DEFAULT_LANGUAGE = "en";
 
     /*
-	 * Default value position for the currency
-	 *
-	 * Default: position 1 (Canada Dollar)
+	 * Default value for the tender currencies Canadian Dollar
 	 */
-    public static final Integer DEFAULT_CURRENCY = 1;
+    public static final String DEFAULT_CURRENCY = "CAD";
 
     /*
 	 * Default value position for the scanner
@@ -155,12 +148,6 @@ public class AppConfig {
 	 * Default: 5 seconds
 	 */
     public static final Integer DEFAULT_DISMISS_TIME = 5;
-
-    /* Bluetooth Yodo POS name */
-    public static final String YODO_POS = "Yodo-Merch-";
-
-    /* Currency of the URL where we are getting the rates */
-    public static final String URL_CURRENCY  = "EUR";
 
     /* SKS Sizes */
     public static final int SKS_SIZE = 256;
