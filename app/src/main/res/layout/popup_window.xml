@@ -17,6 +17,6 @@
 
     <TextView
         style="@style/EditTextView"
-        android:id="@+id/cashTotalText"/>
+        android:id="@+id/tvTotal"/>
 
 </LinearLayout>

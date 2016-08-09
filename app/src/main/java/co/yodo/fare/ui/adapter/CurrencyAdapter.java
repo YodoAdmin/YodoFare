@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import co.yodo.fare.R;
-import co.yodo.fare.data.Currency;
+import co.yodo.fare.ui.adapter.data.Currency;
 
 /**
  * Created by luis on 16/12/14.

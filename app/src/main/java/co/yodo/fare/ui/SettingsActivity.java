@@ -131,10 +131,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         private void updateStatus( String key ) {
-            if( key.equals( AppConfig.SPREF_ADVERTISING_SERVICE ) )
-                PrefUtils.setupAdvertising( c, PrefUtils.isAdvertisingServiceRunning( c ), true );
-
-            if( key.equals( AppConfig.SPREF_CURRENT_LANGUAGE ) ) {
+             if( key.equals( AppConfig.SPREF_CURRENT_LANGUAGE ) ) {
                 Intent i = new Intent( getActivity(), FareActivity.class );
                 i.setFlags( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
                 startActivity( i );

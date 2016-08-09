@@ -48,7 +48,6 @@
 
         <!-- Start Services -->
 
-        <service android:name=".service.RESTService" />
         <service
             android:name=".service.LocationService"
             android:enabled="true"

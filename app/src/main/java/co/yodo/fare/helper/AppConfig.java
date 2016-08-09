@@ -131,11 +131,6 @@ public class AppConfig {
     public static final String DEFAULT_LANGUAGE = "en";
 
     /*
-	 * Default value for the tender currencies Canadian Dollar
-	 */
-    public static final String DEFAULT_CURRENCY = "CAD";
-
-    /*
 	 * Default value position for the scanner
 	 *
 	 * Default: position 0 (BarcodeScanner)
@@ -148,10 +143,6 @@ public class AppConfig {
 	 * Default: 5 seconds
 	 */
     public static final Integer DEFAULT_DISMISS_TIME = 5;
-
-    /* SKS Sizes */
-    public static final int SKS_SIZE = 256;
-    public static final int ALT_SIZE = 257;
 
     /* Defaults for the fares */
     public static final String DEFAULT_OLD_FEE     = "2.50";
