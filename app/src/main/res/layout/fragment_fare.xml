@@ -32,7 +32,7 @@
             android:layout_gravity="center_horizontal">
 
             <ImageView
-                android:id="@+id/locationIconView"
+                android:id="@+id/ivLocationIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
@@ -47,7 +47,7 @@
 
             <TextView
                 style="@style/EditTextView"
-                android:id="@+id/totalFareText"
+                android:id="@+id/tvTotal"
                 android:drawableLeft="@drawable/canada"
                 android:drawableStart="@drawable/canada"
                 android:textStyle="bold"

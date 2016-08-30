@@ -6,18 +6,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
-import co.yodo.fare.R;
-import co.yodo.fare.component.ToastMaster;
-import co.yodo.fare.component.YodoHandler;
-import co.yodo.fare.data.ServerResponse;
-import co.yodo.fare.helper.PrefUtils;
-import co.yodo.fare.net.YodoRequest;
+import javax.inject.Inject;
 
-public class SplashActivity extends Activity implements YodoRequest.RESTListener {
+import co.yodo.fare.R;
+import co.yodo.fare.YodoApplication;
+import co.yodo.fare.ui.notification.ToastMaster;
+import co.yodo.fare.helper.PrefUtils;
+import co.yodo.fare.helper.SystemUtils;
+import co.yodo.fare.ui.notification.MessageHandler;
+import co.yodo.restapi.network.ApiClient;
+import co.yodo.restapi.network.model.ServerResponse;
+import co.yodo.restapi.network.request.AuthenticateRequest;
+import co.yodo.restapi.network.request.QueryRequest;
+
+public class SplashActivity extends Activity implements ApiClient.RequestsListener {
+    /** DEBUG */
+    @SuppressWarnings( "unused" )
+    private static final String TAG = SplashActivity.class.getSimpleName();
+
     /** The context object */
     private Context ac;
 
@@ -25,13 +34,21 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
     private String mHardwareToken;
 
     /** Messages Handler */
-    private static YodoHandler mHandlerMessages;
+    private MessageHandler mHandlerMessages;
+
+    /** Manager for the server requests */
+    @Inject
+    ApiClient mRequestManager;
 
     /** Code for the error dialog */
     private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 0;
 
     /** Request codes for the permissions */
     private static final int PERMISSIONS_REQUEST_READ_PHONE_STATE = 1;
+
+    /** Response codes for the server requests */
+    private static final int AUTH_REQ  = 0x00;
+    private static final int QUERY_REQ = 0x01;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +61,7 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
     @Override
     public void onResume() {
         super.onResume();
-        YodoRequest.getInstance().setListener( this );
+        mRequestManager.setListener( this );
     }
 
     /**
@@ -52,7 +69,11 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
      */
     private void setupGUI() {
         ac = SplashActivity.this;
-        mHandlerMessages = new YodoHandler( this );
+        mHandlerMessages = new MessageHandler( this );
+
+        // Injection
+        YodoApplication.getComponent().inject( this );
+        mRequestManager.setListener( this );
     }
 
     /**
@@ -60,7 +81,7 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
      */
     private void updateData() {
         // Get the main booleans
-        boolean hasServices = PrefUtils.isGooglePlayServicesAvailable(
+        boolean hasServices = SystemUtils.isGooglePlayServicesAvailable(
                 SplashActivity.this,
                 REQUEST_CODE_RECOVER_PLAY_SERVICES
         );
@@ -71,7 +92,12 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
             if( mHardwareToken == null ) {
                 setupPermissions();
             } else {
-                YodoRequest.getInstance().requestAuthentication( SplashActivity.this, mHardwareToken );
+                mRequestManager.invoke(
+                        new AuthenticateRequest(
+                                AUTH_REQ,
+                                mHardwareToken
+                        )
+                );
             }
         }
     }
@@ -80,7 +106,7 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
      * Request the necessary permissions for this activity
      */
     private void setupPermissions() {
-        boolean phoneStatePermission = PrefUtils.requestPermission(
+        boolean phoneStatePermission = SystemUtils.requestPermission(
                 SplashActivity.this,
                 R.string.message_permission_read_phone_state,
                 Manifest.permission.READ_PHONE_STATE,
@@ -98,71 +124,67 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
      */
     private void authenticateUser() {
         mHardwareToken = PrefUtils.generateHardwareToken( ac );
-        if( mHardwareToken != null ) {
-            PrefUtils.saveHardwareToken( ac, mHardwareToken );
-            YodoRequest.getInstance().requestAuthentication( ac, mHardwareToken );
-        } else {
+        if( mHardwareToken == null ) {
             ToastMaster.makeText( ac, R.string.message_no_hardware, Toast.LENGTH_LONG ).show();
             finish();
+        } else {
+            PrefUtils.saveHardwareToken( ac, mHardwareToken );
+            mRequestManager.invoke(
+                    new AuthenticateRequest(
+                            AUTH_REQ,
+                            mHardwareToken
+                    )
+            );
         }
     }
 
     @Override
-    public void onResponse( YodoRequest.RequestType type, ServerResponse response ) {
-        String code, message;
+    public void onPrepare() {
 
-        switch( type ) {
-            case ERROR_NO_INTERNET:
-                mHandlerMessages.sendEmptyMessage( YodoHandler.NO_INTERNET );
-                finish();
-                break;
+    }
 
-            case ERROR_GENERAL:
-                mHandlerMessages.sendEmptyMessage( YodoHandler.GENERAL_ERROR );
-                finish();
-                break;
+    @Override
+    public void onResponse( int responseCode, ServerResponse response ) {
+        // Get response values
+        final String code    = response.getCode();
+        final String message = response.getMessage();
 
-            case AUTH_REQUEST:
-                code = response.getCode();
+        switch( responseCode ) {
+            case AUTH_REQ:
 
                 if( code.equals( ServerResponse.AUTHORIZED ) ) {
-                    if( PrefUtils.getMerchantCurrency( ac ) == null ) {
-                        // There is no currency saved
-                        YodoRequest.getInstance().requestCurrency( ac, mHardwareToken );
-                    } else {
-                        // There is already a currency, lets proceed
-                        Intent intent = new Intent( ac, FareActivity.class );
-                        startActivity( intent );
-                        finish();
-                    }
-                } else if( code.equals( ServerResponse.ERROR_FAILED ) ) {
+                    // Get the merchant currency
+                    mRequestManager.invoke(
+                            new QueryRequest(
+                                    QUERY_REQ,
+                                    mHardwareToken,
+                                    QueryRequest.Record.MERCHANT_CURRENCY
+                            )
+                    );
+                }
+                else if( code.equals( ServerResponse.ERROR_FAILED ) ) {
                     Intent intent = new Intent( ac, RegistrationActivity.class );
                     startActivity( intent );
                     finish();
                 }
                 break;
 
-            case QUERY_CUR_REQUEST:
-                code = response.getCode();
+            case QUERY_REQ:
 
                 if( code.equals( ServerResponse.AUTHORIZED ) ) {
-                    // Get Merchant Currency and save it
-                    String currency = response.getParam( ServerResponse.CURRENCY );
+                    // Set currencies
+                    String currency = response.getParams().getCurrency();
                     PrefUtils.saveMerchantCurrency( ac, currency );
-                    // Start main activity
+
+                    // Start the app
                     Intent intent = new Intent( ac, FareActivity.class );
                     startActivity( intent );
-                } else if( code.equals( ServerResponse.ERROR_FAILED ) ) {
-                    Message msg = new Message();
-                    msg.what = YodoHandler.SERVER_ERROR;
-                    message  = response.getMessage();
-
-                    Bundle bundle = new Bundle();
-                    bundle.putString( YodoHandler.CODE, code );
-                    bundle.putString( YodoHandler.MESSAGE, message );
-                    msg.setData( bundle );
-
-                    mHandlerMessages.sendMessage( msg );
+                } else {
+                    MessageHandler.sendMessage( MessageHandler.INIT_ERROR,
+                            mHandlerMessages,
+                            code,
+                            message
+                    );
                 }
                 finish();
                 break;

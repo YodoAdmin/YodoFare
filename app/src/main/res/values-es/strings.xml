@@ -3,13 +3,16 @@
 
     <!-- Main Strings -->
     <string name="app_name">YodoFare</string>
-    <string name="action_settings">Configuración</string>
-    <string name="version_tag">Version:</string>
     <string name="desc">Desc</string>
     <string name="register">REGISTRAR</string>
     <string name="loading">Cargando</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancelar</string>
+    <string name="version.label">Version:</string>
+
+    <!-- Action Menu -->
+    <string name="action_settings">Ajustes</string>
+    <string name="action_about">Acerca de Yodo</string>
 
     <!-- Error Messages -->
     <string name="error">Esto es embarazoso! Ocurrio un error en el proceso</string>
@@ -18,7 +21,8 @@
     <string name="message.no_gps_support">Lo sentimos, parece que no dispone de soporte para localización</string>
     <string name="message.no_hardware">Debe encender su bluetooth primero</string>
     <string name="message.no_camera">Esta cámara no existe</string>
-    <string name="message.play_services">Google Play Services debe ser instaladohaha</string>
+    <string name="message.play_services">Google Play Services debe ser instalado</string>
+    <string name="message.incorrect_pip">Password incorrecto, intente de nuevo</string>
 
     <!-- General Messages -->
     <string name="input_pip">Merch Identity Phrase (MIP)</string>
@@ -26,10 +30,12 @@
     <string name="remember_pass">Recordar Contraseña</string>
     <string name="merch_pip_hint">Código de Activación</string>
     <string name="barcode_scanner">Escanee el código</string>
+    <string name="message.already_registered">Ya registrado? Reinicie</string>
     <string name="message.gps_enable">El GPS no está habilitado. Desea ir a configuraciones?</string>
     <string name="about_message">Porfavor use el siguiente correo para contactarnos. Haremos todo lo posible para responderle rápidamente. Nosotros no venderemos o distribuiremos la información que usted nos provee.</string>
     <string name="about_email">support@yodo.co</string>
-    <string name="register_hint">Ingrese su código de activación. Debe estar registrado como merchant antes de la activación. Contacto: support@yodo.co</string>
+    <string name="register_hint">Ingrese su código de activación. Debe estar registrado como merchant antes de la activación.</string>
+    <string name="register_contact">Contacto: support@yodo.co</string>
 
     <!-- Exchange Response -->
     <string name="exchange_code">Código:</string>
@@ -37,7 +43,7 @@
     <string name="exchange_message">Mensaje:</string>
     <string name="exchange_balance">Balance:</string>
     <string name="exchange_extra">Extra:</string>
-    <string name="exchange_error">Tamaño SKS inválido</string>
+    <string name="exchange_error">Tamaño SKS inválido. El cliente puede necesitar actualizar la aplicación YodoPayment.</string>
 
     <!-- Balance Messages -->
     <string name="yodo_title">Merchant Balance Report</string>
@@ -47,6 +53,11 @@
     <string name="to_date">hasta la fecha:</string>
     <string name="today">hoy:</string>
     <string name="yodo_today_balance">Balance de Hoy:</string>
+
+    <!-- Supported scanners -->
+    <string name="name.scanner.hardware">Barcode Escaner</string>
+    <string name="name.scanner.software_front">Cámara Frontal</string>
+    <string name="name.scanner.software_back">Cámara Trasera</string>
 
     <!-- Labels -->
     <string name="imei">IMEI:</string>
@@ -114,5 +125,7 @@
 
     <!-- ACRA -->
     <string name="crash_toast_text">Ooooops ! Fallé, pero un reporte ha sido enviado a mi desarrollador para ayudar a resolver el problema!</string>
+    <string name="error.not_supported">Este dispositivo no es soportado</string>
+    <string name="pip_hint">Frase de Identificación Merchant</string>
 
 </resources>

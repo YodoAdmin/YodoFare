@@ -16,7 +16,7 @@
         android:key="SPCurrentBeacon"
         android:inputType="text"/>
 
-    <co.yodo.fare.helper.SeekBarPreference
+    <co.yodo.fare.ui.component.SeekBarPreference
         android:title="@string/config_pref_dismiss"
         android:key="SPDismissTime"
         android:max="10"

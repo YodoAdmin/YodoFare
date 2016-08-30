@@ -3,32 +3,61 @@ package co.yodo.fare.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Message;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import co.yodo.fare.R;
-import co.yodo.fare.component.YodoHandler;
-import co.yodo.fare.data.ServerResponse;
+import co.yodo.fare.YodoApplication;
+import co.yodo.fare.ui.notification.ToastMaster;
+import co.yodo.fare.helper.GUIUtils;
 import co.yodo.fare.helper.PrefUtils;
-import co.yodo.fare.net.YodoRequest;
+import co.yodo.fare.ui.notification.MessageHandler;
+import co.yodo.fare.ui.notification.ProgressDialogHelper;
+import co.yodo.restapi.network.ApiClient;
+import co.yodo.restapi.network.model.ServerResponse;
+import co.yodo.restapi.network.request.RegisterRequest;
 
-public class RegistrationActivity extends AppCompatActivity implements YodoRequest.RESTListener {
+public class RegistrationActivity extends AppCompatActivity implements ApiClient.RequestsListener {
+    /** DEBUG */
+    @SuppressWarnings( "unused" )
+    private static final String TAG = RegistrationActivity.class.getSimpleName();
+
     /** The context object */
     private Context ac;
 
+    /** Hardware Token */
+    private String mHardwareToken;
+
     /** GUI Controllers */
-    private EditText password;
+    @BindView( R.id.etActivationCode )
+    EditText etActivationCode;
 
     /** Messages Handler */
-    private static YodoHandler handlerMessages;
+    private MessageHandler mHandlerMessages;
+
+    /** Manager for the server requests */
+    @Inject
+    ApiClient mRequestManager;
+
+    /** Progress dialog for the requests */
+    @Inject
+    ProgressDialogHelper mProgressManager;
+
+    /** The shake animation for wrong inputs */
+    private Animation aShake;
+
+    /** Response codes for the queries */
+    private static final int REG_REQ = 0x00;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -36,6 +65,7 @@ public class RegistrationActivity extends AppCompatActivity implements YodoReque
         setContentView( R.layout.activity_registration );
 
         setupGUI();
+        updateData();
     }
 
     @Override
@@ -51,20 +81,27 @@ public class RegistrationActivity extends AppCompatActivity implements YodoReque
 
     private void setupGUI() {
         ac = RegistrationActivity.this;
+        mHandlerMessages = new MessageHandler( this );
 
-        handlerMessages = new YodoHandler( RegistrationActivity.this );
-        YodoRequest.getInstance().setListener( this );
+        // Injection
+        ButterKnife.bind( this );
+        YodoApplication.getComponent().inject( this );
+        mRequestManager.setListener( this );
 
-        // GUI global components
-        password = (EditText) findViewById( R.id.merchTokenText );
+        // Load the animation
+        aShake = AnimationUtils.loadAnimation( this, R.anim.shake );
 
-        // Only used at creation
-        Toolbar mActionBarToolbar = (Toolbar) findViewById( R.id.registrationBar );
+        // Setup the toolbar
+        GUIUtils.setActionBar( this, R.string.title_activity_registration );
+    }
 
-        setSupportActionBar( mActionBarToolbar );
-        ActionBar actionbar = getSupportActionBar();
-        if( actionbar != null )
-            actionbar.setDisplayHomeAsUpEnabled( true );
+    private void updateData() {
+        // Gets the hardware token - account identifier
+        mHardwareToken = PrefUtils.getHardwareToken( ac );
+        if( mHardwareToken == null ) {
+            ToastMaster.makeText( ac, R.string.message_no_hardware, Toast.LENGTH_LONG ).show();
+            finish();
+        }
     }
 
     /**
@@ -72,47 +109,55 @@ public class RegistrationActivity extends AppCompatActivity implements YodoReque
      * @param v View of the button, not used
      */
     public void registrationClick( View v ) {
-        String token = password.getText().toString();
+        String token = etActivationCode.getText().toString();
         if( token.isEmpty() ) {
-            Animation shake = AnimationUtils.loadAnimation( this, R.anim.shake );
-            password.startAnimation( shake );
+            etActivationCode.startAnimation( aShake );
         } else {
-            String hardwareToken = PrefUtils.getHardwareToken( ac );
-            PrefUtils.hideSoftKeyboard( this );
-
-            YodoRequest.getInstance().createProgressDialog(
+            mProgressManager.createProgressDialog(
                     RegistrationActivity.this ,
-                    YodoRequest.ProgressDialogType.NORMAL
+                    ProgressDialogHelper.ProgressDialogType.NORMAL
             );
 
-            YodoRequest.getInstance().requestRegistration(
-                    RegistrationActivity.this,
-                    hardwareToken,
-                    token
+            mRequestManager.invoke(
+                    new RegisterRequest(
+                            REG_REQ,
+                            mHardwareToken,
+                            token
+                    )
             );
         }
     }
 
+    /**
+     * Restarts the application to authenticate the user
+     * @param v The view of the button, not used
+     */
+    public void restartClick( View v ) {
+        finish();
+        Intent i = new Intent( ac, SplashActivity.class );
+        i.setFlags( Intent.FLAG_ACTIVITY_CLEAR_TOP );
+        i.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
+        startActivity( i );
+    }
+
+    /**
+     * Shows the activation code
+     * @param v,The checkbox view
+     */
     public void showPasswordClick( View v ) {
-        PrefUtils.showPassword( (CheckBox) v, password );
+        GUIUtils.showPassword( (CheckBox) v, etActivationCode );
     }
 
     @Override
-    public void onResponse( YodoRequest.RequestType type, ServerResponse response ) {
-        YodoRequest.getInstance().destroyProgressDialog();
+    public void onPrepare() {
+    }
 
-        switch( type ) {
-            case ERROR_NO_INTERNET:
-                handlerMessages.sendEmptyMessage( YodoHandler.NO_INTERNET );
-                finish();
-                break;
+    @Override
+    public void onResponse( int responseCode, ServerResponse response ) {
+        mProgressManager.destroyProgressDialog();
 
-            case ERROR_GENERAL:
-                handlerMessages.sendEmptyMessage( YodoHandler.GENERAL_ERROR );
-                finish();
-                break;
-
-            case REG_MERCH_REQUEST:
+        switch( responseCode ) {
+             case REG_REQ:
                 String code = response.getCode();
 
                 if( code.equals( ServerResponse.AUTHORIZED_REGISTRATION ) ) {
@@ -120,15 +165,8 @@ public class RegistrationActivity extends AppCompatActivity implements YodoReque
                     startActivity( intent );
                     finish();
                 } else {
-                    Message msg = new Message();
-                    msg.what = YodoHandler.SERVER_ERROR;
-
-                    Bundle bundle = new Bundle();
-                    bundle.putString( YodoHandler.CODE, code );
-                    bundle.putString( YodoHandler.MESSAGE, response.getMessage() );
-                    msg.setData( bundle );
-
-                    handlerMessages.sendMessage( msg );
+                    String message = response.getMessage();
+                    MessageHandler.sendMessage( mHandlerMessages, code, message );
                 }
                 break;
         }

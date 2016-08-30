@@ -2,39 +2,25 @@ package co.yodo.fare.ui;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Message;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.text.SpannableString;
-import android.text.style.UnderlineSpan;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListAdapter;
-import android.widget.PopupWindow;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -42,25 +28,38 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
 
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import co.yodo.fare.R;
-import co.yodo.fare.ui.adapter.CurrencyAdapter;
-import co.yodo.fare.component.ClearEditText;
-import co.yodo.fare.component.ToastMaster;
-import co.yodo.fare.component.YodoHandler;
-import co.yodo.fare.data.Currency;
-import co.yodo.fare.data.ServerResponse;
-import co.yodo.fare.helper.AlertDialogHelper;
+import co.yodo.fare.YodoApplication;
+import co.yodo.fare.component.SKS;
 import co.yodo.fare.helper.AppConfig;
+import co.yodo.fare.helper.GUIUtils;
 import co.yodo.fare.helper.PrefUtils;
-import co.yodo.fare.net.YodoRequest;
-import co.yodo.fare.scanner.QRScanner;
-import co.yodo.fare.scanner.QRScannerFactory;
+import co.yodo.fare.helper.SystemUtils;
+import co.yodo.fare.manager.PromotionManager;
 import co.yodo.fare.service.LocationService;
-import co.yodo.fare.service.RESTService;
+import co.yodo.fare.ui.adapter.ScannerAdapter;
+import co.yodo.fare.ui.notification.AlertDialogHelper;
+import co.yodo.fare.ui.notification.MessageHandler;
+import co.yodo.fare.ui.notification.ProgressDialogHelper;
+import co.yodo.fare.ui.notification.ToastMaster;
+import co.yodo.fare.ui.option.AboutOption;
+import co.yodo.fare.ui.option.BalanceOption;
+import co.yodo.fare.ui.scanner.QRScannerFactory;
+import co.yodo.fare.ui.scanner.contract.QRScanner;
+import co.yodo.restapi.network.ApiClient;
+import co.yodo.restapi.network.model.ServerResponse;
+import co.yodo.restapi.network.request.AlternateRequest;
+import co.yodo.restapi.network.request.ExchangeRequest;
 
-public class FareActivity extends AppCompatActivity implements YodoRequest.RESTListener, QRScanner.QRScannerListener {
+public class FareActivity extends AppCompatActivity implements
+        ApiClient.RequestsListener,
+        QRScanner.QRScannerListener,
+        PromotionManager.IPromotionListener {
     /** DEBUG */
     @SuppressWarnings( "unused" )
     private static final String TAG = FareActivity.class.getSimpleName();
@@ -69,38 +68,56 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
     private Context ac;
 
     /** Hardware Token */
-    private String hardwareToken;
+    private String mHardwareToken;
+
+    /** Messages Handler */
+    private MessageHandler mHandlerMessages;
+
+    /** Manager for the server requests */
+    @Inject
+    ApiClient mRequestManager;
+
+    /** Progress dialog for the requests */
+    @Inject
+    ProgressDialogHelper mProgressManager;
 
     /** GUI controllers */
-    private SlidingPaneLayout mSlidingLayout;
-    private Spinner mScannersSpinner;
-    private TextView mTotalFareView;
-    private ImageView mLocationView;
-    private ImageView mPaymentButton;
+    @BindView( R.id.splActivityFare )
+    SlidingPaneLayout splActivityFare;
+
+    @BindView( R.id.sScannerSelector )
+    Spinner sScannerSelector;
+
+    @BindView( R.id.ivLocationIcon )
+    ImageView ivLocationIcon;
+
+    @BindView( R.id.tvTotal )
+    TextView tvTotal;
+
+    @BindView( R.id.ivYodoGear )
+    ImageView ivYodoGear;
+
     private View mCurrentFee;
     private View mCurrentZone;
 
-    /** Popup Window for Tips */
-    private PopupWindow mPopupMessage;
-    private BigDecimal equivalentTotal;
+    /** Options from the navigation window */
+    private BalanceOption mBalanceOption;
+    private AboutOption mAboutOption;
 
-    /** Messages Handler */
-    private static YodoHandler handlerMessages;
-
-    /** Balance Temporal */
-    private HashMap<String, String> historyData = null;
-    private HashMap<String, String> todayData = null;
+    /** Handles the start/stop subscribe/unsubscribe functions of Nearby */
+    private PromotionManager mPromotionManager;
+    private boolean isPublishing = false;
 
     /** Current Scanner */
     private QRScannerFactory mScannerFactory;
-    private QRScanner currentScanner;
+    private QRScanner mCurrentScanner;
     private boolean isScanning = false;
 
     /** Total to pay */
     private BigDecimal mCurrentTotal = BigDecimal.ZERO;
 
     /** Location */
-    private Location mLocation;
+    private Location mLocation = new Location( "flp" );
 
     /** Code for the error dialog */
     private static final int REQUEST_CODE_LOCATION_SERVICES = 0;
@@ -109,10 +126,14 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
     private static final int PERMISSIONS_REQUEST_CAMERA   = 1;
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
 
+    /** Response codes for the queries */
+    private static final int EXCH_REQ = 0x00;
+    private static final int ALT_REQ  = 0x01;
+
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate( savedInstanceState );
-        PrefUtils.setLanguage( FareActivity.this );
+        PrefUtils.setLanguage( this );
         getWindow().setFlags( WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN );
         setContentView( R.layout.activity_fare );
 
@@ -125,21 +146,25 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
         super.onStart();
         // register to event bus
         EventBus.getDefault().register( this );
+
         // Setup the required permissions
-        setupPermissions();
+        LocationService.setup(
+                this,
+                PERMISSIONS_REQUEST_LOCATION,
+                REQUEST_CODE_LOCATION_SERVICES
+        );
     }
 
     @Override
     public void onResume() {
         super.onResume();
         // Set the listener for the request (this activity)
-        YodoRequest.getInstance().setListener( this );
-        // Enable the advertising service
-        PrefUtils.setupAdvertising( ac, PrefUtils.isAdvertisingServiceRunning( ac ), false );
+        mRequestManager.setListener( this );
+
         // Start the scanner if necessary
-        if( currentScanner != null && isScanning ) {
+        if( mCurrentScanner != null && isScanning ) {
             isScanning = false;
-            currentScanner.startScan();
+            mCurrentScanner.startScan();
         }
     }
 
@@ -147,9 +172,9 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
     protected void onPause() {
         super.onPause();
         // Pause the scanner while app is not focus (only if scanning)
-        if( currentScanner != null && currentScanner.isScanning() ) {
+        if( mCurrentScanner != null && mCurrentScanner.isScanning() ) {
             isScanning = true;
-            currentScanner.stopScan();
+            mCurrentScanner.stopScan();
         }
     }
 
@@ -159,7 +184,7 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
         // unregister from event bus
         EventBus.getDefault().unregister( this );
         // Stop location service while app is in background
-        if( PrefUtils.isMyServiceRunning( ac, LocationService.class.getName() ) ) {
+        if( SystemUtils.isMyServiceRunning( ac, LocationService.class.getName() ) ) {
             Intent iLoc = new Intent( ac, LocationService.class );
             stopService( iLoc );
         }
@@ -173,8 +198,8 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
 
     @Override
     public void onBackPressed() {
-        if( currentScanner != null && currentScanner.isScanning() ) {
-            currentScanner.stopScan();
+        if( mCurrentScanner != null && mCurrentScanner.isScanning() ) {
+            mCurrentScanner.stopScan();
             return;
         }
         super.onBackPressed();
@@ -186,82 +211,38 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
     private void setupGUI() {
         // get the context
         ac = FareActivity.this;
+        mHandlerMessages = new MessageHandler( FareActivity.this );
+
+        // Injection
+        ButterKnife.bind( this );
+        YodoApplication.getComponent().inject( this );
+
+        // Setup promotion manager start it
+        mPromotionManager = new PromotionManager( this );
+        mPromotionManager.startService();
+
         // creates the factory for the scanners
         mScannerFactory = new QRScannerFactory( this );
-        // Globals
-        mSlidingLayout   = (SlidingPaneLayout) findViewById( R.id.sliding_panel_layout );
-        mScannersSpinner = (Spinner) findViewById( R.id.scannerSpinner );
-        mLocationView    = (ImageView) findViewById( R.id.locationIconView );
-        mPaymentButton   = (ImageView) findViewById( R.id.ivYodoGear );
-        mTotalFareView   = (TextView) findViewById( R.id.totalFareText );
-        // Popup
-        mPopupMessage  = new PopupWindow( ac );
-        // Sliding Panel Configurations
-        mSlidingLayout.setParallaxDistance( 30 );
-        mScannersSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected( AdapterView<?> parentView, View selectedItemView, int position, long id ) {
-                PrefUtils.Logger( TAG, "Entro" );
-                TextView spinnerText = (TextView) parentView.getChildAt( 0 );
-                if( spinnerText != null ) {
-                    spinnerText.setTextColor( Color.WHITE );
-                    PrefUtils.Logger( TAG, spinnerText.getText().toString() );
-                }
-                PrefUtils.saveScanner( ac, position );
-            }
 
-            @Override
-            public void onNothingSelected( AdapterView<?> parent ) {
-            }
-        });
-        // Create the adapter for the supported qr scanners
-        ArrayAdapter<QRScannerFactory.SupportedScanners> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_list_item_1,
-                QRScannerFactory.SupportedScanners.values()
-        );
-        // Get current selected scanner and verify it exists
-        int position = PrefUtils.getScanner( ac );
-        if( position >= QRScannerFactory.SupportedScanners.length ) {
-            position = AppConfig.DEFAULT_SCANNER;
-            PrefUtils.saveScanner( ac, position );
-        }
-        // Set the current scanner
-        mScannersSpinner.setAdapter( adapter );
-        mScannersSpinner.setSelection( position );
-        // Start the messages handler
-        handlerMessages = new YodoHandler( FareActivity.this );
+        // Global options (navigation window)
+        mBalanceOption = new BalanceOption( this, mHandlerMessages, mPromotionManager );
+        mAboutOption   = new AboutOption( this );
+
+        // Sliding Panel Configurations
+        splActivityFare.setParallaxDistance( 30 );
+
+        // Sets up the spinner, listeners, popup, and set currency
+        initializeScannerSpinner();
+
         // Reset all the values
         resetClick( null );
+
         // Set the currency icon
-        PrefUtils.setCurrencyIcon( ac, mTotalFareView, false );
-        // Setup the preview of the Total in the current currency
-        mTotalFareView.setOnLongClickListener( new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick( View v ) {
-                setupPopup( v );
-                return false;
-            }
-        } );
-        // Setup the dismiss of the preview
-        mTotalFareView.setOnTouchListener( new View.OnTouchListener() {
-            @Override
-            public boolean onTouch( View v, MotionEvent event ) {
-                switch( event.getAction() ) {
-                    case MotionEvent.ACTION_UP:
-                    case MotionEvent.ACTION_CANCEL:
-                        if( mPopupMessage != null ) {
-                            mPopupMessage.dismiss();
-                            equivalentTotal = null;
-                        }
-                        break;
-                }
-                return false;
-            }
-        } );
+        GUIUtils.setMerchantCurrencyIcon( ac, tvTotal );
+
         // If it is the first login, show the navigation panel
         if( PrefUtils.isFirstLogin( ac ) ) {
-            mSlidingLayout.openPane();
+            splActivityFare.openPane();
             PrefUtils.saveFirstLogin( ac, false );
         }
     }
@@ -271,191 +252,50 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
      */
     private void updateData() {
         // Get the saved hardware token
-        hardwareToken = PrefUtils.getHardwareToken( ac );
-        // Mock location
-        mLocation = new Location( "flp" );
-        mLocation.setLatitude( 0.00 );
-        mLocation.setLongitude( 0.00 );
-    }
-
-    /**
-     * Request the necessary permissions for this activity
-     */
-    private void setupPermissions() {
-        boolean locationPermission = PrefUtils.requestPermission(
-                FareActivity.this,
-                R.string.message_permission_location,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                PERMISSIONS_REQUEST_LOCATION
-        );
-        // We have permission, it is time to see if location is enabled, if not just request
-        if( locationPermission )
-            enableLocation();
-    }
-
-    /**
-     * Asks the user to enable the location services, otherwise it
-     * closes the application
-     */
-    private void enableLocation() {
-        // If the device doesn't support the Location service, just finish the app
-        if( !PrefUtils.hasLocationService( ac ) ) {
-            ToastMaster.makeText( ac, R.string.message_no_gps_support, Toast.LENGTH_SHORT ).show();
+        mHardwareToken = PrefUtils.getHardwareToken( ac );
+        if( mHardwareToken == null ) {
+            ToastMaster.makeText( ac, R.string.message_no_hardware, Toast.LENGTH_LONG ).show();
             finish();
-        } else if( PrefUtils.isLocationEnabled( ac ) ) {
-            // Start the location service
-            Intent iLoc = new Intent( ac, LocationService.class );
-            if( !PrefUtils.isMyServiceRunning( ac, LocationService.class.getName() ) )
-                startService( iLoc );
-        } else {
-            // If location not enabled, then request
-            DialogInterface.OnClickListener onClick = new DialogInterface.OnClickListener() {
-                public void onClick( DialogInterface dialog, int item ) {
-                    Intent intent = new Intent( Settings.ACTION_LOCATION_SOURCE_SETTINGS );
-                    startActivityForResult( intent, REQUEST_CODE_LOCATION_SERVICES );
-                }
-            };
-
-            DialogInterface.OnClickListener onCancel = new DialogInterface.OnClickListener() {
-                public void onClick( DialogInterface dialog, int item ) {
-                    finish();
-                }
-            };
-
-            AlertDialogHelper.showAlertDialog( ac, R.string.message_gps_enable, onClick, onCancel );
         }
     }
 
     /**
-     * Setup a PopupWindow below a View
-     * @param v The view for te popup
+     * Initializes the spinner for the scanners
      */
-    private void setupPopup( View v ) {
-        // Setup the popup
-        LinearLayout viewGroup = (LinearLayout) findViewById( R.id.popup_window );
-        LayoutInflater layoutInflater = (LayoutInflater) getSystemService( Context.LAYOUT_INFLATER_SERVICE );
-        View layout = layoutInflater.inflate( R.layout.popup_window, viewGroup );
-
-        TextView cashTotal      = (TextView) layout.findViewById( R.id.cashTotalText );
-        ProgressBar progressBar = (ProgressBar) layout.findViewById( R.id.progressBarPopUp );
-
-        cashTotal.setVisibility( View.GONE );
-        progressBar.setVisibility( View.VISIBLE );
-        /*if( equivalentTotal == null ) {
-            cashTotal.setVisibility( View.GONE );
-            progressBar.setVisibility( View.VISIBLE );
-        } else {
-            cashTotal.setText( equivalentTotal.setScale( 2, RoundingMode.DOWN ).toString() );
-        }*/
-
-        mPopupMessage.setWidth( mTotalFareView.getWidth() );
-        mPopupMessage.setHeight( LinearLayout.LayoutParams.WRAP_CONTENT );
-        mPopupMessage.setContentView( layout );
-        mPopupMessage.showAtLocation( v, Gravity.CENTER, 0, 0 );
-
-        // Request the fare value in the rate of the merchant currency
-        YodoRequest.getInstance().requestCurrencies( ac );
-    }
-
-    /**
-     * Creates a dialog to show the balance information
-     */
-    private void balanceDialog() {
-        if( historyData.size() == 1 || todayData.size() == 1 ) {
-            ToastMaster.makeText(ac, R.string.no_balance, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        LayoutInflater inflater = getLayoutInflater();
-        LinearLayout root = (LinearLayout) findViewById( R.id.layoutDialogRoot );
-        View layout = inflater.inflate( R.layout.dialog_balance, root, false );
-
-        TextView todayCreditsText = ( (TextView) layout.findViewById( R.id.yodoTodayCashTextView ) );
-        TextView todayDebitsText  = ( (TextView) layout.findViewById( R.id.yodoTodayDebitsTextView ) );
-        TextView todayBalanceText = ( (TextView) layout.findViewById( R.id.yodoTodayBalanceTextView ) );
-
-        TextView creditsText = ( (TextView) layout.findViewById( R.id.yodoCashTextView ) );
-        TextView debitsText  = ( (TextView) layout.findViewById( R.id.yodoDebitsTextView ) );
-        TextView balanceText = ( (TextView) layout.findViewById( R.id.yodoBalanceTextView ) );
-
-        BigDecimal total = BigDecimal.ZERO;
-
-        BigDecimal result = new BigDecimal( historyData.get( ServerResponse.DEBIT ) );
-        debitsText.setText( result.setScale( 2, RoundingMode.DOWN ).toString() );
-        total = total.subtract( result );
-
-        result = new BigDecimal( historyData.get( ServerResponse.CREDIT ) );
-        creditsText.setText( result.setScale( 2, RoundingMode.DOWN ).toString() );
-        total = total.add( result );
-
-        balanceText.setText(
-                total.negate().setScale( 2, RoundingMode.DOWN ).toString()
-        );
-        total = BigDecimal.ZERO;
-
-        result = new BigDecimal( todayData.get( ServerResponse.DEBIT ) );
-        todayDebitsText.setText( result.setScale( 2, RoundingMode.DOWN ).toString() );
-        total = total.subtract( result );
-
-        result = new BigDecimal( todayData.get( ServerResponse.CREDIT ) );
-        todayCreditsText.setText( result.setScale( 2, RoundingMode.DOWN ).toString() );
-        total = total.add( result );
-
-        todayBalanceText.setText(
-                total.negate().setScale( 2, RoundingMode.DOWN ).toString()
-        );
-
-        AlertDialogHelper.showAlertDialog( ac, getString( R.string.yodo_title ), layout );
-        todayData = historyData = null;
-    }
-
-    /**
-     * Changes the current currency
-     * @param v View, used to get the title
-     */
-    public void setCurrencyClick( View v ) {
-        mSlidingLayout.closePane();
-
-        final String[] currency = getResources().getStringArray( R.array.currency_array );
-        final String[] icons    = getResources().getStringArray( R.array.currency_icon_array );
-
-        Currency[] currencyList = new Currency[currency.length];
-        for( int i = 0; i < currency.length; i++ )
-            currencyList[i] = new Currency( currency[i], PrefUtils.getDrawableByName( ac, icons[i] ) );
-
-        final String title        = ((Button) v).getText().toString();
-        final ListAdapter adapter = new CurrencyAdapter( ac, currencyList );
-        final int current         = PrefUtils.getTenderCurrency( ac );
-
-        DialogInterface.OnClickListener onClick = new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int item) {
-                PrefUtils.saveTenderCurrency( ac, item );
-
-                Drawable icon = PrefUtils.getDrawableByName( ac, icons[ item ] );
-                icon.setBounds( 0, 0, mTotalFareView.getLineHeight(), (int) ( mTotalFareView.getLineHeight() * 0.9 ) );
-                mTotalFareView.setCompoundDrawables( icon, null, null, null );
-                //new getCurrencyFare().execute();
-
-                dialog.dismiss();
+    private void initializeScannerSpinner() {
+        // Add item listener to the spinner
+        sScannerSelector.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected( AdapterView<?> parentView, View selectedItemView, int position, long id ) {
+                TextView scanner = (TextView) selectedItemView;
+                if( scanner != null )
+                    SystemUtils.Logger( TAG, scanner.getText().toString() );
+                PrefUtils.saveScanner( ac, position );
             }
-        };
 
-        AlertDialogHelper.showAlertDialog(
-                ac,
-                title,
-                adapter,
-                current,
-                onClick
+            @Override
+            public void onNothingSelected( AdapterView<?> parent ) {
+            }
+        });
+
+        // Create the adapter for the supported qr scanners
+        ArrayAdapter<QRScannerFactory.SupportedScanner> adapter = new ScannerAdapter(
+                this,
+                android.R.layout.simple_list_item_1,
+                QRScannerFactory.SupportedScanner.values()
         );
+
+        // Set the current scanner
+        sScannerSelector.setAdapter( adapter );
+        sScannerSelector.setSelection( PrefUtils.getScanner( ac ) );
     }
 
     /**
      * Settings for the fee values
      * @param v View, not used
      */
-    public void settingsClick(View v) {
-        mSlidingLayout.closePane();
-
+    public void settingsClick( View v ) {
+        splActivityFare.closePane();
         Intent intent = new Intent( ac, SettingsActivity.class );
         startActivity( intent );
     }
@@ -464,48 +304,9 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
      * Gets the balance of the POS
      * @param v View, not used
      */
-    public void getBalanceClick(View v) {
-        mSlidingLayout.closePane();
-
-        final String title      = getString( R.string.input_pip );
-        final EditText inputBox = new ClearEditText( ac );
-        final CheckBox remember = new CheckBox( ac );
-        remember.setText( R.string.remember_pass );
-
-        DialogInterface.OnClickListener onClick = new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int item) {
-                String pip = inputBox.getText().toString();
-                PrefUtils.hideSoftKeyboard( FareActivity.this );
-
-                if( remember.isChecked() )
-                    PrefUtils.savePassword( ac, pip );
-                else
-                    PrefUtils.savePassword( ac, null );
-
-                YodoRequest.getInstance().createProgressDialog(
-                        FareActivity.this ,
-                        YodoRequest.ProgressDialogType.NORMAL
-                );
-
-                YodoRequest.getInstance().requestHistory(
-                        FareActivity.this,
-                        hardwareToken, pip
-                );
-
-                YodoRequest.getInstance().requestDailyHistory(
-                        FareActivity.this,
-                        hardwareToken, pip
-                );
-            }
-        };
-
-        AlertDialogHelper.showAlertDialog(
-                ac,
-                title,
-                inputBox, true, true,
-                remember,
-                onClick
-        );
+    public void getBalanceClick( View v ) {
+        splActivityFare.closePane();
+        mBalanceOption.execute();
     }
 
     /**
@@ -513,46 +314,8 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
      * @param v View, not used
      */
     public void aboutClick( View v ) {
-        mSlidingLayout.closePane();
-
-        final String title   = ((Button) v).getText().toString();
-        final String message = getString( R.string.imei )       + " " +
-                PrefUtils.getHardwareToken( ac ) + "\n" +
-                getString( R.string.label_currency )    + " " +
-                PrefUtils.getMerchantCurrency( ac ) + "\n" +
-                getString( R.string.version ) + "/" +
-                RESTService.getSwitch() + "\n\n" +
-                getString( R.string.about_message );
-
-        LayoutInflater inflater = (LayoutInflater) getSystemService( LAYOUT_INFLATER_SERVICE );
-        View layout = inflater.inflate( R.layout.dialog_about, new LinearLayout( this ), false );
-
-        TextView emailView = (TextView) layout.findViewById( R.id.emailView );
-        TextView messageView = (TextView) layout.findViewById( R.id.messageView );
-
-        SpannableString email = new SpannableString( getString( R.string.about_email ) );
-        email.setSpan( new UnderlineSpan(), 0, email.length(), 0 );
-
-        emailView.setText( email );
-        messageView.setText( message );
-
-        emailView.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) {
-                Intent intent = new Intent( Intent.ACTION_SEND );
-                String[] recipients = { getString( R.string.about_email ) };
-                intent.putExtra( Intent.EXTRA_EMAIL, recipients );
-                intent.putExtra( Intent.EXTRA_SUBJECT, hardwareToken );
-                intent.setType( "text/html" );
-                startActivity( Intent.createChooser( intent, "Send Email" ) );
-            }
-        } );
-
-        AlertDialogHelper.showAlertDialog(
-                ac,
-                title,
-                layout
-        );
+        splActivityFare.closePane();
+        mAboutOption.execute();
     }
 
     public void feeSelectedClick( View fee ) {
@@ -572,10 +335,11 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
         int tempZone = switchImage( (ImageView) zone, true );
 
         mCurrentZone = zone;
+        final String currentFare = mCurrentTotal.add( new BigDecimal( getFare( tempZone ) ) )
+                .setScale( 2, RoundingMode.DOWN ).toString();
 
-        mTotalFareView.setText(
-                mCurrentTotal.add( new BigDecimal( getFare( tempZone ) ) )
-                        .setScale( 2, RoundingMode.DOWN ).toString()
+        tvTotal.setText(
+                currentFare
         );
     }
 
@@ -592,25 +356,25 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
      *  @param v The View, used to get the amount
      */
     public void addClick( View v ) {
-        mCurrentTotal = new BigDecimal( mTotalFareView.getText().toString() );
+        mCurrentTotal = new BigDecimal( tvTotal.getText().toString() );
     }
 
     /**
      * Request the permission for the camera
      */
     private void showCamera() {
-        if( currentScanner != null && currentScanner.isScanning() ) {
-            currentScanner.stopScan();
+        if( mCurrentScanner != null && mCurrentScanner.isScanning() ) {
+            mCurrentScanner.stopScan();
             return;
         }
 
-        PrefUtils.rotateImage( mPaymentButton );
-        currentScanner = mScannerFactory.getScanner(
-                (QRScannerFactory.SupportedScanners) mScannersSpinner.getSelectedItem()
+        GUIUtils.rotateImage( ivYodoGear );
+        mCurrentScanner = mScannerFactory.getScanner(
+                (QRScannerFactory.SupportedScanner) sScannerSelector.getSelectedItem()
         );
 
-        if( currentScanner != null )
-            currentScanner.startScan();
+        if( mCurrentScanner != null )
+            mCurrentScanner.startScan();
     }
 
     /**
@@ -618,7 +382,7 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
      * @param v The View, not used
      */
     public void yodoPayClick( View v ) {
-        boolean cameraPermission = PrefUtils.requestPermission(
+        boolean cameraPermission = SystemUtils.requestPermission(
                 FareActivity.this,
                 R.string.message_permission_camera,
                 Manifest.permission.CAMERA,
@@ -692,116 +456,46 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
     }
 
     @Override
-    public void onResponse( YodoRequest.RequestType type, ServerResponse response ) {
-        YodoRequest.getInstance().destroyProgressDialog();
+    public void onPrepare() {
+        if( PrefUtils.isAdvertising( ac ) ) {
+            isPublishing = true;
+            mPromotionManager.unpublish();
+        }
+    }
+
+    @Override
+    public void onResponse( int responseCode, ServerResponse response ) {
+        mProgressManager.destroyProgressDialog();
         String code, message;
 
-        switch( type ) {
-            case ERROR_NO_INTERNET:
-                handlerMessages.sendEmptyMessage( YodoHandler.NO_INTERNET );
-                break;
+        // If it was publishing before the request
+        if( isPublishing ) {
+            isPublishing = false;
+            mPromotionManager.publish();
+        }
 
-            case ERROR_GENERAL:
-                handlerMessages.sendEmptyMessage( YodoHandler.GENERAL_ERROR );
-                break;
+        switch( responseCode ) {
 
-            case QUERY_BAL_REQUEST:
-                code = response.getCode();
-                if( code.equals( ServerResponse.AUTHORIZED ) ) {
-                    historyData = response.getParams();
-                    if( todayData != null ) {
-                        balanceDialog();
-                    }
-                } else if( code.equals( ServerResponse.ERROR_FAILED ) ) {
-                    Message msg = new Message();
-                    msg.what = YodoHandler.SERVER_ERROR;
-                    message  = response.getMessage();
-
-                    Bundle bundle = new Bundle();
-                    bundle.putString( YodoHandler.CODE, code );
-                    bundle.putString( YodoHandler.MESSAGE, message );
-                    msg.setData( bundle );
-
-                    handlerMessages.sendMessage( msg );
-                    todayData = historyData = null;
-                }
-                break;
-
-            case QUERY_DAY_REQUEST:
-                code = response.getCode();
-                if( code.equals( ServerResponse.AUTHORIZED ) ) {
-                    todayData = response.getParams();
-                    if( historyData != null ) {
-                        balanceDialog();
-                    }
-                }
-                break;
-
-            case CURRENCIES_REQUEST:
-                final String sMerchRate = response.getParam( ServerResponse.MERCH_RATE );
-                final String sFareRate  = response.getParam( ServerResponse.FARE_RATE );
-
-                if( sMerchRate != null && sFareRate != null ) {
-                    // List of Currencies
-                    String[] currencies = ac.getResources().getStringArray( R.array.currency_array );
-                    // Get the rates in BigDecimals
-                    BigDecimal merchRate = new BigDecimal( sMerchRate );
-                    BigDecimal fareRate = new BigDecimal( sFareRate );
-                    // Get raw value, in order to transform
-                    BigDecimal temp_fare = new BigDecimal( mTotalFareView.getText().toString() );
-
-                    // Transform the currencies using the rate
-                    if( AppConfig.URL_CURRENCY.equals( currencies[ PrefUtils.getTenderCurrency( ac ) ] ) ) {
-                        equivalentTotal = temp_fare.multiply( merchRate );
-                    } else {
-                        BigDecimal currency_rate = merchRate.divide( fareRate, 2 );
-                        equivalentTotal = temp_fare.multiply( currency_rate );
-                    }
-                    // If the popup is showing, then use the new value
-                    if( mPopupMessage.isShowing() ) {
-                        // Disappear the progress bar and show the value
-                        mPopupMessage.getContentView().findViewById( R.id.progressBarPopUp ).setVisibility( View.GONE );
-                        TextView value = (TextView) mPopupMessage.getContentView().findViewById( R.id.cashTotalText );
-                        value.setVisibility( View.VISIBLE );
-                        value.setText( equivalentTotal.setScale( 2, RoundingMode.DOWN ).toString() );
-                    }
-                }
-
-                break;
-
-            case EXCH_MERCH_REQUEST:
-            case ALT_MERCH_REQUEST:
+            case EXCH_REQ:
+            case ALT_REQ:
                 // Returns the selected fare to adult
                 resetClick( null );
+
                 // Handle the response message
                 code = response.getCode();
                 final String ex_authNumber = response.getAuthNumber();
                 final String ex_message    = response.getMessage();
-                final String ex_balance    = response.getParam( ServerResponse.BALANCE );
 
                 if( code.equals( ServerResponse.AUTHORIZED ) ) {
-                    PrefUtils.startSound( ac, AppConfig.SUCCESSFUL );
-                    message = getString( R.string.exchange_auth ) + " " + ex_authNumber + "\n" +
-                            getString( R.string.exchange_message ) + " " + ex_message;
-
-                    if( ex_balance != null )
-                        message += "\n" + getString( R.string.exchange_balance ) + " " +
-                                new BigDecimal( ex_balance ).setScale( 2, RoundingMode.DOWN );
+                    SystemUtils.startSound( ac, AppConfig.SUCCESSFUL );
+                    message = getString( R.string.exchange_auth )    + " " + ex_authNumber + "\n" +
+                              getString( R.string.exchange_message ) + " " + ex_message;
 
                     AlertDialogHelper.showAlertDialog( ac, response.getCode(), message, null );
                 } else {
-                    PrefUtils.startSound( ac, AppConfig.ERROR );
-
-                    Message msg = new Message();
-                    msg.what = YodoHandler.SERVER_ERROR;
-                    message  = response.getMessage() + "\n" + response.getParam( ServerResponse.PARAMS );
-
-                    Bundle bundle = new Bundle();
-                    bundle.putString( YodoHandler.CODE, code );
-                    bundle.putString( YodoHandler.MESSAGE, message );
-                    msg.setData( bundle );
-
-                    handlerMessages.sendMessage( msg );
+                    SystemUtils.startSound( ac, AppConfig.ERROR );
+                    message = response.getMessage();
+                    MessageHandler.sendMessage( mHandlerMessages, code, message );
                 }
 
                 if( PrefUtils.isLiveScan( ac ) )
@@ -812,58 +506,60 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
     }
 
     @Override
-    public void onNewData( String data ) {
-        String totalPurchase = mTotalFareView.getText().toString();
-        final String[] currency = getResources().getStringArray( R.array.currency_array );
-        PrefUtils.Logger( TAG, data );
+    public void onScanResult( String data ) {
+        String total = tvTotal.getText().toString();
+        SystemUtils.Logger( TAG, data );
 
-        switch( data.length() ) {
-            case AppConfig.SKS_SIZE:
-                YodoRequest.getInstance().createProgressDialog(
-                        FareActivity.this,
-                        YodoRequest.ProgressDialogType.TRANSPARENT
-                );
+        SKS code = SKS.build( data );
+        if( code == null ) {
+            SystemUtils.startSound( ac, AppConfig.ERROR );
+            ToastMaster.makeText( this, R.string.exchange_error, Toast.LENGTH_LONG ).show();
 
-                YodoRequest.getInstance().requestExchange(
-                        FareActivity.this,
-                        hardwareToken,
-                        data,
-                        totalPurchase,
-                        "0.00",
-                        "0.00",
-                        mLocation.getLatitude(),
-                        mLocation.getLongitude(),
-                        currency[ PrefUtils.getTenderCurrency( ac ) ]
-                );
-                break;
+            if( PrefUtils.isLiveScan( ac ) )
+                showCamera();
+        } else {
+            final String client = code.getClient();
+            final SKS.PAYMENT method = code.getPaymentMethod();
 
-            case AppConfig.ALT_SIZE:
-                YodoRequest.getInstance().createProgressDialog(
-                        FareActivity.this,
-                        YodoRequest.ProgressDialogType.TRANSPARENT
-                );
+            mProgressManager.createProgressDialog(
+                    FareActivity.this,
+                    ProgressDialogHelper.ProgressDialogType.TRANSPARENT
+            );
 
-                YodoRequest.getInstance().requestAlternate(
-                        FareActivity.this,
-                        hardwareToken,
-                        data,
-                        totalPurchase,
-                        "0.00",
-                        "0.00",
-                        mLocation.getLatitude(),
-                        mLocation.getLongitude(),
-                        currency[ PrefUtils.getTenderCurrency( ac ) ]
-                );
-                break;
+            switch( method ) {
+                case YODO:
+                    mRequestManager.invoke(
+                            new ExchangeRequest(
+                                    EXCH_REQ,
+                                    mHardwareToken,
+                                    client,
+                                    total,
+                                    "0.00",
+                                    "0.00",
+                                    mLocation.getLatitude(),
+                                    mLocation.getLongitude(),
+                                    PrefUtils.getMerchantCurrency( ac )
+                            )
+                    );
+                    break;
 
-            default:
-                PrefUtils.startSound( ac, AppConfig.ERROR );
-                ToastMaster.makeText( FareActivity.this, R.string.exchange_error, Toast.LENGTH_SHORT ).show();
-
-                if( PrefUtils.isLiveScan( ac ) )
-                    showCamera();
-
-                break;
+                case HEART:
+                    mRequestManager.invoke(
+                            new AlternateRequest(
+                                    ALT_REQ,
+                                    String.valueOf( method.ordinal() ),
+                                    mHardwareToken,
+                                    client,
+                                    total,
+                                    "0.00",
+                                    "0.00",
+                                    mLocation.getLatitude(),
+                                    mLocation.getLongitude(),
+                                    PrefUtils.getMerchantCurrency( ac )
+                            )
+                    );
+                    break;
+            }
         }
     }
 
@@ -874,7 +570,7 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
         EventBus.getDefault().removeStickyEvent( Location.class );
         // Process the Event
         mLocation = location;
-        mLocationView.setImageResource( R.drawable.location );
+        ivLocationIcon.setImageResource( R.drawable.location );
     }
 
     @Override
@@ -882,7 +578,7 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
         switch( requestCode ) {
             case REQUEST_CODE_LOCATION_SERVICES:
                 // The user didn't enable the GPS
-                if( !PrefUtils.isLocationEnabled( ac ) )
+                if( !SystemUtils.isLocationEnabled( ac ) )
                     finish();
                 break;
         }
@@ -903,7 +599,7 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
                 // If request is cancelled, the result arrays are empty.
                 if( grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED ) {
                     // Permission Granted
-                    enableLocation();
+                    LocationService.enable( this, REQUEST_CODE_LOCATION_SERVICES );
                 } else {
                     // Permission Denied
                     finish();
@@ -913,5 +609,22 @@ public class FareActivity extends AppCompatActivity implements YodoRequest.RESTL
             default:
                 super.onRequestPermissionsResult( requestCode, permissions, grantResults );
         }
+    }
+
+    @Override
+    public void onConnected( @Nullable Bundle bundle ) {
+        SystemUtils.Logger( TAG, "GoogleApiClient connected" );
+        if( PrefUtils.isAdvertising( ac ) )
+            mPromotionManager.publish();
+    }
+
+    @Override
+    public void onConnectionSuspended( int i ) {
+        SystemUtils.Logger( TAG, "GoogleApiClient connection suspended" );
+    }
+
+    @Override
+    public void onConnectionFailed( @NonNull ConnectionResult result ) {
+        SystemUtils.Logger( TAG, "connection to GoogleApiClient failed" );
     }
 }
