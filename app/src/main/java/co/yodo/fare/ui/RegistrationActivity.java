@@ -23,10 +23,11 @@ import co.yodo.fare.helper.GUIUtils;
 import co.yodo.fare.helper.PrefUtils;
 import co.yodo.fare.ui.notification.MessageHandler;
 import co.yodo.fare.ui.notification.ProgressDialogHelper;
-import co.yodo.restapi.network.YodoRequest;
+import co.yodo.restapi.network.ApiClient;
 import co.yodo.restapi.network.model.ServerResponse;
+import co.yodo.restapi.network.request.RegisterRequest;
 
-public class RegistrationActivity extends AppCompatActivity implements YodoRequest.RESTListener {
+public class RegistrationActivity extends AppCompatActivity implements ApiClient.RequestsListener {
     /** DEBUG */
     @SuppressWarnings( "unused" )
     private static final String TAG = RegistrationActivity.class.getSimpleName();
@@ -46,7 +47,7 @@ public class RegistrationActivity extends AppCompatActivity implements YodoReque
 
     /** Manager for the server requests */
     @Inject
-    YodoRequest mRequestManager;
+    ApiClient mRequestManager;
 
     /** Progress dialog for the requests */
     @Inject
@@ -68,13 +69,6 @@ public class RegistrationActivity extends AppCompatActivity implements YodoReque
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        // Register listener for requests
-        mRequestManager.setListener( this );
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         switch( itemId ) {
@@ -92,6 +86,7 @@ public class RegistrationActivity extends AppCompatActivity implements YodoReque
         // Injection
         ButterKnife.bind( this );
         YodoApplication.getComponent().inject( this );
+        mRequestManager.setListener( this );
 
         // Load the animation
         aShake = AnimationUtils.loadAnimation( this, R.anim.shake );
@@ -123,10 +118,12 @@ public class RegistrationActivity extends AppCompatActivity implements YodoReque
                     ProgressDialogHelper.ProgressDialogType.NORMAL
             );
 
-            mRequestManager.requestMerchReg(
-                    REG_REQ,
-                    mHardwareToken,
-                    token
+            mRequestManager.invoke(
+                    new RegisterRequest(
+                            REG_REQ,
+                            mHardwareToken,
+                            token
+                    )
             );
         }
     }

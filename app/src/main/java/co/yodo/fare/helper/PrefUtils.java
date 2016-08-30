@@ -433,35 +433,6 @@ public class PrefUtils {
         return image;
     }
 
-    /**
-     * Plays a sound of error
-     * @param c The Context of the Android system.
-     * @param type The kind of sound 0 - error and 1 - successful
-     */
-    public static void startSound(Context c, int type) {
-        MediaPlayer mp = null;
-
-        switch( type ) {
-            case AppConfig.ERROR:
-                mp = MediaPlayer.create( c, R.raw.error );
-                break;
-
-            case AppConfig.SUCCESSFUL:
-                mp = MediaPlayer.create( c, R.raw.successful );
-                break;
-        }
-
-        if( mp != null ) {
-            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    mp.release();
-                }
-            });
-            mp.start();
-        }
-    }
-
     public static void setLanguage( Context c ) {
         Locale appLoc = new Locale( getLanguage( c ) );
 

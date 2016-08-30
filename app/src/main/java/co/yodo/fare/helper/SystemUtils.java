@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.LocationManager;
+import android.media.MediaPlayer;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -143,6 +144,35 @@ public class SystemUtils {
         }
         catch(IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Plays a sound of error
+     * @param c The Context of the Android system.
+     * @param type The kind of sound 0 - error and 1 - successful
+     */
+    public static void startSound(Context c, int type) {
+        MediaPlayer mp = null;
+
+        switch( type ) {
+            case AppConfig.ERROR:
+                mp = MediaPlayer.create( c, R.raw.error );
+                break;
+
+            case AppConfig.SUCCESSFUL:
+                mp = MediaPlayer.create( c, R.raw.successful );
+                break;
+        }
+
+        if( mp != null ) {
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mp.release();
+                }
+            });
+            mp.start();
         }
     }
 

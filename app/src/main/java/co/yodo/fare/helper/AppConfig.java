@@ -6,7 +6,7 @@ package co.yodo.fare.helper;
  */
 public class AppConfig {
     /** DEBUG flag: to print the logs in console */
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     /** FILE flag: to print the logs in a file */
     public static final boolean FDEBUG = false;

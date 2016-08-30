@@ -13,7 +13,7 @@ import co.yodo.fare.injection.component.DaggerGraphComponent;
 import co.yodo.fare.injection.component.GraphComponent;
 import co.yodo.fare.injection.module.ApplicationModule;
 import co.yodo.restapi.helper.AppConfig;
-import co.yodo.restapi.network.YodoRequest;
+import co.yodo.restapi.network.ApiClient;
 
 @ReportsCrashes(
                 formUri = "http://198.101.209.120/MAB-LAB/report/report.php",
@@ -34,7 +34,7 @@ public class YodoApplication extends Application {
         ACRA.init( this );
 
         // Sets the log flag and IP for the restapi
-        YodoRequest.IP = YodoRequest.PROD_IP;
+        ApiClient.IP = ApiClient.DEMO_IP;
         AppConfig.DEBUG = co.yodo.fare.helper.AppConfig.DEBUG;
     }
 

@@ -17,11 +17,12 @@ import co.yodo.fare.ui.notification.ToastMaster;
 import co.yodo.fare.helper.PrefUtils;
 import co.yodo.fare.helper.SystemUtils;
 import co.yodo.fare.ui.notification.MessageHandler;
-import co.yodo.restapi.network.YodoRequest;
-import co.yodo.restapi.network.builder.ServerRequest;
+import co.yodo.restapi.network.ApiClient;
 import co.yodo.restapi.network.model.ServerResponse;
+import co.yodo.restapi.network.request.AuthenticateRequest;
+import co.yodo.restapi.network.request.QueryRequest;
 
-public class SplashActivity extends Activity implements YodoRequest.RESTListener {
+public class SplashActivity extends Activity implements ApiClient.RequestsListener {
     /** DEBUG */
     @SuppressWarnings( "unused" )
     private static final String TAG = SplashActivity.class.getSimpleName();
@@ -37,7 +38,7 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
 
     /** Manager for the server requests */
     @Inject
-    YodoRequest mRequestManager;
+    ApiClient mRequestManager;
 
     /** Code for the error dialog */
     private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 0;
@@ -91,9 +92,11 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
             if( mHardwareToken == null ) {
                 setupPermissions();
             } else {
-                mRequestManager.requestMerchAuth(
-                        AUTH_REQ,
-                        mHardwareToken
+                mRequestManager.invoke(
+                        new AuthenticateRequest(
+                                AUTH_REQ,
+                                mHardwareToken
+                        )
                 );
             }
         }
@@ -126,9 +129,11 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
             finish();
         } else {
             PrefUtils.saveHardwareToken( ac, mHardwareToken );
-            mRequestManager.requestMerchAuth(
-                    AUTH_REQ,
-                    mHardwareToken
+            mRequestManager.invoke(
+                    new AuthenticateRequest(
+                            AUTH_REQ,
+                            mHardwareToken
+                    )
             );
         }
     }
@@ -148,11 +153,13 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
             case AUTH_REQ:
 
                 if( code.equals( ServerResponse.AUTHORIZED ) ) {
-                    // There is no currency saved
-                    mRequestManager.requestQuery(
-                            QUERY_REQ,
-                            mHardwareToken,
-                            ServerRequest.QueryRecord.MERCHANT_CURRENCY
+                    // Get the merchant currency
+                    mRequestManager.invoke(
+                            new QueryRequest(
+                                    QUERY_REQ,
+                                    mHardwareToken,
+                                    QueryRequest.Record.MERCHANT_CURRENCY
+                            )
                     );
                 }
                 else if( code.equals( ServerResponse.ERROR_FAILED ) ) {
@@ -166,7 +173,7 @@ public class SplashActivity extends Activity implements YodoRequest.RESTListener
 
                 if( code.equals( ServerResponse.AUTHORIZED ) ) {
                     // Set currencies
-                    String currency = response.getParam( ServerResponse.CURRENCY );
+                    String currency = response.getParams().getCurrency();
                     PrefUtils.saveMerchantCurrency( ac, currency );
 
                     // Start the app

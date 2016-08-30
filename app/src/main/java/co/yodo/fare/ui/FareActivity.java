@@ -35,6 +35,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import co.yodo.fare.R;
 import co.yodo.fare.YodoApplication;
+import co.yodo.fare.component.SKS;
 import co.yodo.fare.helper.AppConfig;
 import co.yodo.fare.helper.GUIUtils;
 import co.yodo.fare.helper.PrefUtils;
@@ -50,12 +51,13 @@ import co.yodo.fare.ui.option.AboutOption;
 import co.yodo.fare.ui.option.BalanceOption;
 import co.yodo.fare.ui.scanner.QRScannerFactory;
 import co.yodo.fare.ui.scanner.contract.QRScanner;
-import co.yodo.restapi.network.YodoRequest;
-import co.yodo.restapi.network.handler.XMLHandler;
+import co.yodo.restapi.network.ApiClient;
 import co.yodo.restapi.network.model.ServerResponse;
+import co.yodo.restapi.network.request.AlternateRequest;
+import co.yodo.restapi.network.request.ExchangeRequest;
 
 public class FareActivity extends AppCompatActivity implements
-        YodoRequest.RESTListener,
+        ApiClient.RequestsListener,
         QRScanner.QRScannerListener,
         PromotionManager.IPromotionListener {
     /** DEBUG */
@@ -73,7 +75,7 @@ public class FareActivity extends AppCompatActivity implements
 
     /** Manager for the server requests */
     @Inject
-    YodoRequest mRequestManager;
+    ApiClient mRequestManager;
 
     /** Progress dialog for the requests */
     @Inject
@@ -485,15 +487,14 @@ public class FareActivity extends AppCompatActivity implements
                 final String ex_message    = response.getMessage();
 
                 if( code.equals( ServerResponse.AUTHORIZED ) ) {
-                    PrefUtils.startSound( ac, AppConfig.SUCCESSFUL );
+                    SystemUtils.startSound( ac, AppConfig.SUCCESSFUL );
                     message = getString( R.string.exchange_auth )    + " " + ex_authNumber + "\n" +
                               getString( R.string.exchange_message ) + " " + ex_message;
 
                     AlertDialogHelper.showAlertDialog( ac, response.getCode(), message, null );
                 } else {
-                    PrefUtils.startSound( ac, AppConfig.ERROR );
-
-                    message = response.getMessage() + "\n" + response.getParam( XMLHandler.PARAMS );
+                    SystemUtils.startSound( ac, AppConfig.ERROR );
+                    message = response.getMessage();
                     MessageHandler.sendMessage( mHandlerMessages, code, message );
                 }
 
@@ -506,59 +507,59 @@ public class FareActivity extends AppCompatActivity implements
 
     @Override
     public void onScanResult( String data ) {
-        String totalPurchase = tvTotal.getText().toString();
+        String total = tvTotal.getText().toString();
+        SystemUtils.Logger( TAG, data );
 
-        switch( data.length() ) {
-            case QRScannerFactory.SKS_SIZE:
-                mProgressManager.createProgressDialog(
-                        FareActivity.this,
-                        ProgressDialogHelper.ProgressDialogType.TRANSPARENT
-                );
+        SKS code = SKS.build( data );
+        if( code == null ) {
+            SystemUtils.startSound( ac, AppConfig.ERROR );
+            ToastMaster.makeText( this, R.string.exchange_error, Toast.LENGTH_LONG ).show();
 
-                mRequestManager.requestExchange(
-                        EXCH_REQ,
-                        mHardwareToken,
-                        data,
-                        totalPurchase,
-                        "0.00",
-                        "0.00",
-                        mLocation.getLatitude(),
-                        mLocation.getLongitude(),
-                        PrefUtils.getMerchantCurrency( ac )
-                );
-                break;
+            if( PrefUtils.isLiveScan( ac ) )
+                showCamera();
+        } else {
+            final String client = code.getClient();
+            final SKS.PAYMENT method = code.getPaymentMethod();
 
-            case QRScannerFactory.ALT_SIZE:
-                String clientData  = data.substring( 0, data.length() - 1 );
-                String accountType = data.substring( data.length() - 1 );
+            mProgressManager.createProgressDialog(
+                    FareActivity.this,
+                    ProgressDialogHelper.ProgressDialogType.TRANSPARENT
+            );
 
-                mProgressManager.createProgressDialog(
-                        FareActivity.this,
-                        ProgressDialogHelper.ProgressDialogType.TRANSPARENT
-                );
+            switch( method ) {
+                case YODO:
+                    mRequestManager.invoke(
+                            new ExchangeRequest(
+                                    EXCH_REQ,
+                                    mHardwareToken,
+                                    client,
+                                    total,
+                                    "0.00",
+                                    "0.00",
+                                    mLocation.getLatitude(),
+                                    mLocation.getLongitude(),
+                                    PrefUtils.getMerchantCurrency( ac )
+                            )
+                    );
+                    break;
 
-                mRequestManager.requestAlternate(
-                        ALT_REQ,
-                        accountType,
-                        mHardwareToken,
-                        clientData,
-                        totalPurchase,
-                        "0.00",
-                        "0.00",
-                        mLocation.getLatitude(),
-                        mLocation.getLongitude(),
-                        PrefUtils.getMerchantCurrency( ac )
-                );
-                break;
-
-            default:
-                PrefUtils.startSound( ac, AppConfig.ERROR );
-                ToastMaster.makeText( ac, R.string.exchange_error, Toast.LENGTH_SHORT ).show();
-
-                if( PrefUtils.isLiveScan( ac ) )
-                    showCamera();
-
-                break;
+                case HEART:
+                    mRequestManager.invoke(
+                            new AlternateRequest(
+                                    ALT_REQ,
+                                    String.valueOf( method.ordinal() ),
+                                    mHardwareToken,
+                                    client,
+                                    total,
+                                    "0.00",
+                                    "0.00",
+                                    mLocation.getLatitude(),
+                                    mLocation.getLongitude(),
+                                    PrefUtils.getMerchantCurrency( ac )
+                            )
+                    );
+                    break;
+            }
         }
     }
 

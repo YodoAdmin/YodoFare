@@ -45,7 +45,7 @@
     <string name="exchange_message">Message:</string>
     <string name="exchange_balance">Balance:</string>
     <string name="exchange_extra">Extra:</string>
-    <string name="exchange_error">Invalid SKS size</string>
+    <string name="exchange_error">Invalid SKS size. The client may need to update the YodoPayment application.</string>
 
     <!-- Balance Messages -->
     <string name="yodo_title">Merchant Balance Report</string>
