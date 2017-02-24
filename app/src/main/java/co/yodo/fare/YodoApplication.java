@@ -4,8 +4,10 @@ import android.app.Application;
 import android.content.Context;
 
 import org.acra.ACRA;
+import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
+import org.acra.sender.HttpSender;
 
 import co.yodo.fare.injection.component.ApplicationComponent;
 import co.yodo.fare.injection.component.DaggerApplicationComponent;
@@ -17,10 +19,11 @@ import co.yodo.restapi.network.ApiClient;
 
 @ReportsCrashes(
                 formUri = "http://198.101.209.120/MAB-LAB/report/report.php",
+                customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.ANDROID_VERSION, ReportField.PHONE_MODEL, ReportField.CUSTOM_DATA, ReportField.STACK_TRACE, ReportField.LOGCAT },
                 formUriBasicAuthLogin = "yodo",
                 formUriBasicAuthPassword = "letryodo",
-                httpMethod = org.acra.sender.HttpSender.Method.POST,
-                reportType = org.acra.sender.HttpSender.Type.JSON,
+                httpMethod = HttpSender.Method.POST,
+                reportType = HttpSender.Type.JSON,
                 mode = ReportingInteractionMode.TOAST,
                 resToastText = R.string.crash_toast_text
 )

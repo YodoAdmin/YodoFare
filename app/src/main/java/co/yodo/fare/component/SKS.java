@@ -1,6 +1,6 @@
 package co.yodo.fare.component;
 
-import java.math.BigDecimal;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Created by hei on 18/08/16.
@@ -8,7 +8,8 @@ import java.math.BigDecimal;
  */
 public class SKS {
     /** Size of the data */
-    public static final int SKS_SIZE = 128;
+    private static final int SKS_SIZE = 128;
+    private static final int ALT_SIZE = 129;
 
     /** Types of payments */
     public enum PAYMENT {
@@ -17,7 +18,8 @@ public class SKS {
         TRANSIT,
         HEART,
         VISA,
-        PAYPAL;
+        PAYPAL,
+        STATIC;
 
         public static final PAYMENT values[] = values();
     }
@@ -33,34 +35,65 @@ public class SKS {
 
     /** SKS Options */
     private final PAYMENT mPayment;
-    private final BigDecimal mTip;
 
     /**
      * Private creator of the SKS
      * @param header The header with the main options
      * @param client The client encrypted data
      */
-    private SKS( String header, String client ) {
-        final String[] split = header.split( HDR_SEP );
+    private SKS( String header, String client ) throws NumberFormatException {
+        if( header != null ) {
+            final String[] split = header.split( HDR_SEP );
 
-        this.mClient = client;
-        this.mPayment = PAYMENT.values[ Integer.valueOf( split[0] ) ];
-        this.mTip = new BigDecimal( split[1] ).movePointLeft( 2 );
+            this.mPayment = PAYMENT.values[ Integer.valueOf( split[ 0 ] ) ];
+
+            if( this.mPayment.equals( PAYMENT.STATIC ) ) {
+                SecretKeySpec key = new SecretKeySpec( "sq;XS,td'ArsOkr.".getBytes(), "AES" );
+                this.mClient = AES.decrypt( client, key );
+            } else {
+                this.mClient = client;
+            }
+        } else {
+            String tempClient;
+            PAYMENT tempPayment;
+            if( client.length() == ALT_SIZE ) {
+                tempClient = client.substring( 0, client.length() - 1 );
+                tempPayment = PAYMENT.values[ Integer.valueOf( client.substring( client.length() - 1 ) ) ];
+            } else {
+                tempClient = client;
+                tempPayment = PAYMENT.YODO;
+            }
+
+            this.mClient = tempClient;
+            this.mPayment = tempPayment;
+        }
     }
 
     public static SKS build( String data ) {
         try {
             final String[] split = data.split( QR_SEP );
+            // Support for old SKS
+            if( split.length == 1 ) {
+                final String client = split[ 0 ];
+                final int length = client.length();
+                if( length == SKS_SIZE || length == ALT_SIZE )
+                    return new SKS( null, client );
+            }
+            // New SKS with header
+            else if( split.length == 2 ) {
+                final String header = split[ 0 ];
+                final String client = split[ 1 ];
 
-            final String header = split[ 0 ];
-            final String client = split[ 1 ];
-
-            return ( client.length() == SKS_SIZE ) ?
-                    new SKS( header, client ) : null;
-        } catch( ArrayIndexOutOfBoundsException ex ) {
+                return new SKS( header, client );
+            }
+            // There is a problem with the SKS
+            else {
+                throw new ArrayIndexOutOfBoundsException( "SKS with too many parameters" );
+            }
+        } catch( ArrayIndexOutOfBoundsException | NumberFormatException ex ) {
             ex.printStackTrace();
-            return null;
         }
+        return null;
     }
 
     /**
@@ -77,13 +110,5 @@ public class SKS {
      */
     public PAYMENT getPaymentMethod() {
         return this.mPayment;
-    }
-
-    /**
-     * Gets the tip
-     * @return A BigDecimal with the tip value %
-     */
-    public BigDecimal getTip() {
-        return this.mTip;
     }
 }

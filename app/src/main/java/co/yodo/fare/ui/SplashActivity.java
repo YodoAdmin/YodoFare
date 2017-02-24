@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import javax.inject.Inject;
@@ -22,23 +23,24 @@ import co.yodo.restapi.network.model.ServerResponse;
 import co.yodo.restapi.network.request.AuthenticateRequest;
 import co.yodo.restapi.network.request.QueryRequest;
 
-public class SplashActivity extends Activity implements ApiClient.RequestsListener {
+public class SplashActivity extends AppCompatActivity /*implements ApiClient.RequestsListener*/ {
     /** DEBUG */
     @SuppressWarnings( "unused" )
     private static final String TAG = SplashActivity.class.getSimpleName();
 
     /** The context object */
-    private Context ac;
-
-    /** Hardware Token */
-    private String mHardwareToken;
-
-    /** Messages Handler */
-    private MessageHandler mHandlerMessages;
+    @Inject
+    Context context;
 
     /** Manager for the server requests */
     @Inject
-    ApiClient mRequestManager;
+    ApiClient requestManager;
+
+    /** Hardware Token */
+    private String hardwareToken;
+
+    /** Messages Handler */
+    private MessageHandler messagesHandler;
 
     /** Code for the error dialog */
     private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 0;
@@ -55,31 +57,30 @@ public class SplashActivity extends Activity implements ApiClient.RequestsListen
         super.onCreate( savedInstanceState );
 
         setupGUI();
-        updateData();
+        //updateData();
     }
 
-    @Override
+    /*@Override
     public void onResume() {
         super.onResume();
-        mRequestManager.setListener( this );
-    }
+        requestManager.setListener( this );
+    }*/
 
     /**
      * Setup the main GUI components
      */
     private void setupGUI() {
-        ac = SplashActivity.this;
-        mHandlerMessages = new MessageHandler( this );
+        //messagesHandler = new MessageHandler( this );
 
         // Injection
         YodoApplication.getComponent().inject( this );
-        mRequestManager.setListener( this );
+        //requestManager.setListener( this );
     }
 
     /**
      * It updates the basic data
      */
-    private void updateData() {
+    /*private void updateData() {
         // Get the main booleans
         boolean hasServices = SystemUtils.isGooglePlayServicesAvailable(
                 SplashActivity.this,
@@ -88,24 +89,24 @@ public class SplashActivity extends Activity implements ApiClient.RequestsListen
 
         // Verify Google Play Services
         if( hasServices ) {
-            mHardwareToken = PrefUtils.getHardwareToken( ac );
-            if( mHardwareToken == null ) {
+            hardwareToken = PrefUtils.getHardwareToken( context );
+            if( hardwareToken == null ) {
                 setupPermissions();
             } else {
-                mRequestManager.invoke(
+                requestManager.invoke(
                         new AuthenticateRequest(
                                 AUTH_REQ,
-                                mHardwareToken
+                                hardwareToken
                         )
                 );
             }
         }
-    }
+    }*/
 
     /**
      * Request the necessary permissions for this activity
      */
-    private void setupPermissions() {
+    /*private void setupPermissions() {
         boolean phoneStatePermission = SystemUtils.requestPermission(
                 SplashActivity.this,
                 R.string.message_permission_read_phone_state,
@@ -115,24 +116,24 @@ public class SplashActivity extends Activity implements ApiClient.RequestsListen
 
         if( phoneStatePermission )
             authenticateUser();
-    }
+    }*/
 
     /**
      * Generates the hardware token after we have the permission
      * and verifies if it is null or not. Null could be caused
      * if the bluetooth is off
      */
-    private void authenticateUser() {
-        mHardwareToken = PrefUtils.generateHardwareToken( ac );
-        if( mHardwareToken == null ) {
-            ToastMaster.makeText( ac, R.string.message_no_hardware, Toast.LENGTH_LONG ).show();
+    /*private void authenticateUser() {
+        hardwareToken = PrefUtils.generateHardwareToken( context );
+        if( hardwareToken == null ) {
+            ToastMaster.makeText( context, R.string.message_no_hardware, Toast.LENGTH_LONG ).show();
             finish();
         } else {
-            PrefUtils.saveHardwareToken( ac, mHardwareToken );
-            mRequestManager.invoke(
+            PrefUtils.saveHardwareToken( context, hardwareToken );
+            requestManager.invoke(
                     new AuthenticateRequest(
                             AUTH_REQ,
-                            mHardwareToken
+                            hardwareToken
                     )
             );
         }
@@ -147,23 +148,22 @@ public class SplashActivity extends Activity implements ApiClient.RequestsListen
     public void onResponse( int responseCode, ServerResponse response ) {
         // Get response values
         final String code    = response.getCode();
-        final String message = response.getMessage();
 
         switch( responseCode ) {
             case AUTH_REQ:
 
                 if( code.equals( ServerResponse.AUTHORIZED ) ) {
                     // Get the merchant currency
-                    mRequestManager.invoke(
+                    requestManager.invoke(
                             new QueryRequest(
                                     QUERY_REQ,
-                                    mHardwareToken,
+                                    hardwareToken,
                                     QueryRequest.Record.MERCHANT_CURRENCY
                             )
                     );
                 }
                 else if( code.equals( ServerResponse.ERROR_FAILED ) ) {
-                    Intent intent = new Intent( ac, RegistrationActivity.class );
+                    Intent intent = new Intent( context, RegistrationActivity.class );
                     startActivity( intent );
                     finish();
                 }
@@ -174,21 +174,32 @@ public class SplashActivity extends Activity implements ApiClient.RequestsListen
                 if( code.equals( ServerResponse.AUTHORIZED ) ) {
                     // Set currencies
                     String currency = response.getParams().getCurrency();
-                    PrefUtils.saveMerchantCurrency( ac, currency );
+                    final boolean savedMCurr= PrefUtils.saveMerchantCurrency( context, currency );
 
-                    // Start the app
-                    Intent intent = new Intent( ac, FareActivity.class );
-                    startActivity( intent );
-                } else {
-                    MessageHandler.sendMessage( MessageHandler.INIT_ERROR,
-                            mHandlerMessages,
-                            code,
-                            message
-                    );
+                    if( savedMCurr ) {
+                        // Start the app
+                        Intent intent = new Intent( context, FareActivity.class );
+                        startActivity( intent );
+                        finish();
+                    } else {
+                        MessageHandler.sendMessage( MessageHandler.INIT_ERROR,
+                                messagesHandler,
+                                ServerResponse.ERROR_FAILED,
+                                "Currency not supported"
+                        );
+                    }
                 }
-                finish();
                 break;
         }
+    }
+
+    @Override
+    public void onError( Throwable error, String message ) {
+        MessageHandler.sendMessage( MessageHandler.INIT_ERROR,
+                messagesHandler,
+                null,
+                message
+        );
     }
 
     @Override
@@ -201,7 +212,7 @@ public class SplashActivity extends Activity implements ApiClient.RequestsListen
                     startActivity( iSplash );
                 } else if( resultCode == RESULT_CANCELED ) {
                     // Denied to install
-                    Toast.makeText( ac, R.string.message_play_services, Toast.LENGTH_SHORT ).show();
+                    Toast.makeText( context, R.string.message_play_services, Toast.LENGTH_SHORT ).show();
                 }
                 finish();
                 break;
@@ -225,5 +236,5 @@ public class SplashActivity extends Activity implements ApiClient.RequestsListen
             default:
                 super.onRequestPermissionsResult( requestCode, permissions, grantResults );
         }
-    }
+    }*/
 }

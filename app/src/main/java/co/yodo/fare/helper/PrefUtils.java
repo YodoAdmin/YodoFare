@@ -11,6 +11,7 @@ import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 import co.yodo.fare.R;
@@ -106,15 +107,25 @@ public class PrefUtils {
     /**
      * It saves the merchant currency to the preferences.
      * @param c The Context of the Android system.
-     * @param n The currency of the merchant.
+     * @param currency The currency of the merchant.
      * @return true  If it was saved.
      *         false If it was not saved.
      */
-    public static Boolean saveMerchantCurrency( Context c, String n ) {
+    public static Boolean saveMerchantCurrency( Context c, String currency ) {
+        // Supported currencies
+        final String[] currencies = c.getResources().getStringArray( R.array.currency_array );
+
+        // Get editor
         SharedPreferences config = getSPrefConfig( c );
         SharedPreferences.Editor writer = config.edit();
-        writer.putString( AppConfig.SPREF_MERCHANT_CURRENCY, n );
-        return writer.commit();
+
+        // Verify if currency exists in the array
+        if( Arrays.asList( currencies ).contains( currency ) ) {
+            writer.putString( AppConfig.SPREF_MERCHANT_CURRENCY, currency );
+            return writer.commit();
+        }
+
+        return false;
     }
 
     /**

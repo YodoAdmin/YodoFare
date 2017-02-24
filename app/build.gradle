@@ -2,15 +2,15 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.0"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
         applicationId "co.yodo.fare"
         minSdkVersion 15
-        targetSdkVersion 24
-        versionCode 3
-        versionName "2.0.1"
+        targetSdkVersion 25
+        versionCode 4
+        versionName "2.2.0"
 
         vectorDrawables.useSupportLibrary = true
     }
@@ -35,10 +35,26 @@ repositories {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     // -- Android --
-    compile 'com.android.support:appcompat-v7:24.1.1'
-    compile 'com.android.support:design:24.1.1'
-    compile 'com.android.support:support-v4:24.1.1'
-    // -- networking (Squareup) --
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.android.support:design:25.1.0'
+    compile 'com.android.support:support-v4:25.1.0'
+
+    // -- Google --
+    compile 'com.google.code.gson:gson:2.4'
+    compile 'com.google.android.gms:play-services-location:10.0.1'
+    compile 'com.google.android.gms:play-services-gcm:10.0.1'
+    compile 'com.google.android.gms:play-services-nearby:10.0.1'
+    
+    // -- Injection Views --
+    compile 'com.jakewharton:butterknife:8.5.1'
+    apt 'com.jakewharton:butterknife-compiler:8.5.1'
+
+    // -- Injection --
+    apt 'com.google.dagger:dagger-compiler:2.9'
+    compile 'com.google.dagger:dagger:2.9'
+    provided 'javax.annotation:jsr250-api:1.0'
+
+    // -- Networking --
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile ('com.squareup.retrofit2:converter-simplexml:2.1.0') {
         exclude group: 'xpp3', module: 'xpp3'
@@ -46,22 +62,13 @@ dependencies {
         exclude group: 'stax', module: 'stax'
     }
     compile 'com.squareup.okhttp3:logging-interceptor:3.3.0'
-    // -- Google --
-    compile 'com.google.code.gson:gson:2.4'
-    compile 'com.google.android.gms:play-services-location:9.4.0'
-    compile 'com.google.android.gms:play-services-gcm:9.4.0'
-    compile 'com.google.android.gms:play-services-nearby:9.4.0'
+
     // -- Event Bus --
     compile 'org.greenrobot:eventbus:3.0.0'
+
     // -- ACRA --
     compile 'ch.acra:acra:4.8.5'
-    // -- ButterKnife --
-    compile 'com.jakewharton:butterknife:8.2.1'
-    apt 'com.jakewharton:butterknife-compiler:8.2.1'
-    // -- Dagger 2 --
-    apt 'com.google.dagger:dagger-compiler:2.5'
-    compile 'com.google.dagger:dagger:2.5'
-    provided 'javax.annotation:jsr250-api:1.0'
+
     // -- Other libraries --
     compile( name:'restapi-release', ext:'aar' )
     compile( name:'ScanditBarcodeScanner', ext:'aar' )

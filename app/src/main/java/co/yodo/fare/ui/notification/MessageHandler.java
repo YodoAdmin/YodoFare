@@ -18,11 +18,11 @@ import co.yodo.restapi.network.model.ServerResponse;
 public class MessageHandler extends Handler {
     /** Id for Messages */
     public static final int INIT_ERROR   = 1;
-    public static final int SERVER_ERROR = 2;
+    private static final int SERVER_ERROR = 2;
 
     /** Id for the content */
-    public static final String CODE    = "code";
-    public static final String MESSAGE = "message";
+    private static final String CODE    = "code";
+    private static final String MESSAGE = "message";
 
     private final WeakReference<Activity> wMain;
 
@@ -65,6 +65,10 @@ public class MessageHandler extends Handler {
 
             case ServerResponse.ERROR_SERVER:
                 response = main.getString( R.string.message_error_server );
+                break;
+
+            case ServerResponse.ERROR_DUP_AUTH:
+                response = main.getString( R.string.message_error_transaction );
                 break;
 
             case ServerResponse.ERROR_UNKOWN:

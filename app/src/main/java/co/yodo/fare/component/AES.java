@@ -3,9 +3,13 @@ package co.yodo.fare.component;
 import android.annotation.SuppressLint;
 import java.security.MessageDigest;
 import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class AES {	 
+public class AES {
+	/** Cipher instance used for encryption */
+	private static final String CIPHER_INSTANCE = "AES/CBC/PKCS5Padding";
+
 	 /** Public key instance */
 	 private static String KEY_INSTANCE = "AES";
 
@@ -47,7 +51,7 @@ public class AES {
          return cipher.doFinal( encrypted );
 	 }
 	 
-	 public static String bytesToHex(byte[] data) {
+	 private static String bytesToHex( byte[] data ) {
 		 if( data == null )
 			 return null;
 
@@ -61,7 +65,7 @@ public class AES {
 		 return str;
 	 }
 	 
-	 public static byte[] hexToBytes(String str) {
+	 private static byte[] hexToBytes( String str ) {
 		 if( str == null ) {
 			 return null;
 		 } else if( str.length() < 2 ) {
@@ -75,4 +79,33 @@ public class AES {
 			 return buffer;
 		 }
 	 }
+
+	/**
+	 * Decrypts a hex encrypted string
+	 * @param hexText The encrypted string in hex
+	 * @param key       The key used to encrypt the data
+	 * @return String   The original message
+	 */
+	public static String decrypt( String hexText, SecretKeySpec key ) {
+		final byte[] encryptedData = hexToBytes( hexText );
+		String unencryptedData = null;
+
+		try {
+			Cipher cipher = Cipher.getInstance( CIPHER_INSTANCE );
+			cipher.init( Cipher.DECRYPT_MODE, key, generateIV( key ) );
+			unencryptedData = new String( cipher.doFinal( encryptedData ) );
+		} catch( Exception e ) {
+			e.printStackTrace();
+		}
+		return unencryptedData;
+	}
+
+	/**
+	 * Generates the IV (salt) from the key
+	 * @param key              The key used to encrypt
+	 * @return IvParameterSpec The IV (salt)
+	 */
+	private static IvParameterSpec generateIV( SecretKeySpec key ) {
+		return new IvParameterSpec( key.getEncoded() );
+	}
 }

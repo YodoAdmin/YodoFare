@@ -171,4 +171,13 @@ public class RegistrationActivity extends AppCompatActivity implements ApiClient
                 break;
         }
     }
+
+    @Override
+    public void onError( Throwable throwable, String message ) {
+        MessageHandler.sendMessage(
+                mHandlerMessages,
+                null,
+                message
+        );
+    }
 }

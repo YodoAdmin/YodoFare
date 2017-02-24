@@ -195,4 +195,9 @@ public class BalanceOption extends IRequestOption implements ApiClient.RequestsL
 
         setTempPIP( null );
     }
+
+    @Override
+    public void onError( Throwable throwable, String s ) {
+
+    }
 }

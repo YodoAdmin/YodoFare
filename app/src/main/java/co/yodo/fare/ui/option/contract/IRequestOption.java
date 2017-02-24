@@ -44,7 +44,6 @@ public abstract class IRequestOption extends IOption {
 
     /** GUI elements */
     protected EditText etInput;
-    protected CheckBox cbShowPIP;
     private TextInputLayout tilPip;
 
     /**
@@ -76,15 +75,7 @@ public abstract class IRequestOption extends IOption {
 
         // GUI setup
         etInput = (EditText) layout.findViewById( R.id.cetPIP );
-        cbShowPIP = (CheckBox) layout.findViewById( R.id.showPassword );
-        tilPip = (TextInputLayout) etInput.getParent();
-
-        cbShowPIP.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) {
-                GUIUtils.showPassword( cbShowPIP, etInput );
-            }
-        } );
+        tilPip = (TextInputLayout) etInput.getParent().getParent();
 
         return layout;
     }
@@ -116,7 +107,5 @@ public abstract class IRequestOption extends IOption {
         tilPip.setErrorEnabled( false );
         tilPip.setError( null );
         etInput.requestFocus();
-        cbShowPIP.setChecked( false );
-        GUIUtils.showPassword( cbShowPIP, etInput );
     }
 }

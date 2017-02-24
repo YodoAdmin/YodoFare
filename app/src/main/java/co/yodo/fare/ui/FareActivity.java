@@ -1,6 +1,8 @@
 package co.yodo.fare.ui;
 
 import android.Manifest;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,6 +28,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -37,6 +40,9 @@ import co.yodo.fare.R;
 import co.yodo.fare.YodoApplication;
 import co.yodo.fare.component.SKS;
 import co.yodo.fare.helper.AppConfig;
+import co.yodo.fare.helper.BluetoothUtil;
+import co.yodo.fare.helper.ESCUtil;
+import co.yodo.fare.helper.FormatUtils;
 import co.yodo.fare.helper.GUIUtils;
 import co.yodo.fare.helper.PrefUtils;
 import co.yodo.fare.helper.SystemUtils;
@@ -55,6 +61,8 @@ import co.yodo.restapi.network.ApiClient;
 import co.yodo.restapi.network.model.ServerResponse;
 import co.yodo.restapi.network.request.AlternateRequest;
 import co.yodo.restapi.network.request.ExchangeRequest;
+
+import static co.yodo.restapi.network.model.ServerResponse.ERROR_FAILED;
 
 public class FareActivity extends AppCompatActivity implements
         ApiClient.RequestsListener,
@@ -398,7 +406,7 @@ public class FareActivity extends AppCompatActivity implements
      * @param current The ImageView to change the state
      * @param selected The state
      */
-    private Integer switchImage(ImageView current, boolean selected) {
+    private Integer switchImage( ImageView current, boolean selected ) {
         Integer result = null;
 
         switch( current.getId() ) {
@@ -474,35 +482,88 @@ public class FareActivity extends AppCompatActivity implements
             mPromotionManager.publish();
         }
 
-        switch( responseCode ) {
+        try {
+            switch( responseCode ) {
+                case EXCH_REQ:
+                case ALT_REQ:
+                    // Returns the selected fare to adult
+                    resetClick( null );
 
-            case EXCH_REQ:
-            case ALT_REQ:
-                // Returns the selected fare to adult
-                resetClick( null );
+                    // Handle the response message
+                    code = response.getCode();
+                    final String ex_authNumber = response.getAuthNumber();
+                    final String ex_message = response.getMessage();
 
-                // Handle the response message
-                code = response.getCode();
-                final String ex_authNumber = response.getAuthNumber();
-                final String ex_message    = response.getMessage();
+                    if( code.equals( ServerResponse.AUTHORIZED ) ) {
+                        String ex_balance = response.getParams().getAccountBalance();
 
-                if( code.equals( ServerResponse.AUTHORIZED ) ) {
-                    SystemUtils.startSound( ac, AppConfig.SUCCESSFUL );
-                    message = getString( R.string.exchange_auth )    + " " + ex_authNumber + "\n" +
-                              getString( R.string.exchange_message ) + " " + ex_message;
+                        SystemUtils.startSound( ac, AppConfig.SUCCESSFUL );
+                        message = getString( R.string.exchange_auth ) + " " + ex_authNumber + "\n" +
+                                  getString( R.string.exchange_message )              + " " + ex_message;
 
-                    AlertDialogHelper.showAlertDialog( ac, response.getCode(), message, null );
-                } else {
-                    SystemUtils.startSound( ac, AppConfig.ERROR );
-                    message = response.getMessage();
-                    MessageHandler.sendMessage( mHandlerMessages, code, message );
-                }
+                        if( ex_balance != null ) {
+                            message += "\n" +
+                                    getString( R.string.exchange_balance ) + " " +
+                                    FormatUtils.truncateDecimal( ex_balance );
+                        } else {
+                            ex_balance = getString( R.string.no_item );
+                        }
 
-                if( PrefUtils.isLiveScan( ac ) )
-                    showCamera();
+                        final BluetoothDevice printer = BluetoothUtil.getDevice();
+                        if( printer != null ) {
+                            // 2: Get the cash values
+                            final String total = tvTotal.getText().toString();
 
-                break;
+                            // 3: Generate a order data
+                            byte[] data = ESCUtil.parseData(
+                                    response,
+                                    total,
+                                    ex_balance
+                            );
+
+                            if( data != null ) {
+                                // 4: Using InnerPrinter print data
+                                BluetoothSocket socket = null;
+                                try {
+                                    socket = BluetoothUtil.getSocket( printer );
+                                    BluetoothUtil.sendData( data, socket );
+                                } catch( IOException e ) {
+                                    if( socket != null ) {
+                                        try {
+                                            socket.close();
+                                        } catch( IOException e1 ) {
+                                            e1.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        AlertDialogHelper.showAlertDialog( ac, response.getCode(), message, null );
+                    } else {
+                        SystemUtils.startSound( ac, AppConfig.ERROR );
+                        message = response.getMessage();
+                        MessageHandler.sendMessage( mHandlerMessages, code, message );
+                    }
+
+                    if( PrefUtils.isLiveScan( ac ) )
+                        showCamera();
+
+                    break;
+            }
+        } catch( NullPointerException e ) {
+            e.printStackTrace();
+            MessageHandler.sendMessage(
+                    mHandlerMessages,
+                    ServerResponse.ERROR_UNKOWN,
+                    getString( R.string.message_error_unknown )
+            );
         }
+    }
+
+    @Override
+    public void onError( Throwable throwable, String s ) {
+
     }
 
     @Override
@@ -543,6 +604,7 @@ public class FareActivity extends AppCompatActivity implements
                     );
                     break;
 
+                case STATIC:
                 case HEART:
                     mRequestManager.invoke(
                             new AlternateRequest(
@@ -557,6 +619,15 @@ public class FareActivity extends AppCompatActivity implements
                                     mLocation.getLongitude(),
                                     PrefUtils.getMerchantCurrency( ac )
                             )
+                    );
+                    break;
+
+                default:
+                    mProgressManager.destroyProgressDialog();
+                    MessageHandler.sendMessage(
+                            mHandlerMessages,
+                            ERROR_FAILED,
+                            "SKS not supported"
                     );
                     break;
             }

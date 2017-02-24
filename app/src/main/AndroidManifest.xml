@@ -17,6 +17,11 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" android:name=".YodoApplication">
+
+        <meta-data
+            android:name="com.google.android.nearby.messages.API_KEY"
+            android:value="AIzaSyAYpz-7ntQwogET5W7wExJcciBhZ9QL1C8"/>
+
         <activity
             android:name=".ui.SplashActivity"
             android:label="@string/app_name"
@@ -28,6 +33,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".ui.FareActivity"
             android:label="@string/title_activity_fare"

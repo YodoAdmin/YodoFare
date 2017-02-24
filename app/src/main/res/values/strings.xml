@@ -46,6 +46,7 @@
     <string name="exchange_balance">Balance:</string>
     <string name="exchange_extra">Extra:</string>
     <string name="exchange_error">Invalid SKS size. The client may need to update the YodoPayment application.</string>
+    <string name="transaction_error">The transaction is not supported yet.</string>
 
     <!-- Balance Messages -->
     <string name="yodo_title">Merchant Balance Report</string>
@@ -119,6 +120,9 @@
         <item>INR</item>
         <item>EUR</item>
         <item>PHP</item>
+        <item>RUB</item>
+        <item>UAH</item>
+        <item>PEN</item>
     </string-array>
 
     <!-- Currency Icon -->
@@ -132,6 +136,9 @@
         <item>india</item>
         <item>euro</item>
         <item>philippine</item>
+        <item>russian</item>
+        <item>ukraine</item>
+        <item>peru</item>
     </string-array>
 
     <string-array name="scanner_values" translatable="false">
