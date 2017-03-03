@@ -8,22 +8,12 @@ import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
-import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 import co.yodo.fare.R;
 import co.yodo.fare.ui.notification.ToastMaster;
@@ -35,6 +25,10 @@ import co.yodo.fare.ui.notification.AlertDialogHelper;
  * google services or logger
  */
 public class SystemUtils {
+    /** Type of transaction sounds  */
+    public static final int ERROR      = 0;
+    public static final int SUCCESSFUL = 1;
+
     /**
      * Verify if the device has GPS
      * @param c The Context of the Android system.
@@ -83,7 +77,7 @@ public class SystemUtils {
             if( apiAvailability.isUserResolvableError( resultCode ) ) {
                 apiAvailability.getErrorDialog( activity, resultCode, code ).show();
             } else {
-                ToastMaster.makeText( activity, R.string.error_not_supported, Toast.LENGTH_LONG ).show();
+                ToastMaster.makeText( activity, R.string.error_supported, Toast.LENGTH_LONG ).show();
                 activity.finish();
             }
             return false;
@@ -115,7 +109,7 @@ public class SystemUtils {
                     }
                 };
 
-                AlertDialogHelper.showAlertDialog(
+                AlertDialogHelper.create(
                         ac,
                         message,
                         onClick
@@ -129,26 +123,8 @@ public class SystemUtils {
         return true;
     }
 
-    @SuppressWarnings( "all" )
-    private static void appendLog(String text) {
-        File logFile = new File( Environment.getExternalStorageDirectory() + "/output.log" );
-
-        try {
-            if( !logFile.exists() )
-                logFile.createNewFile();
-
-            BufferedWriter buf = new BufferedWriter( new FileWriter( logFile, true ) );
-            buf.append( text );
-            buf.newLine();
-            buf.close();
-        }
-        catch(IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
-     * Plays a sound of error
+     * Plays a sound of error or success
      * @param c The Context of the Android system.
      * @param type The kind of sound 0 - error and 1 - successful
      */
@@ -156,11 +132,11 @@ public class SystemUtils {
         MediaPlayer mp = null;
 
         switch( type ) {
-            case AppConfig.ERROR:
+            case ERROR:
                 mp = MediaPlayer.create( c, R.raw.error );
                 break;
 
-            case AppConfig.SUCCESSFUL:
+            case SUCCESSFUL:
                 mp = MediaPlayer.create( c, R.raw.successful );
                 break;
         }
@@ -173,30 +149,6 @@ public class SystemUtils {
                 }
             });
             mp.start();
-        }
-    }
-
-    /**
-     * Logger for Android
-     * @param TAG The String of the TAG for the log
-     * @param text The text to print on the log
-     */
-    public static void Logger(String TAG, String text) {
-        if( AppConfig.DEBUG ) {
-            if( text == null )
-                Log.e( TAG, "Null Text" );
-            else
-                Log.e( TAG, text );
-        }
-
-        if( AppConfig.FDEBUG ) {
-            SimpleDateFormat sdf = new SimpleDateFormat( "yyyyMMdd_HHmmss", Locale.US );
-            String currentDate   = sdf.format( new Date() );
-
-            if( text == null )
-                appendLog( currentDate + "\t/D" + TAG + ": Null Text" );
-            else
-                appendLog( currentDate + "\t/D" + TAG + ": " + text );
         }
     }
 }

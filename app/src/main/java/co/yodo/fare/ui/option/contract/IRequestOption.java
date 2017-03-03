@@ -8,7 +8,6 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -16,9 +15,7 @@ import javax.inject.Inject;
 
 import co.yodo.fare.R;
 import co.yodo.fare.YodoApplication;
-import co.yodo.fare.helper.GUIUtils;
 import co.yodo.fare.helper.PrefUtils;
-import co.yodo.fare.ui.notification.MessageHandler;
 import co.yodo.fare.ui.notification.ProgressDialogHelper;
 import co.yodo.restapi.network.ApiClient;
 
@@ -28,40 +25,33 @@ import co.yodo.restapi.network.ApiClient;
  * different options including requests
  */
 public abstract class IRequestOption extends IOption {
-    /** User identifier */
-    protected final String mHardwareToken;
-
-    /** Handler for messages */
-    protected MessageHandler mHandlerMessages;
-
     /** Manager for the server requests */
     @Inject
-    protected ApiClient mRequestManager;
+    protected ApiClient requestManager;
 
     /** Progress dialog for the requests */
     @Inject
-    protected ProgressDialogHelper mProgressManager;
+    protected ProgressDialogHelper progressManager;
+
+    /** User identifier */
+    protected final String hardwareToken;
 
     /** GUI elements */
     protected EditText etInput;
-    private TextInputLayout tilPip;
+    protected TextInputLayout tilPip;
 
     /**
      * Sets up the main elements of the options
      * @param activity The Activity to handle
-     * @param handlerMessages The Messages handler
      */
-    protected IRequestOption( Activity activity, MessageHandler handlerMessages ) {
+    protected IRequestOption( Activity activity ) {
         super( activity );
-
-        // Gets request's data
-        this.mHardwareToken = PrefUtils.getHardwareToken( mActivity );
 
         // Injection
         YodoApplication.getComponent().inject( this );
 
-        // Gets the messages handler
-        this.mHandlerMessages = handlerMessages;
+        // Gets request's data
+        this.hardwareToken = PrefUtils.getHardwareToken();
     }
 
     /**
@@ -70,11 +60,11 @@ public abstract class IRequestOption extends IOption {
      */
     protected View buildLayout() {
         // Dialog
-        LayoutInflater inflater = (LayoutInflater) mActivity.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
-        final View layout = inflater.inflate( R.layout.dialog_with_pip, new LinearLayout( mActivity ), false );
+        LayoutInflater inflater = (LayoutInflater) activity.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+        final View layout = inflater.inflate( R.layout.dialog_with_pip, new LinearLayout( activity ), false );
 
         // GUI setup
-        etInput = (EditText) layout.findViewById( R.id.cetPIP );
+        etInput = (EditText) layout.findViewById( R.id.text_pip );
         tilPip = (TextInputLayout) etInput.getParent().getParent();
 
         return layout;
@@ -90,8 +80,8 @@ public abstract class IRequestOption extends IOption {
             @Override
             public void onShow( DialogInterface dialog ) {
                 // Get the AlertDialog and the positive Button
-                mAlertDialog = AlertDialog.class.cast( dialog );
-                final Button button = mAlertDialog.getButton( AlertDialog.BUTTON_POSITIVE );
+                alertDialog = AlertDialog.class.cast( dialog );
+                final Button button = alertDialog.getButton( AlertDialog.BUTTON_POSITIVE );
 
                 // Sets the action for the positive Button
                 button.setOnClickListener( onPositive );
@@ -104,7 +94,6 @@ public abstract class IRequestOption extends IOption {
      */
     protected void clearGUI() {
         etInput.setText( "" );
-        tilPip.setErrorEnabled( false );
         tilPip.setError( null );
         etInput.requestFocus();
     }

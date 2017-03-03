@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Fare Labels -->
+    <style name="FareLabelText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:textSize">@dimen/text_size_fee_values</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Fare Editable -->
+    <style name="FareEditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:background">@drawable/show_text_field</item>
+        <item name="android:drawableLeft">@mipmap/canada</item>
+        <item name="android:drawablePadding">5dp</item>
+        <item name="android:gravity">center_vertical|end</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:text">@string/text.zero</item>
+        <item name="android:textSize">@dimen/text_size_fee_values</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Navigation titles -->
+    <style name="NavigationTitleText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textColor">@color/colorTextWhite</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- PIP Input -->
+    <style name="PIPInputText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:drawableLeft">@android:drawable/ic_lock_lock</item>
+        <item name="android:inputType">textPassword</item>
+        <item name="android:maxLength">8</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:hint">@string/text.pip.hint</item>
+        <item name="android:digits">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</item>
+    </style>
+
+</resources>

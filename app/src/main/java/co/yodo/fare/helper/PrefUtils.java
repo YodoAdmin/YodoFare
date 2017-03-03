@@ -1,21 +1,21 @@
 package co.yodo.fare.helper;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import android.media.MediaPlayer;
-import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.view.View;
+
+import com.orhanobut.hawk.Hawk;
 
 import java.util.Arrays;
 import java.util.Locale;
 
 import co.yodo.fare.R;
-import co.yodo.fare.component.AES;
 
 /**
  * Created by luis on 15/12/14.
@@ -59,6 +59,7 @@ public class PrefUtils {
      * from the Phone (IMEI) or the Bluetooth (MAC)
      * @param c The Context of the Android system.
      */
+    @SuppressLint( "HardwareIds" )
     public static String generateHardwareToken( Context c ) {
         String HARDWARE_TOKEN = null;
 
@@ -66,7 +67,7 @@ public class PrefUtils {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if( telephonyManager != null ) {
-            String tempMAC = telephonyManager.getDeviceId();
+             String tempMAC = telephonyManager.getDeviceId();
             if( tempMAC != null )
                 HARDWARE_TOKEN = tempMAC.replace( "/", "" );
         }
@@ -81,17 +82,173 @@ public class PrefUtils {
         return HARDWARE_TOKEN;
     }
 
-    public static Boolean saveHardwareToken( Context c, String hardwareToken ) {
-        SharedPreferences config = getSPrefConfig( c );
-        SharedPreferences.Editor writer = config.edit();
-        writer.putString( AppConfig.SPREF_HARDWARE_TOKEN, hardwareToken );
-        return writer.commit();
+    /**
+     * Saves a hardware token to the secure preferences
+     * @param hardwareToken The hardware token
+     * @return The commit
+     */
+    public static Boolean saveHardwareToken( String hardwareToken ) {
+        return Hawk.put( AppConfig.SPREF_HARDWARE_TOKEN, hardwareToken );
     }
 
-    public static String getHardwareToken( Context c ) {
+    /**
+     * Gets the hardware token
+     * @return The hardware token if exists
+     */
+    public static String getHardwareToken() {
+        String token = Hawk.get( AppConfig.SPREF_HARDWARE_TOKEN );
+        return ( token == null || token.equals( "" ) ) ? null : token;
+    }
+
+    /**
+     * Gets the current fare based in the selection of the fee and zone
+     * @param context The application context
+     * @param fee The fee view (e.g. ic_student, ic_adult)
+     * @param zone The zone (e.g. one, two)
+     * @return The fee for the selection
+     */
+    public static String getFare( Context context, View fee, int zone ) {
+        switch( fee.getId() ) {
+            case R.id.layout_adult_fee:
+                return PrefUtils.getAdultFare( context, zone );
+
+            case R.id.layout_child_fee:
+                return PrefUtils.getChildFare( context, zone );
+
+            case R.id.layout_student_fee:
+                return PrefUtils.getStudentFare( context, zone );
+
+            default:
+                return PrefUtils.getElderlyFare( context, zone );
+        }
+    }
+
+    /**
+     * It gets the different Zones for the ic_elderly.
+     *
+     * @param c The Context of the Android system.
+     * @param flag The choice between the three zones
+     * @return String The value.
+     *         null   If it was not possible to get the value.
+     */
+    public static String getElderlyFare( Context c, int flag ) {
         SharedPreferences config = getSPrefConfig( c );
-        String token = config.getString( AppConfig.SPREF_HARDWARE_TOKEN, "" );
-        return ( token.equals( "" ) ) ? null : token;
+        String s = null;
+
+        switch( flag ) {
+            /* Zone 1 value */
+            case AppConfig.FEE_ZONE_1:
+                s = config.getString( AppConfig.SPREF_FEE_OLD_ZONE_1, AppConfig.DEFAULT_OLD_FEE );
+                break;
+
+		    /* Zone 2 value */
+            case AppConfig.FEE_ZONE_2:
+                s = config.getString( AppConfig.SPREF_FEE_OLD_ZONE_2, AppConfig.DEFAULT_OLD_FEE );
+                break;
+
+		    /* Zone 3 value */
+            case AppConfig.FEE_ZONE_3:
+                s = config.getString( AppConfig.SPREF_FEE_OLD_ZONE_3, AppConfig.DEFAULT_OLD_FEE );
+                break;
+        }
+
+        return s;
+    }
+
+    /**
+     * It gets the different Zones for the ic_adult.
+     *
+     * @param c The Context of the Android system.
+     * @param flag The choice between the three zones
+     * @return String The value.
+     *         null   If it was not possible to get the value.
+     */
+    public static String getAdultFare( Context c, int flag ) {
+        SharedPreferences config = getSPrefConfig( c );
+        String s = null;
+
+        switch( flag ) {
+            // Zone 1 value
+            case AppConfig.FEE_ZONE_1:
+                s = config.getString( AppConfig.SPREF_FEE_ADULT_ZONE_1, AppConfig.DEFAULT_ADULT_FEE );
+                break;
+
+            // Zone 2 value
+            case AppConfig.FEE_ZONE_2:
+                s = config.getString( AppConfig.SPREF_FEE_ADULT_ZONE_2, AppConfig.DEFAULT_ADULT_FEE );
+                break;
+
+            // Zone 3 value
+            case AppConfig.FEE_ZONE_3:
+                s = config.getString( AppConfig.SPREF_FEE_ADULT_ZONE_3, AppConfig.DEFAULT_ADULT_FEE );
+                break;
+        }
+
+        return s;
+    }
+
+    /**
+     * It gets the different Zones for the ic_child.
+     *
+     * @param c The Context of the Android system.
+     * @param flag The choice between the three zones
+     * @return String The value.
+     *         null   If it was not possible to get the value.
+     */
+    public static String getChildFare(Context c, int flag) {
+        SharedPreferences config = getSPrefConfig( c );
+        String s = null;
+
+        switch( flag ) {
+            // Zone 1 value
+            case AppConfig.FEE_ZONE_1:
+                s = config.getString( AppConfig.SPREF_FEE_CHILD_ZONE_1, AppConfig.DEFAULT_CHILD_FEE );
+                break;
+
+            // Zone 2 value
+            case AppConfig.FEE_ZONE_2:
+                s = config.getString( AppConfig.SPREF_FEE_CHILD_ZONE_2, AppConfig.DEFAULT_CHILD_FEE );
+                break;
+
+            // Zone 3 value
+            case AppConfig.FEE_ZONE_3:
+                s = config.getString( AppConfig.SPREF_FEE_CHILD_ZONE_3, AppConfig.DEFAULT_CHILD_FEE );
+                break;
+        }
+
+        return s;
+    }
+
+    /**
+     * It gets the different Zones for the ic_student.
+     *
+     * @param c The Context of the Android system.
+     * @param flag The choice between the three zones
+     * @return String The value.
+     *         null   If it was not possible to get the value.
+     */
+    public static String getStudentFare(Context c, int flag) {
+        SharedPreferences config = getSPrefConfig( c );
+        String s = null;
+
+        switch( flag ) {
+            /* Zone 1 value */
+            case AppConfig.FEE_ZONE_1:
+                s = config.getString( AppConfig.SPREF_FEE_STUDENT_ZONE_1, AppConfig.DEFAULT_STUDENT_FEE );
+                break;
+
+		    /* Zone 2 value */
+            case AppConfig.FEE_ZONE_2:
+                s = config.getString( AppConfig.SPREF_FEE_STUDENT_ZONE_2, AppConfig.DEFAULT_STUDENT_FEE );
+                break;
+
+		    /* Zone 3 value */
+            case AppConfig.FEE_ZONE_3:
+                s = config.getString( AppConfig.SPREF_FEE_STUDENT_ZONE_3, AppConfig.DEFAULT_STUDENT_FEE );
+                break;
+        }
+
+        return s;
     }
 
     /**
@@ -99,7 +256,7 @@ public class PrefUtils {
      * @param c The Context of the Android system.
      * @return String It returns the language.
      */
-    public static String getLanguage( Context c ) {
+    private static String getLanguage( Context c ) {
         SharedPreferences config = getSPrefConfig( c );
         return config.getString( AppConfig.SPREF_CURRENT_LANGUAGE, AppConfig.DEFAULT_LANGUAGE );
     }
@@ -115,17 +272,9 @@ public class PrefUtils {
         // Supported currencies
         final String[] currencies = c.getResources().getStringArray( R.array.currency_array );
 
-        // Get editor
-        SharedPreferences config = getSPrefConfig( c );
-        SharedPreferences.Editor writer = config.edit();
-
         // Verify if currency exists in the array
-        if( Arrays.asList( currencies ).contains( currency ) ) {
-            writer.putString( AppConfig.SPREF_MERCHANT_CURRENCY, currency );
-            return writer.commit();
-        }
-
-        return false;
+        return Arrays.asList( currencies ).contains( currency ) &&
+               Hawk.put( AppConfig.SPREF_MERCHANT_CURRENCY, currency );
     }
 
     /**
@@ -184,47 +333,13 @@ public class PrefUtils {
     }
 
     /**
-     * It saves the password to the preferences.
+     * It gets the current bus route.
      * @param c The Context of the Android system.
-     * @param s The password.
-     * @return true  If it was saved.
-     *         false If it was not saved.
+     * @return int It returns the bus route.
      */
-    public static Boolean savePassword( Context c, String s ) {
+    public static String getBusRoute(Context c) {
         SharedPreferences config = getSPrefConfig( c );
-        SharedPreferences.Editor writer = config.edit();
-
-        if( s != null ) {
-            try {
-                String encryptPip = AES.encrypt( s );
-                writer.putString( AppConfig.SPREF_CURRENT_PASSWORD, encryptPip );
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            writer.remove( AppConfig.SPREF_CURRENT_PASSWORD );
-        }
-
-        return writer.commit();
-    }
-
-    /**
-     * It gets the password if saved.
-     * @param c The Context of the Android system.
-     * @return int It returns the password or nul.
-     */
-    public static String getPassword(Context c) {
-        SharedPreferences config = getSPrefConfig( c );
-        String password = config.getString( AppConfig.SPREF_CURRENT_PASSWORD, null );
-
-        if( password != null ) {
-            try {
-                password = AES.decrypt( password );
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return password;
+        return config.getString( AppConfig.SPREF_CURRENT_ROUTE, "0" );
     }
 
     /**
@@ -285,134 +400,6 @@ public class PrefUtils {
     }
 
     /**
-     * It gets the different Zones for the old.
-     *
-     * @param c The Context of the Android system.
-     * @param flag The choice between the three zones
-     * @return String The value.
-     *         null   If it was not possible to get the value.
-     */
-    public static String getOldFare(Context c, int flag) {
-        SharedPreferences config = getSPrefConfig( c );
-        String s = null;
-
-        switch( flag ) {
-            /* Zone 1 value */
-            case AppConfig.ZONE_1:
-                s = config.getString( AppConfig.SPREF_FEE_OLD_ZONE_1, AppConfig.DEFAULT_OLD_FEE );
-                break;
-
-		    /* Zone 2 value */
-            case AppConfig.ZONE_2:
-                s = config.getString( AppConfig.SPREF_FEE_OLD_ZONE_2, AppConfig.DEFAULT_OLD_FEE );
-                break;
-
-		    /* Zone 3 value */
-            case AppConfig.ZONE_3:
-                s = config.getString( AppConfig.SPREF_FEE_OLD_ZONE_3, AppConfig.DEFAULT_OLD_FEE );
-                break;
-        }
-
-        return s;
-    }
-
-    /**
-     * It gets the different Zones for the adult.
-     *
-     * @param c The Context of the Android system.
-     * @param flag The choice between the three zones
-     * @return String The value.
-     *         null   If it was not possible to get the value.
-     */
-    public static String getAdultFare(Context c, int flag) {
-        SharedPreferences config = getSPrefConfig( c );
-        String s = null;
-
-        switch( flag ) {
-            /* Zone 1 value */
-            case AppConfig.ZONE_1:
-                s = config.getString( AppConfig.SPREF_FEE_ADULT_ZONE_1, AppConfig.DEFAULT_ADULT_FEE );
-                break;
-
-		    /* Zone 2 value */
-            case AppConfig.ZONE_2:
-                s = config.getString( AppConfig.SPREF_FEE_ADULT_ZONE_2, AppConfig.DEFAULT_ADULT_FEE );
-                break;
-
-		    /* Zone 3 value */
-            case AppConfig.ZONE_3:
-                s = config.getString( AppConfig.SPREF_FEE_ADULT_ZONE_3, AppConfig.DEFAULT_ADULT_FEE );
-                break;
-        }
-
-        return s;
-    }
-
-    /**
-     * It gets the different Zones for the child.
-     *
-     * @param c The Context of the Android system.
-     * @param flag The choice between the three zones
-     * @return String The value.
-     *         null   If it was not possible to get the value.
-     */
-    public static String getChildFare(Context c, int flag) {
-        SharedPreferences config = getSPrefConfig( c );
-        String s = null;
-
-        switch( flag ) {
-            /* Zone 1 value */
-            case AppConfig.ZONE_1:
-                s = config.getString( AppConfig.SPREF_FEE_CHILD_ZONE_1, AppConfig.DEFAULT_CHILD_FEE );
-                break;
-
-		    /* Zone 2 value */
-            case AppConfig.ZONE_2:
-                s = config.getString( AppConfig.SPREF_FEE_CHILD_ZONE_2, AppConfig.DEFAULT_CHILD_FEE );
-                break;
-
-		    /* Zone 3 value */
-            case AppConfig.ZONE_3:
-                s = config.getString( AppConfig.SPREF_FEE_CHILD_ZONE_3, AppConfig.DEFAULT_CHILD_FEE );
-                break;
-        }
-
-        return s;
-    }
-
-    /**
-     * It gets the different Zones for the student.
-     *
-     * @param c The Context of the Android system.
-     * @param flag The choice between the three zones
-     * @return String The value.
-     *         null   If it was not possible to get the value.
-     */
-    public static String getStudentFare(Context c, int flag) {
-        SharedPreferences config = getSPrefConfig( c );
-        String s = null;
-
-        switch( flag ) {
-            /* Zone 1 value */
-            case AppConfig.ZONE_1:
-                s = config.getString( AppConfig.SPREF_FEE_STUDENT_ZONE_1, AppConfig.DEFAULT_STUDENT_FEE );
-                break;
-
-		    /* Zone 2 value */
-            case AppConfig.ZONE_2:
-                s = config.getString( AppConfig.SPREF_FEE_STUDENT_ZONE_2, AppConfig.DEFAULT_STUDENT_FEE );
-                break;
-
-		    /* Zone 3 value */
-            case AppConfig.ZONE_3:
-                s = config.getString( AppConfig.SPREF_FEE_STUDENT_ZONE_3, AppConfig.DEFAULT_STUDENT_FEE );
-                break;
-        }
-
-        return s;
-    }
-
-    /**
      * Gets the bluetooth adapter
      * @return The bluetooth adapter
      */
@@ -426,22 +413,6 @@ public class PrefUtils {
      */
     public static boolean hasBluetooth() {
         return getBluetoothAdapter() != null;
-    }
-
-    /**
-     * Get the drawable based on the name
-     * @param c The Context of the Android system.
-     * @param name The name of the drawable
-     * @return The drawable
-     */
-    public static Drawable getDrawableByName( Context c, String name ) {
-        Resources resources = c.getResources();
-        final int resourceId = resources.getIdentifier(name, "drawable", c.getPackageName());
-        Drawable image = ContextCompat.getDrawable( c, resourceId );
-        int h = image.getIntrinsicHeight();
-        int w = image.getIntrinsicWidth();
-        image.setBounds( 0, 0, w, h );
-        return image;
     }
 
     public static void setLanguage( Context c ) {

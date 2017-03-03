@@ -10,7 +10,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 4
-        versionName "2.2.0"
+        versionName "2.2.3"
 
         vectorDrawables.useSupportLibrary = true
     }
@@ -66,8 +66,14 @@ dependencies {
     // -- Event Bus --
     compile 'org.greenrobot:eventbus:3.0.0'
 
-    // -- ACRA --
+    // -- Error Logger --
     compile 'ch.acra:acra:4.8.5'
+
+    // -- Logging --
+    compile 'com.jakewharton.timber:timber:4.5.1'
+
+    // -- Secure Preferences --
+    compile 'com.orhanobut:hawk:2.0.1'
 
     // -- Other libraries --
     compile( name:'restapi-release', ext:'aar' )

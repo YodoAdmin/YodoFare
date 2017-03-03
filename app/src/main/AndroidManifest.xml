@@ -14,7 +14,7 @@
     <application
         android:allowBackup="true"
         android:fullBackupContent="false"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" android:name=".YodoApplication">
 
@@ -36,19 +36,18 @@
 
         <activity
             android:name=".ui.FareActivity"
-            android:label="@string/title_activity_fare"
-            android:screenOrientation="sensorLandscape"
-            android:windowSoftInputMode="adjustNothing" >
+            android:screenOrientation="sensorLandscape">
         </activity>
+
         <activity
             android:name=".ui.RegistrationActivity"
-            android:label="@string/title_activity_registration"
-            android:screenOrientation="sensorLandscape"
-            android:windowSoftInputMode="adjustResize" >
+            android:label="@string/title.activity.registration"
+            android:screenOrientation="sensorLandscape">
         </activity>
+
         <activity
             android:name=".ui.SettingsActivity"
-            android:label="@string/title_activity_settings"
+            android:label="@string/title.activity.settings"
             android:theme="@style/AppTheme.Settings">
         </activity>
 

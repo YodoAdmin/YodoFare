@@ -3,7 +3,6 @@
     android:id="@+id/popup_window"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="@dimen/data_margin"
     android:background="@drawable/popup_shape"
     android:orientation="vertical">
 
@@ -16,7 +15,7 @@
         android:visibility="gone"/>
 
     <TextView
-        style="@style/EditTextView"
-        android:id="@+id/tvTotal"/>
+        style="@style/FareEditText"
+        android:id="@+id/text_total"/>
 
 </LinearLayout>

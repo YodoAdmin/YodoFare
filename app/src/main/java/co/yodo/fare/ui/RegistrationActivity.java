@@ -3,13 +3,11 @@ package co.yodo.fare.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import javax.inject.Inject;
@@ -17,47 +15,42 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import co.yodo.fare.R;
+import co.yodo.fare.utils.ErrorUtils;
 import co.yodo.fare.YodoApplication;
-import co.yodo.fare.ui.notification.ToastMaster;
 import co.yodo.fare.helper.GUIUtils;
+import co.yodo.fare.ui.notification.ToastMaster;
 import co.yodo.fare.helper.PrefUtils;
-import co.yodo.fare.ui.notification.MessageHandler;
 import co.yodo.fare.ui.notification.ProgressDialogHelper;
 import co.yodo.restapi.network.ApiClient;
 import co.yodo.restapi.network.model.ServerResponse;
 import co.yodo.restapi.network.request.RegisterRequest;
 
-public class RegistrationActivity extends AppCompatActivity implements ApiClient.RequestsListener {
+public class RegistrationActivity extends AppCompatActivity {
     /** DEBUG */
     @SuppressWarnings( "unused" )
     private static final String TAG = RegistrationActivity.class.getSimpleName();
 
-    /** The context object */
-    private Context ac;
-
-    /** Hardware Token */
-    private String mHardwareToken;
-
-    /** GUI Controllers */
-    @BindView( R.id.etActivationCode )
-    EditText etActivationCode;
-
-    /** Messages Handler */
-    private MessageHandler mHandlerMessages;
+    /** The application context */
+    @Inject
+    Context context;
 
     /** Manager for the server requests */
     @Inject
-    ApiClient mRequestManager;
+    ApiClient requestManager;
 
     /** Progress dialog for the requests */
     @Inject
-    ProgressDialogHelper mProgressManager;
+    ProgressDialogHelper progressManager;
 
-    /** The shake animation for wrong inputs */
-    private Animation aShake;
+    /** GUI Controllers */
+    @BindView( R.id.layout_activation_code )
+    TextInputLayout tilActivationCode;
 
-    /** Response codes for the queries */
-    private static final int REG_REQ = 0x00;
+    @BindView( R.id.text_activation_code )
+    TextInputEditText tietActivationCode;
+
+    /** Hardware Token */
+    private String hardwareToken;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -80,26 +73,19 @@ public class RegistrationActivity extends AppCompatActivity implements ApiClient
     }
 
     private void setupGUI() {
-        ac = RegistrationActivity.this;
-        mHandlerMessages = new MessageHandler( this );
-
         // Injection
         ButterKnife.bind( this );
         YodoApplication.getComponent().inject( this );
-        mRequestManager.setListener( this );
-
-        // Load the animation
-        aShake = AnimationUtils.loadAnimation( this, R.anim.shake );
 
         // Setup the toolbar
         GUIUtils.setActionBar( this, R.string.title_activity_registration );
     }
 
     private void updateData() {
-        // Gets the hardware token - account identifier
-        mHardwareToken = PrefUtils.getHardwareToken( ac );
-        if( mHardwareToken == null ) {
-            ToastMaster.makeText( ac, R.string.message_no_hardware, Toast.LENGTH_LONG ).show();
+        // Gets the account identifier
+        hardwareToken = PrefUtils.getHardwareToken();
+        if( hardwareToken == null ) {
+            ToastMaster.makeText( context, R.string.error_hardware, Toast.LENGTH_LONG ).show();
             finish();
         }
     }
@@ -108,22 +94,58 @@ public class RegistrationActivity extends AppCompatActivity implements ApiClient
      * Realize a registration request
      * @param v View of the button, not used
      */
-    public void registrationClick( View v ) {
-        String token = etActivationCode.getText().toString();
+    public void register( View v ) {
+        String token = tietActivationCode.getText().toString();
         if( token.isEmpty() ) {
-            etActivationCode.startAnimation( aShake );
+            ErrorUtils.handleFieldError(
+                    context,
+                    tietActivationCode,
+                    R.string.error_required_field
+            );
         } else {
-            mProgressManager.createProgressDialog(
+            progressManager.create(
                     RegistrationActivity.this ,
                     ProgressDialogHelper.ProgressDialogType.NORMAL
             );
 
-            mRequestManager.invoke(
+            requestManager.invoke(
                     new RegisterRequest(
-                            REG_REQ,
-                            mHardwareToken,
+                            hardwareToken,
                             token
-                    )
+                    ), new ApiClient.RequestCallback() {
+                        @Override
+                        public void onPrepare() {
+
+                        }
+
+                        @Override
+                        public void onResponse( ServerResponse response ) {
+                            progressManager.destroy();
+                            String code = response.getCode();
+
+                            if( code.equals( ServerResponse.AUTHORIZED_REGISTRATION ) ) {
+                                Intent intent = new Intent( context, SplashActivity.class );
+                                startActivity( intent );
+                                finish();
+                            } else {
+                                ErrorUtils.handleFieldError(
+                                        context,
+                                        tietActivationCode,
+                                        R.string.error_incorrect_code
+                                );
+                            }
+                        }
+
+                        @Override
+                        public void onError( Throwable error ) {
+                            progressManager.destroy();
+                            ErrorUtils.handleApiError(
+                                    RegistrationActivity.this,
+                                    error,
+                                    false
+                            );
+                        }
+                    }
             );
         }
     }
@@ -132,52 +154,11 @@ public class RegistrationActivity extends AppCompatActivity implements ApiClient
      * Restarts the application to authenticate the user
      * @param v The view of the button, not used
      */
-    public void restartClick( View v ) {
+    public void restart( View v ) {
         finish();
-        Intent i = new Intent( ac, SplashActivity.class );
+        Intent i = new Intent( context, SplashActivity.class );
         i.setFlags( Intent.FLAG_ACTIVITY_CLEAR_TOP );
         i.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
         startActivity( i );
-    }
-
-    /**
-     * Shows the activation code
-     * @param v,The checkbox view
-     */
-    public void showPasswordClick( View v ) {
-        GUIUtils.showPassword( (CheckBox) v, etActivationCode );
-    }
-
-    @Override
-    public void onPrepare() {
-    }
-
-    @Override
-    public void onResponse( int responseCode, ServerResponse response ) {
-        mProgressManager.destroyProgressDialog();
-
-        switch( responseCode ) {
-             case REG_REQ:
-                String code = response.getCode();
-
-                if( code.equals( ServerResponse.AUTHORIZED_REGISTRATION ) ) {
-                    Intent intent = new Intent( ac, SplashActivity.class );
-                    startActivity( intent );
-                    finish();
-                } else {
-                    String message = response.getMessage();
-                    MessageHandler.sendMessage( mHandlerMessages, code, message );
-                }
-                break;
-        }
-    }
-
-    @Override
-    public void onError( Throwable throwable, String message ) {
-        MessageHandler.sendMessage(
-                mHandlerMessages,
-                null,
-                message
-        );
     }
 }

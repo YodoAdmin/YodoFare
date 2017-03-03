@@ -25,7 +25,7 @@ public class ProgressDialogHelper {
      * Creates a new progress dialog on a respective activity
      * @param context This context must be an activity (e.g. MainActivity.this)
      */
-    public void createProgressDialog( Context context, ProgressDialogType type ) {
+    public void create( Context context, ProgressDialogType type ) {
         if( progressDialog != null || transProgressDialog != null )
             throw new ExceptionInInitializerError( "There is already a progress dialog in front" );
 
@@ -38,7 +38,7 @@ public class ProgressDialogHelper {
                 break;
 
             case TRANSPARENT:
-                transProgressDialog = new TransparentProgressDialog( context, R.drawable.spinner );
+                transProgressDialog = new TransparentProgressDialog( context, R.mipmap.spinner );
                 transProgressDialog.show();
                 break;
         }
@@ -48,7 +48,7 @@ public class ProgressDialogHelper {
      * Verifies if the dialog is being showed
      * @return A boolean that shows if the progress dialog is showing
      */
-    public boolean isProgressDialogShowing() {
+    public boolean isShowing() {
         return ( progressDialog != null && progressDialog.isShowing() ) ||
                ( transProgressDialog != null && transProgressDialog.isShowing() );
     }
@@ -56,7 +56,7 @@ public class ProgressDialogHelper {
     /**
      * Destroys the current progress dialog
      */
-    public void destroyProgressDialog() {
+    public void destroy() {
         if( progressDialog != null && progressDialog.isShowing() ) {
             progressDialog.dismiss();
             progressDialog = null;

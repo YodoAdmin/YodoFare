@@ -11,7 +11,7 @@
 
 	<TextView
 		style="@style/DialogLabel"
-		android:text="@string/today"
+		android:text="@string/text.balance.today"
 		android:textStyle="bold"
 		android:textAppearance="?android:attr/textAppearanceSmall" />
 
@@ -22,7 +22,7 @@
 
 		<TextView
 			style="@style/DialogLabel"
-			android:text="@string/yodo_cash"
+			android:text="@string/text.balance.cash"
 			android:textAppearance="?android:attr/textAppearanceSmall" />
 
 		<TextView
@@ -38,7 +38,7 @@
 
 			<TextView
 				style="@style/DialogLabel"
-				android:text="@string/yodo_debits"
+				android:text="@string/text.balance.debits"
 				android:textAppearance="?android:attr/textAppearanceSmall" />
 
 			<TextView
@@ -58,7 +58,7 @@
 
 		<TextView
 			style="@style/DialogLabel"
-			android:text="@string/yodo_today_balance"
+			android:text="@string/text.balance.cumulative.today"
 			android:textAppearance="?android:attr/textAppearanceSmall" />
 
 		<TextView
@@ -72,7 +72,7 @@
 
 	<TextView
 		style="@style/DialogLabel"
-		android:text="@string/to_date"
+		android:text="@string/text.balance.to.date"
 		android:textStyle="bold"
 		android:textAppearance="?android:attr/textAppearanceSmall" />
 
@@ -83,7 +83,7 @@
 
 		<TextView
 			style="@style/DialogLabel"
-			android:text="@string/yodo_cash"
+			android:text="@string/text.balance.cash"
 			android:textAppearance="?android:attr/textAppearanceSmall" />
 
 		<TextView
@@ -99,7 +99,7 @@
 
 			<TextView
 				style="@style/DialogLabel"
-				android:text="@string/yodo_debits"
+				android:text="@string/text.balance.debits"
 				android:textAppearance="?android:attr/textAppearanceSmall" />
 
 			<TextView
@@ -119,7 +119,7 @@
 
 		<TextView
 			style="@style/DialogLabel"
-			android:text="@string/yodo_cumulative_balance"
+			android:text="@string/text.balance.cumulative.total"
 			android:textAppearance="?android:attr/textAppearanceSmall" />
 
 		<TextView

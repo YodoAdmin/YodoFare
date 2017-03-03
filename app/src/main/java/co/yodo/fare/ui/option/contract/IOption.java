@@ -10,15 +10,15 @@ import android.support.v7.app.AlertDialog;
  */
 public abstract class IOption {
     /** Main options elements */
-    protected final Activity mActivity;
-    protected AlertDialog mAlertDialog;
+    protected final Activity activity;
+    protected AlertDialog alertDialog;
 
     /**
      * Sets up the main elements of the options
      * @param activity The Activity to handle
      */
     protected IOption( Activity activity ) {
-        this.mActivity = activity;
+        this.activity = activity;
     }
 
     /**

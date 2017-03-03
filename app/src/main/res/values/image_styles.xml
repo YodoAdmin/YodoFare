@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--  ImageView for the fee options -->
+    <style name="FeeImageView">
+        <item name="android:layout_width">@dimen/image_fee_option_size</item>
+        <item name="android:layout_height">@dimen/image_fee_option_size</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="ChildFeeImageView">
+        <item name="android:layout_width">@dimen/image_child_fee_option_size</item>
+        <item name="android:layout_height">@dimen/image_child_fee_option_size</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <!-- ImageView for the fare options -->
+    <style name="FeeOptionImageButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:adjustViewBounds">true</item>
+        <item name="android:padding">@dimen/button_fee_options_padding</item>
+    </style>
+
+</resources>

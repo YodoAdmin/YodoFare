@@ -57,12 +57,6 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     /** Accuracy requirements */
     private static final int BAD_ACCURACY = 100; // 100 meters
 
-    @Override
-    public void onCreate() {
-        SystemUtils.Logger( TAG, ">> Created" );
-        super.onCreate();
-    }
-
     /**
      * It gets called when the service is started.
      *
@@ -86,7 +80,6 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     @Override
     public void onDestroy() {
         super.onDestroy();
-        SystemUtils.Logger( TAG, ">> Destroyed" );
         // Disconnect from the Google API
         if( mGoogleApiClient != null && mGoogleApiClient.isConnected() ) {
             mGoogleApiClient.disconnect();
@@ -126,11 +119,11 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     /**
      * Decide if new location is better than older by following some basic criteria.
      * @param oldLocation Old location used for comparison.
-     * @param newLocation Newly acquired location compared to old one.
-     * @return If new location is more accurate and suits your criteria more than the old one.
+     * @param newLocation Newly acquired location compared to ic_elderly one.
+     * @return If new location is more accurate and suits your criteria more than the ic_elderly one.
      */
     private boolean isBetterLocation( Location oldLocation, Location newLocation ) {
-        // If there is no old location, the new location is better
+        // If there is no ic_elderly location, the new location is better
         if( oldLocation == null )
             return true;
 
@@ -154,7 +147,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         boolean isMoreAccurate = accuracyDelta < 0;
         boolean isSignificantlyLessAccurate = accuracyDelta > BAD_ACCURACY; // 100 meters
 
-        // Check if the old and new location are from the same provider
+        // Check if the ic_elderly and new location are from the same provider
         boolean isFromSameProvider = isSameProvider( newLocation.getProvider(), oldLocation.getProvider() );
 
         // Determine location quality using a combination of timeliness and accuracy
@@ -193,13 +186,13 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onConnectionSuspended( int i ) {
-        SystemUtils.Logger( TAG, "GoogleApiClient connection has been suspended" );
+        //SystemUtils.Logger( TAG, "GoogleApiClient connection has been suspended" );
         mGoogleApiClient.connect();
     }
 
     @Override
     public void onConnectionFailed( @NonNull ConnectionResult connectionResult ) {
-        SystemUtils.Logger( TAG, "GoogleApiClient connection has failed" );
+        //SystemUtils.Logger( TAG, "GoogleApiClient connection has failed" );
         stopSelf();
     }
 
@@ -216,7 +209,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             // Save the location as last registered
             lastRegisteredLocation = location;
             // Print location for debugging
-            SystemUtils.Logger( TAG, location.toString() );
+            //SystemUtils.Logger( TAG, location.toString() );
         }
     }
 
@@ -265,9 +258,9 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
                 }
             };
 
-            AlertDialogHelper.showAlertDialog(
+            AlertDialogHelper.create(
                     activity,
-                    R.string.message_gps_enable,
+                    R.string.text_enable_gps,
                     onClick,
                     onCancel
             );

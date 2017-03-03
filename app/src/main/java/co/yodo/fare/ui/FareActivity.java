@@ -2,7 +2,6 @@ package co.yodo.fare.ui;
 
 import android.Manifest;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -18,6 +17,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,7 +28,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -37,10 +36,11 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import co.yodo.fare.R;
+import co.yodo.fare.utils.ErrorUtils;
+import co.yodo.fare.utils.ImageUtils;
 import co.yodo.fare.YodoApplication;
 import co.yodo.fare.component.SKS;
-import co.yodo.fare.helper.AppConfig;
-import co.yodo.fare.helper.BluetoothUtil;
+import co.yodo.fare.helper.BluetoothPrinterUtil;
 import co.yodo.fare.helper.ESCUtil;
 import co.yodo.fare.helper.FormatUtils;
 import co.yodo.fare.helper.GUIUtils;
@@ -50,7 +50,6 @@ import co.yodo.fare.manager.PromotionManager;
 import co.yodo.fare.service.LocationService;
 import co.yodo.fare.ui.adapter.ScannerAdapter;
 import co.yodo.fare.ui.notification.AlertDialogHelper;
-import co.yodo.fare.ui.notification.MessageHandler;
 import co.yodo.fare.ui.notification.ProgressDialogHelper;
 import co.yodo.fare.ui.notification.ToastMaster;
 import co.yodo.fare.ui.option.AboutOption;
@@ -61,71 +60,77 @@ import co.yodo.restapi.network.ApiClient;
 import co.yodo.restapi.network.model.ServerResponse;
 import co.yodo.restapi.network.request.AlternateRequest;
 import co.yodo.restapi.network.request.ExchangeRequest;
-
-import static co.yodo.restapi.network.model.ServerResponse.ERROR_FAILED;
+import timber.log.Timber;
 
 public class FareActivity extends AppCompatActivity implements
-        ApiClient.RequestsListener,
         QRScanner.QRScannerListener,
         PromotionManager.IPromotionListener {
     /** DEBUG */
     @SuppressWarnings( "unused" )
     private static final String TAG = FareActivity.class.getSimpleName();
 
-    /** The context object */
-    private Context ac;
-
-    /** Hardware Token */
-    private String mHardwareToken;
-
-    /** Messages Handler */
-    private MessageHandler mHandlerMessages;
+    /** The application context object */
+    @Inject
+    Context context;
 
     /** Manager for the server requests */
     @Inject
-    ApiClient mRequestManager;
+    ApiClient requestManager;
 
     /** Progress dialog for the requests */
     @Inject
-    ProgressDialogHelper mProgressManager;
+    ProgressDialogHelper progressManager;
 
     /** GUI controllers */
-    @BindView( R.id.splActivityFare )
-    SlidingPaneLayout splActivityFare;
-
-    @BindView( R.id.sScannerSelector )
-    Spinner sScannerSelector;
-
-    @BindView( R.id.ivLocationIcon )
-    ImageView ivLocationIcon;
-
-    @BindView( R.id.tvTotal )
+    @BindView( R.id.text_total )
     TextView tvTotal;
 
-    @BindView( R.id.ivYodoGear )
+    @BindView( R.id.image_yodo_gear )
     ImageView ivYodoGear;
 
-    private View mCurrentFee;
-    private View mCurrentZone;
+    @BindView( R.id.layout_adult_fee )
+    LinearLayout llAdultFee;
+
+    @BindView( R.id.image_zone_one )
+    ImageView ivZoneOne;
+
+    @BindView( R.id.layout_fare )
+    SlidingPaneLayout splFare;
+
+    @BindView( R.id.spinner_scanner_selector )
+    Spinner sScannerSelector;
+
+    @BindView( R.id.image_location )
+    ImageView ivLocationIcon;
+
+    @BindView( R.id.text_route_number )
+    TextView tvRouteNumber;
+
+    /** Hardware Token */
+    private String hardwareToken;
+
+    /** Current selections */
+    private View currentFee;
+    private View currentZone;
 
     /** Options from the navigation window */
-    private BalanceOption mBalanceOption;
-    private AboutOption mAboutOption;
-
-    /** Handles the start/stop subscribe/unsubscribe functions of Nearby */
-    private PromotionManager mPromotionManager;
-    private boolean isPublishing = false;
+    private BalanceOption balanceOption;
+    private AboutOption aboutOption;
 
     /** Current Scanner */
-    private QRScannerFactory mScannerFactory;
-    private QRScanner mCurrentScanner;
+    private QRScannerFactory scannerFactory;
+    private QRScanner currentScanner;
     private boolean isScanning = false;
 
+    /** Handles the start/stop subscribe/unsubscribe functions of Nearby */
+    private PromotionManager promotionManager;
+    private boolean isPublishing = false;
+
     /** Total to pay */
-    private BigDecimal mCurrentTotal = BigDecimal.ZERO;
+    private BigDecimal currentTotal = BigDecimal.ZERO;
 
     /** Location */
-    private Location mLocation = new Location( "flp" );
+    private Location location = new Location( "flp" );
 
     /** Code for the error dialog */
     private static final int REQUEST_CODE_LOCATION_SERVICES = 0;
@@ -134,15 +139,13 @@ public class FareActivity extends AppCompatActivity implements
     private static final int PERMISSIONS_REQUEST_CAMERA   = 1;
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
 
-    /** Response codes for the queries */
-    private static final int EXCH_REQ = 0x00;
-    private static final int ALT_REQ  = 0x01;
-
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate( savedInstanceState );
         PrefUtils.setLanguage( this );
-        getWindow().setFlags( WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN );
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().addFlags( WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON );
         setContentView( R.layout.activity_fare );
 
         setupGUI();
@@ -166,23 +169,23 @@ public class FareActivity extends AppCompatActivity implements
     @Override
     public void onResume() {
         super.onResume();
-        // Set the listener for the request (this activity)
-        mRequestManager.setListener( this );
-
         // Start the scanner if necessary
-        if( mCurrentScanner != null && isScanning ) {
+        if( currentScanner != null && isScanning ) {
             isScanning = false;
-            mCurrentScanner.startScan();
+            currentScanner.startScan();
         }
+
+        // Set route
+        tvRouteNumber.setText( getString( R.string.text_route_number, PrefUtils.getBusRoute( context ) ) );
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         // Pause the scanner while app is not focus (only if scanning)
-        if( mCurrentScanner != null && mCurrentScanner.isScanning() ) {
+        if( currentScanner != null && currentScanner.isScanning() ) {
             isScanning = true;
-            mCurrentScanner.stopScan();
+            currentScanner.stopScan();
         }
     }
 
@@ -191,67 +194,59 @@ public class FareActivity extends AppCompatActivity implements
         super.onStop();
         // unregister from event bus
         EventBus.getDefault().unregister( this );
+
         // Stop location service while app is in background
-        if( SystemUtils.isMyServiceRunning( ac, LocationService.class.getName() ) ) {
-            Intent iLoc = new Intent( ac, LocationService.class );
+        if( SystemUtils.isMyServiceRunning( context, LocationService.class.getName() ) ) {
+            Intent iLoc = new Intent( context, LocationService.class );
             stopService( iLoc );
         }
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mScannerFactory.destroy();
-    }
-
-    @Override
     public void onBackPressed() {
-        if( mCurrentScanner != null && mCurrentScanner.isScanning() ) {
-            mCurrentScanner.stopScan();
-            return;
+        // If we are scanning, first close the camera
+        if( currentScanner != null && currentScanner.isScanning() ) {
+            currentScanner.stopScan();
+        } else {
+            super.onBackPressed();
         }
-        super.onBackPressed();
     }
 
     /**
      * Initialized all the GUI main components
      */
     private void setupGUI() {
-        // get the context
-        ac = FareActivity.this;
-        mHandlerMessages = new MessageHandler( FareActivity.this );
-
         // Injection
         ButterKnife.bind( this );
         YodoApplication.getComponent().inject( this );
 
-        // Setup promotion manager start it
-        mPromotionManager = new PromotionManager( this );
-        mPromotionManager.startService();
-
-        // creates the factory for the scanners
-        mScannerFactory = new QRScannerFactory( this );
-
-        // Global options (navigation window)
-        mBalanceOption = new BalanceOption( this, mHandlerMessages, mPromotionManager );
-        mAboutOption   = new AboutOption( this );
-
         // Sliding Panel Configurations
-        splActivityFare.setParallaxDistance( 30 );
-
-        // Sets up the spinner, listeners, popup, and set currency
-        initializeScannerSpinner();
-
-        // Reset all the values
-        resetClick( null );
+        splFare.setParallaxDistance( 30 );
 
         // Set the currency icon
-        GUIUtils.setMerchantCurrencyIcon( ac, tvTotal );
+        GUIUtils.setMerchantCurrencyIcon( context, tvTotal );
+
+        // Reset all the values
+        reset( null );
+
+        // Global options (navigation window)
+        aboutOption = new AboutOption( this );
+        balanceOption = new BalanceOption( this, promotionManager );
+
+        // Sets up the spinner for the cameras
+        initializeScannerSpinner();
+
+        // creates the factory for the scanners
+        scannerFactory = new QRScannerFactory( this );
+
+        // Setup promotion manager start it
+        promotionManager = new PromotionManager( this );
+        promotionManager.startService();
 
         // If it is the first login, show the navigation panel
-        if( PrefUtils.isFirstLogin( ac ) ) {
-            splActivityFare.openPane();
-            PrefUtils.saveFirstLogin( ac, false );
+        if( PrefUtils.isFirstLogin( context ) ) {
+            splFare.openPane();
+            PrefUtils.saveFirstLogin( context, false );
         }
     }
 
@@ -260,9 +255,9 @@ public class FareActivity extends AppCompatActivity implements
      */
     private void updateData() {
         // Get the saved hardware token
-        mHardwareToken = PrefUtils.getHardwareToken( ac );
-        if( mHardwareToken == null ) {
-            ToastMaster.makeText( ac, R.string.message_no_hardware, Toast.LENGTH_LONG ).show();
+        hardwareToken = PrefUtils.getHardwareToken();
+        if( hardwareToken == null ) {
+            ToastMaster.makeText( context, R.string.error_hardware, Toast.LENGTH_LONG ).show();
             finish();
         }
     }
@@ -275,10 +270,7 @@ public class FareActivity extends AppCompatActivity implements
         sScannerSelector.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected( AdapterView<?> parentView, View selectedItemView, int position, long id ) {
-                TextView scanner = (TextView) selectedItemView;
-                if( scanner != null )
-                    SystemUtils.Logger( TAG, scanner.getText().toString() );
-                PrefUtils.saveScanner( ac, position );
+                PrefUtils.saveScanner( context, position );
             }
 
             @Override
@@ -295,16 +287,25 @@ public class FareActivity extends AppCompatActivity implements
 
         // Set the current scanner
         sScannerSelector.setAdapter( adapter );
-        sScannerSelector.setSelection( PrefUtils.getScanner( ac ) );
+        sScannerSelector.setSelection( PrefUtils.getScanner( context ) );
+    }
+
+    /**
+     * Resets the values to 0.00 and default options
+     * @param v The View, not used
+     */
+    public void reset( View v ) {
+        currentTotal = BigDecimal.ZERO;
+        feeSelection( llAdultFee );
     }
 
     /**
      * Settings for the fee values
      * @param v View, not used
      */
-    public void settingsClick( View v ) {
-        splActivityFare.closePane();
-        Intent intent = new Intent( ac, SettingsActivity.class );
+    public void settings( View v ) {
+        splFare.closePane();
+        Intent intent = new Intent( context, SettingsActivity.class );
         startActivity( intent );
     }
 
@@ -312,84 +313,71 @@ public class FareActivity extends AppCompatActivity implements
      * Gets the balance of the POS
      * @param v View, not used
      */
-    public void getBalanceClick( View v ) {
-        splActivityFare.closePane();
-        mBalanceOption.execute();
+    public void balance( View v ) {
+        splFare.closePane();
+        balanceOption.execute();
     }
 
     /**
-     * Shows some basic information about the POS
+     * Shows some basic information aboutOption the POS
      * @param v View, not used
      */
-    public void aboutClick( View v ) {
-        splActivityFare.closePane();
-        mAboutOption.execute();
-    }
-
-    public void feeSelectedClick( View fee ) {
-        if( mCurrentFee != null )
-            mCurrentFee.setBackgroundColor( 0 );
-
-        mCurrentFee = fee;
-        mCurrentFee.setBackgroundColor( ContextCompat.getColor( ac, R.color.holo_blue_bright ) );
-        View newZone = findViewById( R.id.oneZoneView );
-
-        zoneSelectedClick( newZone );
-    }
-
-    public void zoneSelectedClick( View zone ) {
-        if( mCurrentZone != null )
-            switchImage( (ImageView) mCurrentZone, false );
-        int tempZone = switchImage( (ImageView) zone, true );
-
-        mCurrentZone = zone;
-        final String currentFare = mCurrentTotal.add( new BigDecimal( getFare( tempZone ) ) )
-                .setScale( 2, RoundingMode.DOWN ).toString();
-
-        tvTotal.setText(
-                currentFare
-        );
+    public void about( View v ) {
+        splFare.closePane();
+        aboutOption.execute();
     }
 
     /**
-     * Resets the values to 0.00
-     * @param v The View, not used
+     * Action to select a current fee type
+     * @param fee, The view of the new fee
      */
-    public void resetClick( View v ) {
-        mCurrentTotal = BigDecimal.ZERO;
-        feeSelectedClick( findViewById( R.id.adultFeeView ) );
-    }
-
-    /** Handle numeric add clicked
-     *  @param v The View, used to get the amount
-     */
-    public void addClick( View v ) {
-        mCurrentTotal = new BigDecimal( tvTotal.getText().toString() );
-    }
-
-    /**
-     * Request the permission for the camera
-     */
-    private void showCamera() {
-        if( mCurrentScanner != null && mCurrentScanner.isScanning() ) {
-            mCurrentScanner.stopScan();
-            return;
+    public void feeSelection( View fee ) {
+        if( currentFee != null ) {
+            currentFee.setBackgroundColor( ContextCompat.getColor( context, R.color.colorInnerLayout ) );
         }
 
-        GUIUtils.rotateImage( ivYodoGear );
-        mCurrentScanner = mScannerFactory.getScanner(
-                (QRScannerFactory.SupportedScanner) sScannerSelector.getSelectedItem()
+        currentFee = fee;
+        currentFee.setBackgroundColor( ContextCompat.getColor( context, R.color.colorSelectedFee ) );
+        zoneSelection( ivZoneOne );
+    }
+
+    /**
+     * Action to select a current fee zone
+     * @param zone, The view of the new zone
+     */
+    public void zoneSelection( View zone ) {
+        if( currentZone != null ) {
+            ImageUtils.handleFeeZone( (ImageView) currentZone, false );
+        }
+
+        currentZone = zone;
+        final String fare = PrefUtils.getFare(
+                context,
+                currentFee,
+                ImageUtils.handleFeeZone( (ImageView) zone, true )
         );
 
-        if( mCurrentScanner != null )
-            mCurrentScanner.startScan();
+        // Add values to the fare view
+        final String currentFare = currentTotal.add(
+                new BigDecimal( fare )
+        ).setScale( 2, RoundingMode.DOWN ).toString();
+
+        tvTotal.setText( currentFare );
+    }
+
+    /**
+     * Handle numeric add clicked
+     * @param v The View, used to get the amount
+     */
+    public void addValue( View v ) {
+        currentTotal = new BigDecimal( tvTotal.getText().toString() );
     }
 
     /**
      * Opens the scanner to realize a payment
      * @param v The View, not used
      */
-    public void yodoPayClick( View v ) {
+    public void makePayment( View v ) {
         boolean cameraPermission = SystemUtils.requestPermission(
                 FareActivity.this,
                 R.string.message_permission_camera,
@@ -402,236 +390,102 @@ public class FareActivity extends AppCompatActivity implements
     }
 
     /**
-     * Switch the image of the zone buttons
-     * @param current The ImageView to change the state
-     * @param selected The state
+     * Request the permission for the camera
      */
-    private Integer switchImage( ImageView current, boolean selected ) {
-        Integer result = null;
+    private void showCamera() {
+        // Rotate the yodo year icon
+        GUIUtils.rotateImage( ivYodoGear );
 
-        switch( current.getId() ) {
-            case R.id.oneZoneView:
-                if( selected )
-                    current.setImageResource( R.drawable.one_selected );
-                else
-                    current.setImageResource( R.drawable.one );
-
-                result = AppConfig.ZONE_1;
-                break;
-
-            case R.id.twoZoneView:
-                if( selected )
-                    current.setImageResource( R.drawable.two_selected );
-                else
-                    current.setImageResource( R.drawable.two );
-
-                result = AppConfig.ZONE_2;
-                break;
-
-            case R.id.threeZoneView:
-                if( selected )
-                    current.setImageResource( R.drawable.three_selected );
-                else
-                    current.setImageResource( R.drawable.three );
-
-                result = AppConfig.ZONE_3;
-                break;
-        }
-        return result;
-    }
-
-    private String getFare(int zone) {
-        String result = null;
-
-        switch( mCurrentFee.getId() ) {
-            case R.id.oldFeeView:
-                result = PrefUtils.getOldFare( ac, zone );
-                break;
-
-            case R.id.adultFeeView:
-                result = PrefUtils.getAdultFare( ac, zone );
-                break;
-
-            case R.id.childFeeView:
-                result = PrefUtils.getChildFare( ac, zone );
-                break;
-
-            case R.id.studentFeeView:
-                result = PrefUtils.getStudentFare( ac, zone );
-                break;
-        }
-        return result;
-    }
-
-    @Override
-    public void onPrepare() {
-        if( PrefUtils.isAdvertising( ac ) ) {
-            isPublishing = true;
-            mPromotionManager.unpublish();
-        }
-    }
-
-    @Override
-    public void onResponse( int responseCode, ServerResponse response ) {
-        mProgressManager.destroyProgressDialog();
-        String code, message;
-
-        // If it was publishing before the request
-        if( isPublishing ) {
-            isPublishing = false;
-            mPromotionManager.publish();
-        }
-
-        try {
-            switch( responseCode ) {
-                case EXCH_REQ:
-                case ALT_REQ:
-                    // Returns the selected fare to adult
-                    resetClick( null );
-
-                    // Handle the response message
-                    code = response.getCode();
-                    final String ex_authNumber = response.getAuthNumber();
-                    final String ex_message = response.getMessage();
-
-                    if( code.equals( ServerResponse.AUTHORIZED ) ) {
-                        String ex_balance = response.getParams().getAccountBalance();
-
-                        SystemUtils.startSound( ac, AppConfig.SUCCESSFUL );
-                        message = getString( R.string.exchange_auth ) + " " + ex_authNumber + "\n" +
-                                  getString( R.string.exchange_message )              + " " + ex_message;
-
-                        if( ex_balance != null ) {
-                            message += "\n" +
-                                    getString( R.string.exchange_balance ) + " " +
-                                    FormatUtils.truncateDecimal( ex_balance );
-                        } else {
-                            ex_balance = getString( R.string.no_item );
-                        }
-
-                        final BluetoothDevice printer = BluetoothUtil.getDevice();
-                        if( printer != null ) {
-                            // 2: Get the cash values
-                            final String total = tvTotal.getText().toString();
-
-                            // 3: Generate a order data
-                            byte[] data = ESCUtil.parseData(
-                                    response,
-                                    total,
-                                    ex_balance
-                            );
-
-                            if( data != null ) {
-                                // 4: Using InnerPrinter print data
-                                BluetoothSocket socket = null;
-                                try {
-                                    socket = BluetoothUtil.getSocket( printer );
-                                    BluetoothUtil.sendData( data, socket );
-                                } catch( IOException e ) {
-                                    if( socket != null ) {
-                                        try {
-                                            socket.close();
-                                        } catch( IOException e1 ) {
-                                            e1.printStackTrace();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        AlertDialogHelper.showAlertDialog( ac, response.getCode(), message, null );
-                    } else {
-                        SystemUtils.startSound( ac, AppConfig.ERROR );
-                        message = response.getMessage();
-                        MessageHandler.sendMessage( mHandlerMessages, code, message );
-                    }
-
-                    if( PrefUtils.isLiveScan( ac ) )
-                        showCamera();
-
-                    break;
-            }
-        } catch( NullPointerException e ) {
-            e.printStackTrace();
-            MessageHandler.sendMessage(
-                    mHandlerMessages,
-                    ServerResponse.ERROR_UNKOWN,
-                    getString( R.string.message_error_unknown )
+        // Process the scanner
+        if( currentScanner != null && currentScanner.isScanning() ) {
+            currentScanner.stopScan();
+        } else {
+            currentScanner = scannerFactory.getScanner(
+                    ( QRScannerFactory.SupportedScanner ) sScannerSelector.getSelectedItem()
             );
+            currentScanner.startScan();
         }
-    }
-
-    @Override
-    public void onError( Throwable throwable, String s ) {
-
     }
 
     @Override
     public void onScanResult( String data ) {
+        // Log the data
+        Timber.i( data );
         String total = tvTotal.getText().toString();
-        SystemUtils.Logger( TAG, data );
 
         SKS code = SKS.build( data );
         if( code == null ) {
-            SystemUtils.startSound( ac, AppConfig.ERROR );
+            SystemUtils.startSound( context, SystemUtils.ERROR );
             ToastMaster.makeText( this, R.string.exchange_error, Toast.LENGTH_LONG ).show();
-
-            if( PrefUtils.isLiveScan( ac ) )
-                showCamera();
         } else {
             final String client = code.getClient();
             final SKS.PAYMENT method = code.getPaymentMethod();
 
-            mProgressManager.createProgressDialog(
+            progressManager.create(
                     FareActivity.this,
                     ProgressDialogHelper.ProgressDialogType.TRANSPARENT
             );
 
             switch( method ) {
                 case YODO:
-                    mRequestManager.invoke(
-                            new ExchangeRequest(
-                                    EXCH_REQ,
-                                    mHardwareToken,
-                                    client,
-                                    total,
-                                    "0.00",
-                                    "0.00",
-                                    mLocation.getLatitude(),
-                                    mLocation.getLongitude(),
-                                    PrefUtils.getMerchantCurrency( ac )
-                            )
+                    requestManager.invoke(
+                        new ExchangeRequest(
+                                hardwareToken,
+                                client,
+                                total,
+                                "0.00",
+                                "0.00",
+                                location.getLatitude(),
+                                location.getLongitude(),
+                                PrefUtils.getMerchantCurrency( context )
+                        ), callback
                     );
                     break;
 
                 case STATIC:
                 case HEART:
-                    mRequestManager.invoke(
-                            new AlternateRequest(
-                                    ALT_REQ,
-                                    String.valueOf( method.ordinal() ),
-                                    mHardwareToken,
-                                    client,
-                                    total,
-                                    "0.00",
-                                    "0.00",
-                                    mLocation.getLatitude(),
-                                    mLocation.getLongitude(),
-                                    PrefUtils.getMerchantCurrency( ac )
-                            )
+                    requestManager.invoke(
+                        new AlternateRequest(
+                                String.valueOf( method.ordinal() ),
+                                hardwareToken,
+                                client,
+                                total,
+                                "0.00",
+                                "0.00",
+                                location.getLatitude(),
+                                location.getLongitude(),
+                                PrefUtils.getMerchantCurrency( context )
+                        ), callback
                     );
                     break;
 
                 default:
-                    mProgressManager.destroyProgressDialog();
-                    MessageHandler.sendMessage(
-                            mHandlerMessages,
-                            ERROR_FAILED,
-                            "SKS not supported"
+                    progressManager.destroy();
+                    ErrorUtils.handleError(
+                            FareActivity.this,
+                            R.string.error_sks,
+                            false
                     );
                     break;
             }
         }
+    }
+
+    @Override
+    public void onConnected( @Nullable Bundle bundle ) {
+        Timber.i( "GoogleApiClient connected" );
+        if( PrefUtils.isAdvertising( context ) )
+            promotionManager.publish();
+    }
+
+    @Override
+    public void onConnectionSuspended( int i ) {
+        Timber.i( "GoogleApiClient connection suspended" );
+    }
+
+    @Override
+    public void onConnectionFailed( @NonNull ConnectionResult result ) {
+        Timber.i( "connection to GoogleApiClient failed" );
     }
 
     @SuppressWarnings("unused") // it receives events from the Location Service
@@ -640,8 +494,8 @@ public class FareActivity extends AppCompatActivity implements
         // Remove Sticky Event
         EventBus.getDefault().removeStickyEvent( Location.class );
         // Process the Event
-        mLocation = location;
-        ivLocationIcon.setImageResource( R.drawable.location );
+        this.location = location;
+        ivLocationIcon.setImageResource( R.mipmap.location );
     }
 
     @Override
@@ -649,7 +503,7 @@ public class FareActivity extends AppCompatActivity implements
         switch( requestCode ) {
             case REQUEST_CODE_LOCATION_SERVICES:
                 // The user didn't enable the GPS
-                if( !SystemUtils.isLocationEnabled( ac ) )
+                if( !SystemUtils.isLocationEnabled( context ) )
                     finish();
                 break;
         }
@@ -682,20 +536,93 @@ public class FareActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
-    public void onConnected( @Nullable Bundle bundle ) {
-        SystemUtils.Logger( TAG, "GoogleApiClient connected" );
-        if( PrefUtils.isAdvertising( ac ) )
-            mPromotionManager.publish();
-    }
+    private final ApiClient.RequestCallback callback = new ApiClient.RequestCallback() {
+        @Override
+        public void onPrepare() {
+            if( PrefUtils.isAdvertising( context ) ) {
+                isPublishing = true;
+                promotionManager.unpublish();
+            }
+        }
 
-    @Override
-    public void onConnectionSuspended( int i ) {
-        SystemUtils.Logger( TAG, "GoogleApiClient connection suspended" );
-    }
+        @Override
+        public void onResponse( ServerResponse response ) {
+            progressManager.destroy();
+            reset( null );
 
-    @Override
-    public void onConnectionFailed( @NonNull ConnectionResult result ) {
-        SystemUtils.Logger( TAG, "connection to GoogleApiClient failed" );
-    }
+            final String code = response.getCode();
+            String info;
+            if( code.equals( ServerResponse.AUTHORIZED ) ) {
+                SystemUtils.startSound( context, SystemUtils.SUCCESSFUL );
+
+                // Get the response values
+                final String authNumber = response.getAuthNumber();
+                final String message = response.getMessage();
+                String balance = response.getParams().getAccountBalance();
+
+                info = getString( R.string.exchange_auth ) + " " + authNumber + "\n" +
+                        getString( R.string.exchange_message ) + " " + message;
+
+                if( balance != null ) {
+                    info += "\n" + getString( R.string.exchange_balance ) + " " +
+                            FormatUtils.truncateDecimal( balance );
+                } else {
+                    balance = getString( R.string.error_no_item );
+                }
+
+                final BluetoothDevice printer = BluetoothPrinterUtil.getDevice();
+                if( printer != null ) {
+                    // 2: Get the cash values
+                    final String total = tvTotal.getText().toString();
+
+                    // 3: Generate a order data
+                    byte[] data = ESCUtil.parseData(
+                            response,
+                            total,
+                            balance
+                    );
+
+                    // 4: Using InnerPrinter print data
+                    BluetoothPrinterUtil.printData( printer, data );
+                }
+            } else {
+                SystemUtils.startSound( context, SystemUtils.ERROR );
+                switch( code ) {
+                    case ServerResponse.ERROR_DUP_AUTH:
+                        info = getString( R.string.error_20 );
+                        break;
+
+                    case ServerResponse.ERROR_NO_BALANCE:
+                        info = getString( R.string.error_21 );
+                        break;
+
+                    default:
+                        info = getString( R.string.error_unknown );
+                        break;
+                }
+            }
+
+            AlertDialogHelper.create( FareActivity.this, info );
+
+            // If it was publishing before the request
+            if( isPublishing ) {
+                isPublishing = false;
+                promotionManager.publish();
+            }
+
+            if( PrefUtils.isLiveScan( context ) ) {
+                showCamera();
+            }
+        }
+
+        @Override
+        public void onError( Throwable error ) {
+            progressManager.destroy();
+            ErrorUtils.handleApiError(
+                    FareActivity.this,
+                    error,
+                    false
+            );
+        }
+    };
 }

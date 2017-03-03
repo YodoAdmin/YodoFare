@@ -3,127 +3,135 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:robobunny="http://robobunny.com">
 
-    <ListPreference
-        android:key="SPCurrentLanguage"
-        android:title="@string/config_pref_languages"
-        android:summary="%s"
-        android:entries="@array/languages_array"
-        android:entryValues="@array/languages_array_values"
-        android:defaultValue="en"/>
+    <PreferenceCategory android:title="@string/text.pref.category.general" >
 
-    <EditTextPreference
-        android:title="@string/config_pref_username"
-        android:key="SPCurrentBeacon"
-        android:inputType="text"/>
+        <ListPreference
+            android:key="SPCurrentLanguage"
+            android:title="@string/text.pref.language"
+            android:summary="%s"
+            android:entries="@array/languages_array"
+            android:entryValues="@array/languages_array_values"
+            android:defaultValue="en"/>
 
-    <co.yodo.fare.ui.component.SeekBarPreference
-        android:title="@string/config_pref_dismiss"
-        android:key="SPDismissTime"
-        android:max="10"
-        android:defaultValue="5"
-        robobunny:min="1"
-        robobunny:unitsRight=" second(s)" />
-
-    <CheckBoxPreference
-        android:key="SPAdvertisingService"
-        android:title="@string/config_pref_advertising"
-        android:summary="@string/config_pref_advertising_summary" />
-
-    <CheckBoxPreference
-        android:key="SPLiveScan"
-        android:title="@string/config_pref_live_scan"
-        android:summary="@string/config_pref_live_scan_summary" />
-     <!--
-    <ListPreference
-        android:key="SPCurrentScannerEngine"
-        android:title="@string/config_pref_scanner"
-        android:summary="%s"
-        android:entries="@array/scanner_array"
-        android:entryValues="@array/scanner_values"
-        android:defaultValue="ZBarScanner"/>
-    -->
-    <PreferenceCategory android:title="@string/config_pref_category_old" >
-        
         <EditTextPreference
-            android:title="@string/config_pref_zone_1"
+            android:title="@string/text.pref.route"
+            android:key="SPBusRoute"
+            android:inputType="text"
+            android:maxLength="30"
+            android:maxLines="1"
+            android:defaultValue="0"/>
+
+        <EditTextPreference
+            android:title="@string/text..pref.username"
+            android:key="SPCurrentBeacon"
+            android:inputType="text"/>
+
+        <CheckBoxPreference
+            android:key="SPAdvertisingService"
+            android:title="@string/text.pref.advertising"
+            android:summary="@string/text.pref.advertising.summary" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/text.pref.category.scanner" >
+
+        <CheckBoxPreference
+            android:key="SPLiveScan"
+            android:title="@string/text.pref.live.scan"
+            android:summary="@string/text.pref.live.scan.summary" />
+
+        <co.yodo.fare.ui.component.SeekBarPreference
+            android:title="@string/text..pref.dismiss"
+            android:key="SPDismissTime"
+            android:max="10"
+            android:defaultValue="5"
+            robobunny:min="1"
+            robobunny:unitsRight=" second(s)" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/text.pref.category.elderly" >
+
+        <EditTextPreference
+            android:title="@string/text.pref.zone.1"
             android:key="SPOldZone1"
             android:inputType="numberDecimal"
             android:defaultValue="2.50"/>
 
         <EditTextPreference
-            android:title="@string/config_pref_zone_2"
+            android:title="@string/text.pref.zone.2"
             android:key="SPOldZone2"
             android:inputType="numberDecimal"
             android:defaultValue="2.50"/>
 
         <EditTextPreference
-            android:title="@string/config_pref_zone_3"
+            android:title="@string/text.pref.zone.3"
             android:key="SPOldZone3"
             android:inputType="numberDecimal"
             android:defaultValue="2.50"/>
         
 	</PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/config_pref_category_adult" >
+    <PreferenceCategory android:title="@string/text..pref.category.adult" >
 
         <EditTextPreference
-            android:title="@string/config_pref_zone_1"
+            android:title="@string/text.pref.zone.1"
             android:key="SPAdultZone1"
             android:inputType="numberDecimal"
             android:defaultValue="4.50"/>
 
         <EditTextPreference
-            android:title="@string/config_pref_zone_2"
+            android:title="@string/text.pref.zone.2"
             android:key="SPAdultZone2"
             android:inputType="numberDecimal"
             android:defaultValue="4.50"/>
 
         <EditTextPreference
-            android:title="@string/config_pref_zone_3"
+            android:title="@string/text.pref.zone.3"
             android:key="SPAdultZone3"
             android:inputType="numberDecimal"
             android:defaultValue="4.50"/>
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/config_pref_category_child" >
+    <PreferenceCategory android:title="@string/text.category.child" >
 
         <EditTextPreference
-            android:title="@string/config_pref_zone_1"
+            android:title="@string/text.pref.zone.1"
             android:key="SPChildZone1"
             android:inputType="numberDecimal"
             android:defaultValue="2.50"/>
 
         <EditTextPreference
-            android:title="@string/config_pref_zone_2"
+            android:title="@string/text.pref.zone.2"
             android:key="SPChildZone2"
             android:inputType="numberDecimal"
             android:defaultValue="2.50"/>
 
         <EditTextPreference
-            android:title="@string/config_pref_zone_3"
+            android:title="@string/text.pref.zone.3"
             android:key="SPChildZone3"
             android:inputType="numberDecimal"
             android:defaultValue="2.50"/>
 
     </PreferenceCategory>
 	
-    <PreferenceCategory android:title="@string/config_pref_category_student" >
+    <PreferenceCategory android:title="@string/text.pref.category.student" >
 
         <EditTextPreference
-            android:title="@string/config_pref_zone_1"
+            android:title="@string/text.pref.zone.1"
             android:key="SPStudentZone1"
             android:inputType="numberDecimal"
             android:defaultValue="3.00"/>
 
         <EditTextPreference
-            android:title="@string/config_pref_zone_2"
+            android:title="@string/text.pref.zone.2"
             android:key="SPStudentZone2"
             android:inputType="numberDecimal"
             android:defaultValue="3.00"/>
 
         <EditTextPreference
-            android:title="@string/config_pref_zone_3"
+            android:title="@string/text.pref.zone.3"
             android:key="SPStudentZone3"
             android:inputType="numberDecimal"
             android:defaultValue="3.00"/>

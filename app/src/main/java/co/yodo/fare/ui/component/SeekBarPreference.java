@@ -102,7 +102,7 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
 			ViewGroup newContainer = (ViewGroup) view.findViewById( R.id.seekBarPrefBarContainer );
 			
 			if (oldContainer != newContainer) {
-				// remove the seekbar from the old view
+				// remove the seekbar from the ic_elderly view
 				if (oldContainer != null) {
 					((ViewGroup) oldContainer).removeView(mSeekBar);
 				}

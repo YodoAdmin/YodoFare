@@ -72,7 +72,7 @@ public class SKS {
     public static SKS build( String data ) {
         try {
             final String[] split = data.split( QR_SEP );
-            // Support for old SKS
+            // Support for ic_elderly SKS
             if( split.length == 1 ) {
                 final String client = split[ 0 ];
                 final int length = client.length();

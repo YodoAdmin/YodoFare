@@ -14,6 +14,7 @@ import com.google.android.gms.nearby.messages.Strategy;
 
 import co.yodo.fare.helper.PrefUtils;
 import co.yodo.fare.helper.SystemUtils;
+import timber.log.Timber;
 
 /**
  * Created by hei on 15/06/16.
@@ -76,7 +77,7 @@ public class PromotionManager {
         if( isNotAvailable() )
             return;
 
-        SystemUtils.Logger( TAG, "trying to publish" );
+        Timber.i( "trying to publish" );
         String message = PrefUtils.getBeaconName( ac );
         mActiveMessage = new Message( message.getBytes() );
 
@@ -86,7 +87,7 @@ public class PromotionManager {
                     @Override
                     public void onExpired() {
                         super.onExpired();
-                        SystemUtils.Logger( TAG, "no longer publishing" );
+                        Timber.i( "no longer publishing" );
                         publish();
                     }
                 }).build();
@@ -96,9 +97,9 @@ public class PromotionManager {
                     @Override
                     public void onResult( @NonNull Status status ) {
                         if( status.isSuccess() ) {
-                            SystemUtils.Logger( TAG, "published successfully" );
+                            Timber.i( "published successfully" );
                         } else {
-                            SystemUtils.Logger( TAG, "could not publish" );
+                            Timber.i( "could not publish" );
                         }
                     }
                 });
@@ -113,15 +114,15 @@ public class PromotionManager {
         if( isNotAvailable() )
             return;
 
-        SystemUtils.Logger( TAG, "trying to unpublish" );
+        Timber.i( "trying to unpublish" );
         Nearby.Messages.unpublish( mGoogleApiClient, mActiveMessage )
                 .setResultCallback( new ResultCallback<Status>() {
                     @Override
                     public void onResult( @NonNull Status status ) {
                         if( status.isSuccess() ) {
-                            SystemUtils.Logger( TAG, "unpublished successfully" );
+                            Timber.i( "unpublished successfully" );
                         } else {
-                            SystemUtils.Logger( TAG, "could not unpublish" );
+                            Timber.i( "could not unpublish" );
                         }
                     }
                 });

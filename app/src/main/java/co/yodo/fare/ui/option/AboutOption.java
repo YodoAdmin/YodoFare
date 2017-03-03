@@ -30,8 +30,8 @@ public class AboutOption extends IOption {
         super( activity );
 
         // Gets and sets the dialog layout
-        LayoutInflater inflater = (LayoutInflater) mActivity.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
-        final View layout = inflater.inflate( R.layout.dialog_about, new LinearLayout( mActivity ), false );
+        LayoutInflater inflater = (LayoutInflater) this.activity.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+        final View layout = inflater.inflate( R.layout.dialog_about, new LinearLayout( this.activity ), false );
         setupLayout( layout );
     }
 
@@ -45,14 +45,14 @@ public class AboutOption extends IOption {
         TextView messageView = (TextView) layout.findViewById( R.id.messageView );
 
         // Get data
-        final String hardwareToken = PrefUtils.getHardwareToken( mActivity );
+        final String hardwareToken = PrefUtils.getHardwareToken();
         final String message =
-                mActivity.getString( R.string.imei )           + " " + PrefUtils.getHardwareToken( mActivity ) + "\n" +
-                mActivity.getString( R.string.label_currency ) + " " + PrefUtils.getMerchantCurrency( mActivity ) + "\n" +
-                mActivity.getString( R.string.version_label )  + " " + BuildConfig.VERSION_NAME + "/" +
+                activity.getString( R.string.imei ) + " " + PrefUtils.getHardwareToken() + "\n" +
+                activity.getString( R.string.label_currency ) + " " + PrefUtils.getMerchantCurrency( activity ) + "\n" +
+                activity.getString( R.string.text_version )  + " " + BuildConfig.VERSION_NAME + "/" +
                 ApiClient.getSwitch()  + "\n\n" +
-                mActivity.getString( R.string.about_message );
-        final String email = mActivity.getString( R.string.about_email );
+                activity.getString( R.string.text_about_message );
+        final String email = activity.getString( R.string.text_about_email );
 
         // Set text to the controllers
         SpannableString ssEmail = new SpannableString( email );
@@ -69,13 +69,13 @@ public class AboutOption extends IOption {
                 intent.putExtra( Intent.EXTRA_EMAIL, recipients ) ;
                 intent.putExtra( Intent.EXTRA_SUBJECT, hardwareToken );
                 intent.setType( "text/html" );
-                mActivity.startActivity( Intent.createChooser( intent, "Send Email" ) );
+                activity.startActivity( Intent.createChooser( intent, "Send Email" ) );
             }
         });
 
         // Generate the AlertDialog
-        mAlertDialog = AlertDialogHelper.create(
-                mActivity,
+        alertDialog = AlertDialogHelper.create(
+                activity,
                 R.string.action_about,
                 layout
         );
@@ -83,6 +83,6 @@ public class AboutOption extends IOption {
 
     @Override
     public void execute() {
-        mAlertDialog.show();
+        alertDialog.show();
     }
 }

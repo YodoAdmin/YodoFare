@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!-- Fare fee images -->
+    <dimen name="image_fee_option_size">200dp</dimen>
+    <dimen name="image_child_fee_option_size">100dp</dimen>
+
+    <!-- Fare fee options -->
+    <dimen name="button_fee_options_padding">20dp</dimen>
+
+    <!-- Fee text -->
+    <dimen name="text_size_fee_values">41sp</dimen>
+
+</resources>

@@ -38,16 +38,16 @@ public class BalanceDialog extends IDialog {
          * @param context The application context
          */
         public Builder( Context context ) {
-            super( context, R.layout.dialog_balance, R.string.yodo_title );
+            super( context, R.layout.dialog_balance, R.string.text_balance_title );
 
             // Controllers
-            this.tvTodayCredits = (TextView) mDialog.findViewById( R.id.tvTodayCredits );
-            this.tvTodayDebits  = (TextView) mDialog.findViewById( R.id.tvTodayDebits );
-            this.tvTodayBalance = (TextView) mDialog.findViewById( R.id.tvTodayBalance );
+            this.tvTodayCredits = (TextView) dialog.findViewById( R.id.tvTodayCredits );
+            this.tvTodayDebits  = (TextView) dialog.findViewById( R.id.tvTodayDebits );
+            this.tvTodayBalance = (TextView) dialog.findViewById( R.id.tvTodayBalance );
 
-            this.tvHistoryCredits = (TextView) mDialog.findViewById( R.id.tvHistoryCredits );
-            this.tvHistoryDebits  = (TextView) mDialog.findViewById( R.id.tvHistoryDebits );
-            this.tvHistoryBalance = (TextView) mDialog.findViewById( R.id.tvHistoryBalance );
+            this.tvHistoryCredits = (TextView) dialog.findViewById( R.id.tvHistoryCredits );
+            this.tvHistoryDebits  = (TextView) dialog.findViewById( R.id.tvHistoryDebits );
+            this.tvHistoryBalance = (TextView) dialog.findViewById( R.id.tvHistoryBalance );
         }
 
         public Builder todayCredits( String todayCredits ) {

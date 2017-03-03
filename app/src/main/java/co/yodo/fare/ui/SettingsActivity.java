@@ -58,6 +58,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     	private EditTextPreference
             ETP_SPREF_USERNAME,
+            ETP_SPREF_CURRENT_ROUTE,
 
     		ETP_SPREF_FARE_OLD_ZONE_1,
             ETP_SPREF_FARE_OLD_ZONE_2,
@@ -94,6 +95,8 @@ public class SettingsActivity extends AppCompatActivity {
 
             ETP_SPREF_USERNAME = (EditTextPreference) getPreferenceScreen()
                     .findPreference( AppConfig.SPREF_CURRENT_BEACON );
+            ETP_SPREF_CURRENT_ROUTE = (EditTextPreference) getPreferenceScreen()
+                    .findPreference( AppConfig.SPREF_CURRENT_ROUTE );
 
             ETP_ADVERTISING = (CheckBoxPreference) getPreferenceScreen()
                     .findPreference( AppConfig.SPREF_ADVERTISING_SERVICE );
@@ -126,8 +129,9 @@ public class SettingsActivity extends AppCompatActivity {
             ETP_SPREF_FARE_STUDENT_ZONE_3 = (EditTextPreference) getPreferenceScreen()
                     .findPreference( AppConfig.SPREF_FEE_STUDENT_ZONE_3 );
 
-            if( !PrefUtils.hasBluetooth() )
+            if( !PrefUtils.hasBluetooth() ) {
                 ETP_ADVERTISING.setEnabled( false );
+            }
         }
 
         private void updateStatus( String key ) {
@@ -156,22 +160,23 @@ public class SettingsActivity extends AppCompatActivity {
 
         private void setAllSummaries() {
             ETP_SPREF_USERNAME.setSummary( PrefUtils.getBeaconName( c ) );
+            ETP_SPREF_CURRENT_ROUTE.setSummary( PrefUtils.getBusRoute( c ) );
 
-            ETP_SPREF_FARE_OLD_ZONE_1.setSummary( PrefUtils.getOldFare( c, AppConfig.ZONE_1 ) );
-            ETP_SPREF_FARE_OLD_ZONE_2.setSummary( PrefUtils.getOldFare( c, AppConfig.ZONE_2 ) );
-            ETP_SPREF_FARE_OLD_ZONE_3.setSummary( PrefUtils.getOldFare( c, AppConfig.ZONE_3 ) );
+            ETP_SPREF_FARE_OLD_ZONE_1.setSummary( PrefUtils.getElderlyFare( c, AppConfig.FEE_ZONE_1 ) );
+            ETP_SPREF_FARE_OLD_ZONE_2.setSummary( PrefUtils.getElderlyFare( c, AppConfig.FEE_ZONE_2 ) );
+            ETP_SPREF_FARE_OLD_ZONE_3.setSummary( PrefUtils.getElderlyFare( c, AppConfig.FEE_ZONE_3 ) );
 
-            ETP_SPREF_FARE_ADULT_ZONE_1.setSummary( PrefUtils.getAdultFare( c, AppConfig.ZONE_1 ) );
-            ETP_SPREF_FARE_ADULT_ZONE_2.setSummary( PrefUtils.getAdultFare( c, AppConfig.ZONE_2 ) );
-            ETP_SPREF_FARE_ADULT_ZONE_3.setSummary( PrefUtils.getAdultFare( c, AppConfig.ZONE_3 ) );
+            ETP_SPREF_FARE_ADULT_ZONE_1.setSummary( PrefUtils.getAdultFare( c, AppConfig.FEE_ZONE_1 ) );
+            ETP_SPREF_FARE_ADULT_ZONE_2.setSummary( PrefUtils.getAdultFare( c, AppConfig.FEE_ZONE_2 ) );
+            ETP_SPREF_FARE_ADULT_ZONE_3.setSummary( PrefUtils.getAdultFare( c, AppConfig.FEE_ZONE_3 ) );
 
-            ETP_SPREF_FARE_CHILD_ZONE_1.setSummary( PrefUtils.getChildFare( c, AppConfig.ZONE_1 ) );
-            ETP_SPREF_FARE_CHILD_ZONE_2.setSummary( PrefUtils.getChildFare( c, AppConfig.ZONE_2 ) );
-            ETP_SPREF_FARE_CHILD_ZONE_3.setSummary( PrefUtils.getChildFare( c, AppConfig.ZONE_3 ) );
+            ETP_SPREF_FARE_CHILD_ZONE_1.setSummary( PrefUtils.getChildFare( c, AppConfig.FEE_ZONE_1 ) );
+            ETP_SPREF_FARE_CHILD_ZONE_2.setSummary( PrefUtils.getChildFare( c, AppConfig.FEE_ZONE_2 ) );
+            ETP_SPREF_FARE_CHILD_ZONE_3.setSummary( PrefUtils.getChildFare( c, AppConfig.FEE_ZONE_3 ) );
 
-            ETP_SPREF_FARE_STUDENT_ZONE_1.setSummary( PrefUtils.getStudentFare( c, AppConfig.ZONE_1 ) );
-            ETP_SPREF_FARE_STUDENT_ZONE_2.setSummary( PrefUtils.getStudentFare( c, AppConfig.ZONE_2 ) );
-            ETP_SPREF_FARE_STUDENT_ZONE_3.setSummary( PrefUtils.getStudentFare( c, AppConfig.ZONE_3 ) );
+            ETP_SPREF_FARE_STUDENT_ZONE_1.setSummary( PrefUtils.getStudentFare( c, AppConfig.FEE_ZONE_1 ) );
+            ETP_SPREF_FARE_STUDENT_ZONE_2.setSummary( PrefUtils.getStudentFare( c, AppConfig.FEE_ZONE_2 ) );
+            ETP_SPREF_FARE_STUDENT_ZONE_3.setSummary( PrefUtils.getStudentFare( c, AppConfig.FEE_ZONE_3 ) );
     	}
 
 		@Override

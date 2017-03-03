@@ -1,18 +1,18 @@
 package co.yodo.fare.ui.scanner;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 
 import co.yodo.fare.R;
 import co.yodo.fare.helper.GUIUtils;
-import co.yodo.fare.helper.SystemUtils;
 import co.yodo.fare.ui.scanner.contract.QRScanner;
 
-public class HardwareScanner extends QRScanner {
+class HardwareScanner extends QRScanner {
 	/** DEBUG */
 	@SuppressWarnings( "unused" )
 	private static final String TAG = HardwareScanner.class.getSimpleName();
@@ -20,11 +20,11 @@ public class HardwareScanner extends QRScanner {
 	/** GUI Controllers */
 	private AlertDialog inputDialog;
 
-	public HardwareScanner( Activity activity ) {
+	HardwareScanner( Activity activity ) {
 		super( activity );
 
 		AlertDialog.Builder builder = new AlertDialog.Builder( activity );
-		final EditText input        = new EditText( activity );
+		final EditText input = new EditText( activity );
 
 		input.setOnKeyListener( new View.OnKeyListener() {
 			@Override
@@ -33,17 +33,16 @@ public class HardwareScanner extends QRScanner {
 				if( event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER )
 					return true;
 
+				// Detect final of the scan
 				if( event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER ) {
-					String scanData = input.getText().toString();
-
 					inputDialog.dismiss();
-
-					SystemUtils.Logger(TAG, scanData);
 					GUIUtils.hideSoftKeyboard( act );
 
-					if( listener != null )
-						listener.onScanResult( scanData );
+					// Sets the data
+					final String scanData = input.getText().toString();
+					listener.onScanResult( scanData );
 
+					// Delete the information
 					input.setText( "" );
 					return true;
 				}
@@ -52,12 +51,16 @@ public class HardwareScanner extends QRScanner {
 		});
 
 		builder.setTitle( activity.getString( R.string.barcode_scanner ) );
-		builder.setIcon( R.drawable.ic_launcher );
+		builder.setIcon( R.mipmap.ic_launcher );
 		builder.setView( input );
-		builder.setNegativeButton( activity.getString(R.string.cancel), null );
+		builder.setNegativeButton( activity.getString(R.string.text_cancel), null );
 
 		inputDialog = builder.create();
-		inputDialog.getWindow().setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN );
+
+		Window window = inputDialog.getWindow();
+		if( window != null ) {
+			window.setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN );
+		}
 	}
 
 	@Override

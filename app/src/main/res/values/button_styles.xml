@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Fare button -->
+    <style name="FareButtonTheme">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:clickable">true</item>
+        <item name="android:gravity">center</item>
+        <item name="android:onClick">feeSelection</item>
+    </style>
+
+    <!--  Navigation button -->
+    <style name="NavigationButtonTheme">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:textColor">@color/colorTextWhite</item>
+        <item name="android:drawablePadding">10dp</item>
+        <item name="android:background">@drawable/highlight_button</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:gravity">start|center_vertical</item>
+    </style>
+
+</resources>

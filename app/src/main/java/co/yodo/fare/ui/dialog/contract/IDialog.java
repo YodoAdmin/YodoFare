@@ -11,23 +11,23 @@ import co.yodo.fare.R;
  */
 public abstract class IDialog {
     /** Dialog to be build */
-    protected final AlertDialog mDialog;
+    private final AlertDialog privateDialog;
 
     /**
-     * Constructor that shows the dialog
+     * Constructor that shows the privateDialog
      * based in the DialogBuilder
      * @param builder The DialogBuilder
      */
     protected IDialog( DialogBuilder builder ) {
-        this.mDialog = builder.mDialog;
-        this.mDialog.show();
+        this.privateDialog = builder.dialog;
+        this.privateDialog.show();
     }
 
     /**
-     * Show the inner dialog
+     * Show the inner privateDialog
      */
     public void show() {
-        this.mDialog.show();
+        this.privateDialog.show();
     }
 
     /**
@@ -35,28 +35,25 @@ public abstract class IDialog {
      */
     protected static abstract class DialogBuilder {
         /** Context object */
-        protected final Context mContext;
+        protected final Context context;
 
         /** Dialog to be build */
-        protected final AlertDialog mDialog;
+        protected final AlertDialog dialog;
 
         /**
          * Builder constructor with the mandatory elements
          * @param context The application context
-         * @param layout The layout for the dialog
+         * @param layout The layout for the privateDialog
          */
         protected DialogBuilder( Context context, int layout, int title ) {
-            this.mContext = context;
-            AlertDialog.Builder mBuilder = new AlertDialog.Builder(
-                    mContext,
-                    R.style.AppCompatAlertDialogStyle
-            );
-            mBuilder.setIcon( R.drawable.icon );
+            this.context = context;
+            AlertDialog.Builder mBuilder = new AlertDialog.Builder( this.context );
+            mBuilder.setIcon( R.mipmap.icon );
             mBuilder.setTitle( title );
             mBuilder.setView( layout );
             mBuilder.setCancelable( false );
-            mBuilder.setPositiveButton( R.string.ok, null );
-            this.mDialog = mBuilder.show();
+            mBuilder.setPositiveButton( R.string.text_ok, null );
+            this.dialog = mBuilder.show();
         }
 
         /**

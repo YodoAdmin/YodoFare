@@ -15,9 +15,9 @@ public class QRScannerFactory {
 	public static final int ALT_SIZE = 129;
 
 	public enum SupportedScanner {
-		Hardware    ( R.string.name_scanner_hardware ),
-		CameraFront ( R.string.name_scanner_software_front ),
-		CameraBack  ( R.string.name_scanner_software_back );
+		Hardware    ( R.string.text_scanner_hardware ),
+		CameraFront ( R.string.text_scanner_software_front ),
+		CameraBack  ( R.string.text_scanner_software_back );
 
 		private int value;
 		public static final long length = values().length;
@@ -64,13 +64,5 @@ public class QRScannerFactory {
 			default:
 				return hardwareScanner;
 		}
-	}
-
-	/**
-	 * Release the resources from both scanners
-	 */
-	public void destroy() {
-		hardwareScanner.destroy();
-		softwareScanner.destroy();
 	}
 }

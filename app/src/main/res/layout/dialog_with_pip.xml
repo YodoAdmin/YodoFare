@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	style="@style/GeneralLayout"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:id="@+id/dialog_with_password"
+	style="@style/GeneralLayout"
 	android:orientation="vertical">
 
 	<android.support.design.widget.TextInputLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content" >
+		android:layout_height="wrap_content"
+		app:errorEnabled="true"
+		app:passwordToggleEnabled="true">
 
 		<android.support.design.widget.TextInputEditText
-			style="@style/PIPInput"
-			android:id="@+id/cetPIP" />
+			style="@style/PIPInputText"
+			android:id="@+id/text_pip" />
 
 	</android.support.design.widget.TextInputLayout>
 
