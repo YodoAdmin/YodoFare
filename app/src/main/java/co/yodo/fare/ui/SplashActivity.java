@@ -21,6 +21,7 @@ import co.yodo.restapi.network.ApiClient;
 import co.yodo.restapi.network.model.ServerResponse;
 import co.yodo.restapi.network.request.AuthenticateRequest;
 import co.yodo.restapi.network.request.QueryRequest;
+import timber.log.Timber;
 
 public class SplashActivity extends AppCompatActivity {
     /** DEBUG */
@@ -50,6 +51,42 @@ public class SplashActivity extends AppCompatActivity {
 
         setupGUI();
         updateData();
+    }
+
+    @Override
+    protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
+        switch( requestCode ) {
+            case REQUEST_CODE_RECOVER_PLAY_SERVICES:
+                if( resultCode == RESULT_OK ) {
+                    // Google play services installed
+                    Intent iSplash = new Intent( this, SplashActivity.class );
+                    startActivity( iSplash );
+                } else if( resultCode == RESULT_CANCELED ) {
+                    // Denied to install
+                    Toast.makeText( context, R.string.error_play_services, Toast.LENGTH_SHORT ).show();
+                }
+                finish();
+                break;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult( int requestCode, @NonNull String permissions[], @NonNull int[] grantResults ) {
+        switch( requestCode ) {
+            case PERMISSIONS_REQUEST_READ_PHONE_STATE:
+                // If request is cancelled, the result arrays are empty.
+                if( grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED ) {
+                    // Permission Granted
+                    generateUserToken();
+                } else {
+                    // Permission Denied
+                    finish();
+                }
+                break;
+
+            default:
+                super.onRequestPermissionsResult( requestCode, permissions, grantResults );
+        }
     }
 
     /**
@@ -125,13 +162,16 @@ public class SplashActivity extends AppCompatActivity {
 
                     // Do the correct action
                     if( code.equals( ServerResponse.AUTHORIZED ) ) {
-                        getCurrency();
+                        getFees();
                     }
                     else if( code.equals( ServerResponse.ERROR_FAILED ) ) {
                         // We need to register first
                         Intent intent = new Intent( context, RegistrationActivity.class );
                         startActivity( intent );
                         finish();
+                    } else {
+                        // Show an error message
+                        handleError( R.string.error_unknown );
                     }
                 }
 
@@ -144,6 +184,41 @@ public class SplashActivity extends AppCompatActivity {
                     );
                 }
             }
+        );
+    }
+
+    private void getFees() {
+        // Get the fees
+        requestManager.invoke(
+                new QueryRequest( hardwareToken, "", QueryRequest.Record.FARE_FEES ),
+                new ApiClient.RequestCallback() {
+                    @Override
+                    public void onPrepare() {
+                    }
+
+                    @Override
+                    public void onResponse( ServerResponse response ) {
+                        // Get response code
+                        final String code = response.getCode();
+                        if( code.equals( ServerResponse.AUTHORIZED ) ) {
+                            Timber.i(response.getParams().getElderlyZone1().getName());
+                            // Do the correct action
+                            //getCurrency();
+                        } else {
+                            // Show an error message
+                            handleError( R.string.error_unknown );
+                        }
+                    }
+
+                    @Override
+                    public void onError( Throwable error ) {
+                        ErrorUtils.handleApiError(
+                                SplashActivity.this,
+                                error,
+                                true
+                        );
+                    }
+                }
         );
     }
 
@@ -177,11 +252,7 @@ public class SplashActivity extends AppCompatActivity {
                             finish();
                         } else {
                             // Show an error message
-                            ErrorUtils.handleError(
-                                    SplashActivity.this,
-                                    R.string.error_currency,
-                                    true
-                            );
+                            handleError( R.string.error_currency );
                         }
                     }
                 }
@@ -198,39 +269,14 @@ public class SplashActivity extends AppCompatActivity {
         );
     }
 
-    @Override
-    protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
-        switch( requestCode ) {
-            case REQUEST_CODE_RECOVER_PLAY_SERVICES:
-                if( resultCode == RESULT_OK ) {
-                    // Google play services installed
-                    Intent iSplash = new Intent( this, SplashActivity.class );
-                    startActivity( iSplash );
-                } else if( resultCode == RESULT_CANCELED ) {
-                    // Denied to install
-                    Toast.makeText( context, R.string.error_play_services, Toast.LENGTH_SHORT ).show();
-                }
-                finish();
-                break;
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult( int requestCode, @NonNull String permissions[], @NonNull int[] grantResults ) {
-        switch( requestCode ) {
-            case PERMISSIONS_REQUEST_READ_PHONE_STATE:
-                // If request is cancelled, the result arrays are empty.
-                if( grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED ) {
-                    // Permission Granted
-                    generateUserToken();
-                } else {
-                    // Permission Denied
-                    finish();
-                }
-                break;
-
-            default:
-                super.onRequestPermissionsResult( requestCode, permissions, grantResults );
-        }
+    /**
+     * Handles any unknown error
+     */
+    private void handleError( int message ) {
+        ErrorUtils.handleError(
+                SplashActivity.this,
+                message,
+                true
+        );
     }
 }

@@ -22,10 +22,6 @@ import co.yodo.fare.R;
  * Utilities for the App, Mainly shared preferences
  */
 public class PrefUtils {
-    /** DEBUG */
-    @SuppressWarnings( "unused" )
-    private static final String TAG = PrefUtils.class.getSimpleName();
-
     /**
      * A simple check to see if a string is a valid number before inserting
      * into the shared preferences.

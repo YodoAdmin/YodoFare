@@ -10,7 +10,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 4
-        versionName "2.2.3"
+        versionName "2.2.7"
 
         vectorDrawables.useSupportLibrary = true
     }
@@ -35,15 +35,15 @@ repositories {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     // -- Android --
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    compile 'com.android.support:design:25.1.0'
-    compile 'com.android.support:support-v4:25.1.0'
+    compile 'com.android.support:appcompat-v7:25.2.0'
+    compile 'com.android.support:design:25.2.0'
+    compile 'com.android.support:support-v4:25.2.0'
 
     // -- Google --
-    compile 'com.google.code.gson:gson:2.4'
-    compile 'com.google.android.gms:play-services-location:10.0.1'
-    compile 'com.google.android.gms:play-services-gcm:10.0.1'
-    compile 'com.google.android.gms:play-services-nearby:10.0.1'
+    compile 'com.google.code.gson:gson:2.7'
+    compile 'com.google.android.gms:play-services-location:10.2.0'
+    compile 'com.google.android.gms:play-services-gcm:10.2.0'
+    compile 'com.google.android.gms:play-services-nearby:10.2.0'
     
     // -- Injection Views --
     compile 'com.jakewharton:butterknife:8.5.1'
