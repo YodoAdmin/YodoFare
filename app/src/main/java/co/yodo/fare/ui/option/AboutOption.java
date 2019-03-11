@@ -48,7 +48,7 @@ public class AboutOption extends IOption {
         final String hardwareToken = PrefUtils.getHardwareToken();
         final String message =
                 activity.getString( R.string.imei ) + " " + PrefUtils.getHardwareToken() + "\n" +
-                activity.getString( R.string.label_currency ) + " " + PrefUtils.getMerchantCurrency( activity ) + "\n" +
+                activity.getString( R.string.label_currency ) + " " + PrefUtils.getMerchantCurrency() + "\n" +
                 activity.getString( R.string.text_version )  + " " + BuildConfig.VERSION_NAME + "/" +
                 ApiClient.getSwitch()  + "\n\n" +
                 activity.getString( R.string.text_about_message );

@@ -12,12 +12,14 @@ import android.widget.Toast;
 import javax.inject.Inject;
 
 import co.yodo.fare.R;
+import co.yodo.fare.helper.AppConfig;
 import co.yodo.fare.utils.ErrorUtils;
 import co.yodo.fare.YodoApplication;
 import co.yodo.fare.helper.PrefUtils;
 import co.yodo.fare.helper.SystemUtils;
 import co.yodo.fare.ui.notification.ToastMaster;
 import co.yodo.restapi.network.ApiClient;
+import co.yodo.restapi.network.model.Params;
 import co.yodo.restapi.network.model.ServerResponse;
 import co.yodo.restapi.network.request.AuthenticateRequest;
 import co.yodo.restapi.network.request.QueryRequest;
@@ -201,9 +203,10 @@ public class SplashActivity extends AppCompatActivity {
                         // Get response code
                         final String code = response.getCode();
                         if( code.equals( ServerResponse.AUTHORIZED ) ) {
-                            Timber.i(response.getParams().getElderlyZone1().getName());
-                            // Do the correct action
-                            //getCurrency();
+                            // Save the fares
+                            saveFares( response.getParams() );
+                            // Start the currency process
+                            getCurrency();
                         } else {
                             // Show an error message
                             handleError( R.string.error_unknown );
@@ -220,6 +223,32 @@ public class SplashActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    /**
+     * Gets the fares from the params to save them
+     * @param params The params of the request
+     */
+    private void saveFares( Params params ) {
+        // Elderly
+        PrefUtils.saveFare( context, AppConfig.SPREF_ELDERLY_ZONE_1, params.getElderlyZone1().getPrice() );
+        PrefUtils.saveFare( context, AppConfig.SPREF_ELDERLY_ZONE_2, params.getElderlyZone2().getPrice() );
+        PrefUtils.saveFare( context, AppConfig.SPREF_ELDERLY_ZONE_3, params.getElderlyZone3().getPrice() );
+
+        // Adults
+        PrefUtils.saveFare( context, AppConfig.SPREF_ADULT_ZONE_1, params.getAdultZone1().getPrice() );
+        PrefUtils.saveFare( context, AppConfig.SPREF_ADULT_ZONE_2, params.getAdultZone2().getPrice() );
+        PrefUtils.saveFare( context, AppConfig.SPREF_ADULT_ZONE_3, params.getAdultZone3().getPrice() );
+
+        // Students
+        PrefUtils.saveFare( context, AppConfig.SPREF_STUDENT_ZONE_1, params.getStudentZone1().getPrice() );
+        PrefUtils.saveFare( context, AppConfig.SPREF_STUDENT_ZONE_2, params.getStudentZone2().getPrice() );
+        PrefUtils.saveFare( context, AppConfig.SPREF_STUDENT_ZONE_3, params.getStudentZone3().getPrice() );
+
+        // Child
+        PrefUtils.saveFare( context, AppConfig.SPREF_CHILD_ZONE_1, params.getChildZone1().getPrice() );
+        PrefUtils.saveFare( context, AppConfig.SPREF_CHILD_ZONE_2, params.getChildZone2().getPrice() );
+        PrefUtils.saveFare( context, AppConfig.SPREF_CHILD_ZONE_3, params.getChildZone3().getPrice() );
     }
 
     /**

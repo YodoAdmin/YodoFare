@@ -96,6 +96,48 @@ public class PrefUtils {
         return ( token == null || token.equals( "" ) ) ? null : token;
     }
 
+
+    /**
+     * It saves the merchant currency to the preferences.
+     * @param c The Context of the Android system.
+     * @param currency The currency of the merchant.
+     * @return true  If it was saved.
+     *         false If it was not saved.
+     */
+    public static Boolean saveMerchantCurrency( Context c, String currency ) {
+        // Supported currencies
+        final String[] currencies = c.getResources().getStringArray( R.array.currency_array );
+
+        // Verify if currency exists in the array
+        return Arrays.asList( currencies ).contains( currency ) &&
+                Hawk.put( AppConfig.SPREF_MERCHANT_CURRENCY, currency );
+    }
+
+    /**
+     * It gets the merchant currency.
+     * @return int It returns the currency.
+     */
+    public static String getMerchantCurrency() {
+        return Hawk.get( AppConfig.SPREF_MERCHANT_CURRENCY );
+    }
+
+    /**
+     * Saves a fare in the preferences
+     * @param c The application context
+     * @param key The key of the fare
+     * @param fareValue The value
+     * @return The commit
+     */
+    public static boolean saveFare( Context c, String key, String fareValue ) {
+        if( fareValue != null ) {
+            SharedPreferences config = getSPrefConfig( c );
+            SharedPreferences.Editor writer = config.edit();
+            writer.putString( key, FormatUtils.truncateDecimal( fareValue ) );
+            return writer.commit();
+        }
+        return false;
+    }
+
     /**
      * Gets the current fare based in the selection of the fee and zone
      * @param context The application context
@@ -134,17 +176,17 @@ public class PrefUtils {
         switch( flag ) {
             /* Zone 1 value */
             case AppConfig.FEE_ZONE_1:
-                s = config.getString( AppConfig.SPREF_FEE_OLD_ZONE_1, AppConfig.DEFAULT_OLD_FEE );
+                s = config.getString( AppConfig.SPREF_ELDERLY_ZONE_1, AppConfig.DEFAULT_OLD_FEE );
                 break;
 
 		    /* Zone 2 value */
             case AppConfig.FEE_ZONE_2:
-                s = config.getString( AppConfig.SPREF_FEE_OLD_ZONE_2, AppConfig.DEFAULT_OLD_FEE );
+                s = config.getString( AppConfig.SPREF_ELDERLY_ZONE_2, AppConfig.DEFAULT_OLD_FEE );
                 break;
 
 		    /* Zone 3 value */
             case AppConfig.FEE_ZONE_3:
-                s = config.getString( AppConfig.SPREF_FEE_OLD_ZONE_3, AppConfig.DEFAULT_OLD_FEE );
+                s = config.getString( AppConfig.SPREF_ELDERLY_ZONE_3, AppConfig.DEFAULT_OLD_FEE );
                 break;
         }
 
@@ -166,17 +208,17 @@ public class PrefUtils {
         switch( flag ) {
             // Zone 1 value
             case AppConfig.FEE_ZONE_1:
-                s = config.getString( AppConfig.SPREF_FEE_ADULT_ZONE_1, AppConfig.DEFAULT_ADULT_FEE );
+                s = config.getString( AppConfig.SPREF_ADULT_ZONE_1, AppConfig.DEFAULT_ADULT_FEE );
                 break;
 
             // Zone 2 value
             case AppConfig.FEE_ZONE_2:
-                s = config.getString( AppConfig.SPREF_FEE_ADULT_ZONE_2, AppConfig.DEFAULT_ADULT_FEE );
+                s = config.getString( AppConfig.SPREF_ADULT_ZONE_2, AppConfig.DEFAULT_ADULT_FEE );
                 break;
 
             // Zone 3 value
             case AppConfig.FEE_ZONE_3:
-                s = config.getString( AppConfig.SPREF_FEE_ADULT_ZONE_3, AppConfig.DEFAULT_ADULT_FEE );
+                s = config.getString( AppConfig.SPREF_ADULT_ZONE_3, AppConfig.DEFAULT_ADULT_FEE );
                 break;
         }
 
@@ -198,17 +240,17 @@ public class PrefUtils {
         switch( flag ) {
             // Zone 1 value
             case AppConfig.FEE_ZONE_1:
-                s = config.getString( AppConfig.SPREF_FEE_CHILD_ZONE_1, AppConfig.DEFAULT_CHILD_FEE );
+                s = config.getString( AppConfig.SPREF_CHILD_ZONE_1, AppConfig.DEFAULT_CHILD_FEE );
                 break;
 
             // Zone 2 value
             case AppConfig.FEE_ZONE_2:
-                s = config.getString( AppConfig.SPREF_FEE_CHILD_ZONE_2, AppConfig.DEFAULT_CHILD_FEE );
+                s = config.getString( AppConfig.SPREF_CHILD_ZONE_2, AppConfig.DEFAULT_CHILD_FEE );
                 break;
 
             // Zone 3 value
             case AppConfig.FEE_ZONE_3:
-                s = config.getString( AppConfig.SPREF_FEE_CHILD_ZONE_3, AppConfig.DEFAULT_CHILD_FEE );
+                s = config.getString( AppConfig.SPREF_CHILD_ZONE_3, AppConfig.DEFAULT_CHILD_FEE );
                 break;
         }
 
@@ -230,17 +272,17 @@ public class PrefUtils {
         switch( flag ) {
             /* Zone 1 value */
             case AppConfig.FEE_ZONE_1:
-                s = config.getString( AppConfig.SPREF_FEE_STUDENT_ZONE_1, AppConfig.DEFAULT_STUDENT_FEE );
+                s = config.getString( AppConfig.SPREF_STUDENT_ZONE_1, AppConfig.DEFAULT_STUDENT_FEE );
                 break;
 
 		    /* Zone 2 value */
             case AppConfig.FEE_ZONE_2:
-                s = config.getString( AppConfig.SPREF_FEE_STUDENT_ZONE_2, AppConfig.DEFAULT_STUDENT_FEE );
+                s = config.getString( AppConfig.SPREF_STUDENT_ZONE_2, AppConfig.DEFAULT_STUDENT_FEE );
                 break;
 
 		    /* Zone 3 value */
             case AppConfig.FEE_ZONE_3:
-                s = config.getString( AppConfig.SPREF_FEE_STUDENT_ZONE_3, AppConfig.DEFAULT_STUDENT_FEE );
+                s = config.getString( AppConfig.SPREF_STUDENT_ZONE_3, AppConfig.DEFAULT_STUDENT_FEE );
                 break;
         }
 
@@ -255,32 +297,6 @@ public class PrefUtils {
     private static String getLanguage( Context c ) {
         SharedPreferences config = getSPrefConfig( c );
         return config.getString( AppConfig.SPREF_CURRENT_LANGUAGE, AppConfig.DEFAULT_LANGUAGE );
-    }
-
-    /**
-     * It saves the merchant currency to the preferences.
-     * @param c The Context of the Android system.
-     * @param currency The currency of the merchant.
-     * @return true  If it was saved.
-     *         false If it was not saved.
-     */
-    public static Boolean saveMerchantCurrency( Context c, String currency ) {
-        // Supported currencies
-        final String[] currencies = c.getResources().getStringArray( R.array.currency_array );
-
-        // Verify if currency exists in the array
-        return Arrays.asList( currencies ).contains( currency ) &&
-               Hawk.put( AppConfig.SPREF_MERCHANT_CURRENCY, currency );
-    }
-
-    /**
-     * It gets the merchant currency.
-     * @param c The Context of the Android system.
-     * @return int It returns the currency.
-     */
-    public static String getMerchantCurrency( Context c ) {
-        SharedPreferences config = getSPrefConfig( c );
-        return config.getString( AppConfig.SPREF_MERCHANT_CURRENCY, null );
     }
 
     /**
@@ -361,17 +377,6 @@ public class PrefUtils {
     public static Boolean isFirstLogin(Context c) {
         SharedPreferences config = getSPrefConfig( c );
         return config.getBoolean( AppConfig.SPREF_FIRST_LOGIN, true );
-    }
-
-    /**
-     * It gets the status of the advertising service.
-     * @param c The Context of the Android system.
-     * @return true  Advertising service is on.
-     *         false Advertising service is off.
-     */
-    public static Boolean isAdvertisingServiceRunning(Context c) {
-        SharedPreferences config = getSPrefConfig(c);
-        return config.getBoolean( AppConfig.SPREF_ADVERTISING_SERVICE, false );
     }
 
     /**

@@ -437,7 +437,7 @@ public class FareActivity extends AppCompatActivity implements
                                 "0.00",
                                 location.getLatitude(),
                                 location.getLongitude(),
-                                PrefUtils.getMerchantCurrency( context )
+                                PrefUtils.getMerchantCurrency()
                         ), callback
                     );
                     break;
@@ -454,7 +454,7 @@ public class FareActivity extends AppCompatActivity implements
                                 "0.00",
                                 location.getLatitude(),
                                 location.getLongitude(),
-                                PrefUtils.getMerchantCurrency( context )
+                                PrefUtils.getMerchantCurrency()
                         ), callback
                     );
                     break;

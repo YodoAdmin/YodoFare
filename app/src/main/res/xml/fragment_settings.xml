@@ -94,6 +94,28 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/text.pref.category.student" >
+
+        <EditTextPreference
+            android:title="@string/text.pref.zone.1"
+            android:key="SPStudentZone1"
+            android:inputType="numberDecimal"
+            android:defaultValue="3.00"/>
+
+        <EditTextPreference
+            android:title="@string/text.pref.zone.2"
+            android:key="SPStudentZone2"
+            android:inputType="numberDecimal"
+            android:defaultValue="3.00"/>
+
+        <EditTextPreference
+            android:title="@string/text.pref.zone.3"
+            android:key="SPStudentZone3"
+            android:inputType="numberDecimal"
+            android:defaultValue="3.00"/>
+
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/text.category.child" >
 
         <EditTextPreference
@@ -115,27 +137,5 @@
             android:defaultValue="2.50"/>
 
     </PreferenceCategory>
-	
-    <PreferenceCategory android:title="@string/text.pref.category.student" >
-
-        <EditTextPreference
-            android:title="@string/text.pref.zone.1"
-            android:key="SPStudentZone1"
-            android:inputType="numberDecimal"
-            android:defaultValue="3.00"/>
-
-        <EditTextPreference
-            android:title="@string/text.pref.zone.2"
-            android:key="SPStudentZone2"
-            android:inputType="numberDecimal"
-            android:defaultValue="3.00"/>
-
-        <EditTextPreference
-            android:title="@string/text.pref.zone.3"
-            android:key="SPStudentZone3"
-            android:inputType="numberDecimal"
-            android:defaultValue="3.00"/>
-        
-	</PreferenceCategory>
 
 </PreferenceScreen>

@@ -22,7 +22,7 @@ public class FormatUtils {
      */
     static String UTCtoCurrent( String date ) {
         Calendar c = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss", Locale.US );
+        SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss", Locale.getDefault() );
 
         try {
             TimeZone z = c.getTimeZone();
@@ -38,15 +38,6 @@ public class FormatUtils {
         }
 
         return sdf.format( c.getTimeInMillis() );
-    }
-
-    /**
-     * Transforms a UTC date to the cellphone date
-     * @return the Date in the cellphone time
-     */
-    static String getCurrentDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss", Locale.US );
-        return sdf.format( new Date() );
     }
 
     /**

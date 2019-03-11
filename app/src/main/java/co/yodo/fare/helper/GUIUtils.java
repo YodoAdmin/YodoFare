@@ -85,7 +85,7 @@ public class GUIUtils {
      * @param v The view to modify the drawable
      */
     public static void setMerchantCurrencyIcon( Context c, TextView v ) {
-        setCurrencyIcon( c, v, PrefUtils.getMerchantCurrency( c ) );
+        setCurrencyIcon( c, v, PrefUtils.getMerchantCurrency() );
     }
 
     /**

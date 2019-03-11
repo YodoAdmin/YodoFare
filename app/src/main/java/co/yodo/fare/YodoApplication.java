@@ -51,11 +51,11 @@ public class YodoApplication extends Application {
 
         // Init Dagger
         ApplicationComponent appComponent = DaggerApplicationComponent.builder()
-                .applicationModule( new ApplicationModule( this ) )
+                .applicationModule(new ApplicationModule(this))
                 .build();
 
         component = DaggerGraphComponent.builder()
-                .applicationComponent( appComponent )
+                .applicationComponent(appComponent)
                 .build();
 
         // Init secure preferences

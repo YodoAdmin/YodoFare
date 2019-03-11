@@ -83,25 +83,25 @@ public class AppConfig {
     public static final int FEE_ZONE_2 = 2;
     public static final int FEE_ZONE_3 = 3;
 
-    /* The values for the different zones of the ic_elderly fare */
-    public static final String SPREF_FEE_OLD_ZONE_1 = "SPOldZone1";
-    public static final String SPREF_FEE_OLD_ZONE_2 = "SPOldZone2";
-    public static final String SPREF_FEE_OLD_ZONE_3 = "SPOldZone3";
+    /* The values for the different zones of the elderly */
+    public static final String SPREF_ELDERLY_ZONE_1 = "SPOldZone1";
+    public static final String SPREF_ELDERLY_ZONE_2 = "SPOldZone2";
+    public static final String SPREF_ELDERLY_ZONE_3 = "SPOldZone3";
 
-    /* The values for the different zones of the ic_elderly fare */
-    public static final String SPREF_FEE_ADULT_ZONE_1 = "SPAdultZone1";
-    public static final String SPREF_FEE_ADULT_ZONE_2 = "SPAdultZone2";
-    public static final String SPREF_FEE_ADULT_ZONE_3 = "SPAdultZone3";
+    /* The values for the different zones of the adult */
+    public static final String SPREF_ADULT_ZONE_1 = "SPAdultZone1";
+    public static final String SPREF_ADULT_ZONE_2 = "SPAdultZone2";
+    public static final String SPREF_ADULT_ZONE_3 = "SPAdultZone3";
 
-    /* The values for the different zones of the ic_elderly fare */
-    public static final String SPREF_FEE_CHILD_ZONE_1 = "SPChildZone1";
-    public static final String SPREF_FEE_CHILD_ZONE_2 = "SPChildZone2";
-    public static final String SPREF_FEE_CHILD_ZONE_3 = "SPChildZone3";
+    /* The values for the different zones of the student */
+    public static final String SPREF_STUDENT_ZONE_1 = "SPStudentZone1";
+    public static final String SPREF_STUDENT_ZONE_2 = "SPStudentZone2";
+    public static final String SPREF_STUDENT_ZONE_3 = "SPStudentZone3";
 
-    /* The values for the different zones of the ic_elderly fare */
-    public static final String SPREF_FEE_STUDENT_ZONE_1 = "SPStudentZone1";
-    public static final String SPREF_FEE_STUDENT_ZONE_2 = "SPStudentZone2";
-    public static final String SPREF_FEE_STUDENT_ZONE_3 = "SPStudentZone3";
+    /* The values for the different zones of the child */
+    public static final String SPREF_CHILD_ZONE_1 = "SPChildZone1";
+    public static final String SPREF_CHILD_ZONE_2 = "SPChildZone2";
+    public static final String SPREF_CHILD_ZONE_3 = "SPChildZone3";
 
     /**
      * Default values

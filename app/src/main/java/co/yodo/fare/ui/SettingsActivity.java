@@ -102,32 +102,32 @@ public class SettingsActivity extends AppCompatActivity {
                     .findPreference( AppConfig.SPREF_ADVERTISING_SERVICE );
 
             ETP_SPREF_FARE_OLD_ZONE_1 = (EditTextPreference) getPreferenceScreen()
-                    .findPreference( AppConfig.SPREF_FEE_OLD_ZONE_1 );
+                    .findPreference( AppConfig.SPREF_ELDERLY_ZONE_1 );
             ETP_SPREF_FARE_OLD_ZONE_2 = (EditTextPreference) getPreferenceScreen()
-                    .findPreference( AppConfig.SPREF_FEE_OLD_ZONE_2 );
+                    .findPreference( AppConfig.SPREF_ELDERLY_ZONE_2 );
             ETP_SPREF_FARE_OLD_ZONE_3 = (EditTextPreference) getPreferenceScreen()
-                    .findPreference( AppConfig.SPREF_FEE_OLD_ZONE_3 );
+                    .findPreference( AppConfig.SPREF_ELDERLY_ZONE_3 );
 
             ETP_SPREF_FARE_ADULT_ZONE_1 = (EditTextPreference) getPreferenceScreen()
-                    .findPreference( AppConfig.SPREF_FEE_ADULT_ZONE_1 );
+                    .findPreference( AppConfig.SPREF_ADULT_ZONE_1 );
             ETP_SPREF_FARE_ADULT_ZONE_2 = (EditTextPreference) getPreferenceScreen()
-                    .findPreference( AppConfig.SPREF_FEE_ADULT_ZONE_2 );
+                    .findPreference( AppConfig.SPREF_ADULT_ZONE_2 );
             ETP_SPREF_FARE_ADULT_ZONE_3 = (EditTextPreference) getPreferenceScreen()
-                    .findPreference( AppConfig.SPREF_FEE_ADULT_ZONE_3 );
+                    .findPreference( AppConfig.SPREF_ADULT_ZONE_3 );
 
             ETP_SPREF_FARE_CHILD_ZONE_1 = (EditTextPreference) getPreferenceScreen()
-                    .findPreference( AppConfig.SPREF_FEE_CHILD_ZONE_1 );
+                    .findPreference( AppConfig.SPREF_CHILD_ZONE_1 );
             ETP_SPREF_FARE_CHILD_ZONE_2 = (EditTextPreference) getPreferenceScreen()
-                    .findPreference( AppConfig.SPREF_FEE_CHILD_ZONE_2 );
+                    .findPreference( AppConfig.SPREF_CHILD_ZONE_2 );
             ETP_SPREF_FARE_CHILD_ZONE_3 = (EditTextPreference) getPreferenceScreen()
-                    .findPreference( AppConfig.SPREF_FEE_CHILD_ZONE_3 );
+                    .findPreference( AppConfig.SPREF_CHILD_ZONE_3 );
 
             ETP_SPREF_FARE_STUDENT_ZONE_1 = (EditTextPreference) getPreferenceScreen()
-                    .findPreference( AppConfig.SPREF_FEE_STUDENT_ZONE_1 );
+                    .findPreference( AppConfig.SPREF_STUDENT_ZONE_1 );
             ETP_SPREF_FARE_STUDENT_ZONE_2 = (EditTextPreference) getPreferenceScreen()
-                    .findPreference( AppConfig.SPREF_FEE_STUDENT_ZONE_2 );
+                    .findPreference( AppConfig.SPREF_STUDENT_ZONE_2 );
             ETP_SPREF_FARE_STUDENT_ZONE_3 = (EditTextPreference) getPreferenceScreen()
-                    .findPreference( AppConfig.SPREF_FEE_STUDENT_ZONE_3 );
+                    .findPreference( AppConfig.SPREF_STUDENT_ZONE_3 );
 
             if( !PrefUtils.hasBluetooth() ) {
                 ETP_ADVERTISING.setEnabled( false );
