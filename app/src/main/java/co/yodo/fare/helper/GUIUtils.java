@@ -4,16 +4,17 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import java.util.Arrays;
 
@@ -30,9 +31,9 @@ public class GUIUtils {
      * @param title    The integer that represents the resource title
      * @return Toolbar The toolbar found for the activity
      */
-    public static Toolbar setActionBar( AppCompatActivity act, int title ) {
+    public static Toolbar setActionBar(AppCompatActivity act, int title ) {
         // Only used at creation
-        Toolbar toolbar = (Toolbar ) act.findViewById( R.id.actionBar );
+        Toolbar toolbar = act.findViewById( R.id.actionBar );
 
         // Setup the toolbar
         act.setTitle( title );

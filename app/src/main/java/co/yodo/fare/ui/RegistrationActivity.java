@@ -3,27 +3,30 @@ package co.yodo.fare.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import co.yodo.fare.R;
-import co.yodo.fare.utils.ErrorUtils;
 import co.yodo.fare.YodoApplication;
 import co.yodo.fare.helper.GUIUtils;
-import co.yodo.fare.ui.notification.ToastMaster;
 import co.yodo.fare.helper.PrefUtils;
 import co.yodo.fare.ui.notification.ProgressDialogHelper;
-import co.yodo.restapi.network.ApiClient;
+import co.yodo.fare.ui.notification.ToastMaster;
+import co.yodo.fare.utils.ErrorUtils;
+import co.yodo.restapi.YodoApi;
+import co.yodo.restapi.network.contract.RequestCallback;
 import co.yodo.restapi.network.model.ServerResponse;
-import co.yodo.restapi.network.request.RegisterRequest;
+import co.yodo.restapi.network.requests.RegMerchDeviceRequest;
 
 public class RegistrationActivity extends AppCompatActivity {
     /** DEBUG */
@@ -33,10 +36,6 @@ public class RegistrationActivity extends AppCompatActivity {
     /** The application context */
     @Inject
     Context context;
-
-    /** Manager for the server requests */
-    @Inject
-    ApiClient requestManager;
 
     /** Progress dialog for the requests */
     @Inject
@@ -64,10 +63,8 @@ public class RegistrationActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
-        switch( itemId ) {
-            case android.R.id.home:
-                finish();
-                break;
+        if (itemId == android.R.id.home) {
+            finish();
         }
         return super.onOptionsItemSelected( item );
     }
@@ -108,36 +105,44 @@ public class RegistrationActivity extends AppCompatActivity {
                     ProgressDialogHelper.ProgressDialogType.NORMAL
             );
 
-            requestManager.invoke(
-                    new RegisterRequest(
-                            hardwareToken,
-                            token
-                    ), new ApiClient.RequestCallback() {
+            YodoApi.execute(
+                    new RegMerchDeviceRequest(token),
+                    new RequestCallback() {
                         @Override
                         public void onPrepare() {
-
                         }
 
                         @Override
-                        public void onResponse( ServerResponse response ) {
+                        public void onResponse(ServerResponse response) {
                             progressManager.destroy();
-                            String code = response.getCode();
+                            final String code = response.getCode();
+                            switch (code) {
+                                case ServerResponse.AUTHORIZED_REGISTRATION:
+                                    Intent intent = new Intent( context, SplashActivity.class );
+                                    startActivity( intent );
+                                    finish();
+                                    break;
 
-                            if( code.equals( ServerResponse.AUTHORIZED_REGISTRATION ) ) {
-                                Intent intent = new Intent( context, SplashActivity.class );
-                                startActivity( intent );
-                                finish();
-                            } else {
-                                ErrorUtils.handleFieldError(
-                                        context,
-                                        tietActivationCode,
-                                        R.string.error_incorrect_code
-                                );
+                                case ServerResponse.ERROR_DUP_AUTH:
+                                    ErrorUtils.handleError(
+                                            RegistrationActivity.this,
+                                            R.string.error_20,
+                                            false
+                                    );
+                                    break;
+
+                                default:
+                                    ErrorUtils.handleError(
+                                            RegistrationActivity.this,
+                                            R.string.error_server,
+                                            false
+                                    );
+                                    break;
                             }
                         }
 
                         @Override
-                        public void onError( Throwable error ) {
+                        public void onError(Throwable error) {
                             progressManager.destroy();
                             ErrorUtils.handleApiError(
                                     RegistrationActivity.this,

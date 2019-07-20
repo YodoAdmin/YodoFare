@@ -1,7 +1,7 @@
 package co.yodo.fare.manager;
 
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -13,7 +13,6 @@ import com.google.android.gms.nearby.messages.PublishOptions;
 import com.google.android.gms.nearby.messages.Strategy;
 
 import co.yodo.fare.helper.PrefUtils;
-import co.yodo.fare.helper.SystemUtils;
 import timber.log.Timber;
 
 /**

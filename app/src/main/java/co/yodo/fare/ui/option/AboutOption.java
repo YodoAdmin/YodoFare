@@ -15,7 +15,7 @@ import co.yodo.fare.R;
 import co.yodo.fare.helper.PrefUtils;
 import co.yodo.fare.ui.notification.AlertDialogHelper;
 import co.yodo.fare.ui.option.contract.IOption;
-import co.yodo.restapi.network.ApiClient;
+import co.yodo.restapi.YodoApi;
 
 /**
  * Created by hei on 22/06/16.
@@ -41,8 +41,8 @@ public class AboutOption extends IOption {
      */
     private void setupLayout( View layout ) {
         // GUI controllers of the dialog
-        TextView emailView = (TextView) layout.findViewById( R.id.emailView );
-        TextView messageView = (TextView) layout.findViewById( R.id.messageView );
+        TextView emailView = layout.findViewById( R.id.emailView );
+        TextView messageView = layout.findViewById( R.id.messageView );
 
         // Get data
         final String hardwareToken = PrefUtils.getHardwareToken();
@@ -50,7 +50,7 @@ public class AboutOption extends IOption {
                 activity.getString( R.string.imei ) + " " + PrefUtils.getHardwareToken() + "\n" +
                 activity.getString( R.string.label_currency ) + " " + PrefUtils.getMerchantCurrency() + "\n" +
                 activity.getString( R.string.text_version )  + " " + BuildConfig.VERSION_NAME + "/" +
-                ApiClient.getSwitch()  + "\n\n" +
+                YodoApi.getAlias()  + "\n\n" +
                 activity.getString( R.string.text_about_message );
         final String email = activity.getString( R.string.text_about_email );
 

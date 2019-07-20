@@ -52,8 +52,8 @@ class ScanditScanner extends QRScanner implements OnScanListener {
         ScanditLicense.setAppKey( sScanditSdkAppKey );
 
         // Setup GUI
-        opPanel = (TableLayout) act.findViewById( R.id.layout_fare_options );
-        pvPanel = (RelativeLayout) act.findViewById( R.id.layout_preview_panel );
+        opPanel = act.findViewById( R.id.layout_fare_options );
+        pvPanel = act.findViewById( R.id.layout_preview_panel );
 
         // Initialize and start the bar code recognition.
         initializeBarcodeScanning();

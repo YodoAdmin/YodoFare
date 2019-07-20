@@ -9,9 +9,10 @@ import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import co.yodo.fare.R;
 import co.yodo.fare.helper.AppConfig;
@@ -31,17 +32,15 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
-        switch( itemId ) {
-            case android.R.id.home:
-                finish();
-                break;
+        if (itemId == android.R.id.home) {
+            finish();
         }
         return super.onOptionsItemSelected( item );
     }
 
     private void setupGUI() {
         // Only used at creation
-        Toolbar toolbar = (Toolbar) findViewById( R.id.toolbar );
+        Toolbar toolbar = findViewById( R.id.toolbar );
 
         setSupportActionBar( toolbar );
         if( getSupportActionBar() != null )

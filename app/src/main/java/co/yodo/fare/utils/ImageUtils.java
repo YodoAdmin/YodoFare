@@ -14,7 +14,6 @@ public class ImageUtils {
      * Switch the image of the zone buttons
      * @param current The ImageView to change the state
      * @param selected The state
-     * @return
      */
     public static int handleFeeZone( ImageView current, boolean selected ) {
         switch( current.getId() ) {

@@ -1,4 +1,4 @@
-<android.support.v4.widget.SlidingPaneLayout
+<androidx.slidingpanelayout.widget.SlidingPaneLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_fare"
@@ -12,4 +12,4 @@
     <!-- The main content view -->
     <include layout="@layout/fragment_fare"/>
 
-</android.support.v4.widget.SlidingPaneLayout>
+</androidx.slidingpanelayout.widget.SlidingPaneLayout>

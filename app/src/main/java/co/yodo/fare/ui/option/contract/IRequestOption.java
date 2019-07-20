@@ -3,13 +3,15 @@ package co.yodo.fare.ui.option.contract;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+
+import androidx.appcompat.app.AlertDialog;
+
+import com.google.android.material.textfield.TextInputLayout;
 
 import javax.inject.Inject;
 
@@ -17,7 +19,6 @@ import co.yodo.fare.R;
 import co.yodo.fare.YodoApplication;
 import co.yodo.fare.helper.PrefUtils;
 import co.yodo.fare.ui.notification.ProgressDialogHelper;
-import co.yodo.restapi.network.ApiClient;
 
 /**
  * Created by hei on 04/08/16.
@@ -25,10 +26,6 @@ import co.yodo.restapi.network.ApiClient;
  * different options including requests
  */
 public abstract class IRequestOption extends IOption {
-    /** Manager for the server requests */
-    @Inject
-    protected ApiClient requestManager;
-
     /** Progress dialog for the requests */
     @Inject
     protected ProgressDialogHelper progressManager;
@@ -64,7 +61,7 @@ public abstract class IRequestOption extends IOption {
         final View layout = inflater.inflate( R.layout.dialog_with_pip, new LinearLayout( activity ), false );
 
         // GUI setup
-        etInput = (EditText) layout.findViewById( R.id.text_pip );
+        etInput = layout.findViewById( R.id.text_pip );
         tilPip = (TextInputLayout) etInput.getParent().getParent();
 
         return layout;
@@ -80,7 +77,7 @@ public abstract class IRequestOption extends IOption {
             @Override
             public void onShow( DialogInterface dialog ) {
                 // Get the AlertDialog and the positive Button
-                alertDialog = AlertDialog.class.cast( dialog );
+                alertDialog = (AlertDialog) dialog;
                 final Button button = alertDialog.getButton( AlertDialog.BUTTON_POSITIVE );
 
                 // Sets the action for the positive Button

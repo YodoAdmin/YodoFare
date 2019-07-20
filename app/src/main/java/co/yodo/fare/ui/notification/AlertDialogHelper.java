@@ -3,8 +3,9 @@ package co.yodo.fare.ui.notification;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Handler;
-import android.support.v7.app.AlertDialog;
 import android.view.View;
+
+import androidx.appcompat.app.AlertDialog;
 
 import co.yodo.fare.R;
 import co.yodo.fare.helper.PrefUtils;

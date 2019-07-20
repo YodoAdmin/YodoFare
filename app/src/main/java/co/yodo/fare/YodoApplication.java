@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.orhanobut.hawk.Hawk;
 
 import org.acra.ACRA;
@@ -17,8 +19,7 @@ import co.yodo.fare.injection.component.DaggerApplicationComponent;
 import co.yodo.fare.injection.component.DaggerGraphComponent;
 import co.yodo.fare.injection.component.GraphComponent;
 import co.yodo.fare.injection.module.ApplicationModule;
-import co.yodo.restapi.helper.AppConfig;
-import co.yodo.restapi.network.ApiClient;
+import co.yodo.restapi.YodoApi;
 import timber.log.Timber;
 
 @ReportsCrashes(
@@ -41,8 +42,8 @@ public class YodoApplication extends Application {
         ACRA.init( this );
 
         // Sets the log flag and IP for the restapi
-        ApiClient.IP = ApiClient.DEV_IP;
-        AppConfig.DEBUG = co.yodo.fare.helper.AppConfig.DEBUG;
+        //ApiClient.IP = ApiClient.DEV_IP;
+        //AppConfig.DEBUG = co.yodo.fare.helper.AppConfig.DEBUG;
     }
 
     @Override
@@ -67,7 +68,7 @@ public class YodoApplication extends Application {
             Timber.plant(new Timber.DebugTree() {
                 // Adds the line number
                 @Override
-                protected String createStackElementTag(StackTraceElement element) {
+                protected String createStackElementTag(@NonNull StackTraceElement element) {
                     return super.createStackElementTag(element) + ':' + element.getLineNumber();
                 }
             });
@@ -75,6 +76,11 @@ public class YodoApplication extends Application {
             // Release
             Timber.plant(new CrashReportingTree());
         }
+
+        YodoApi.init(this)
+                .setLog(BuildConfig.DEBUG)
+                .server(YodoApi.DEMO_IP, "E")
+                .build();
     }
 
     /** A tree which logs important information for crash reporting. */
@@ -82,7 +88,7 @@ public class YodoApplication extends Application {
         /** The max size of a line */
         private static final int MAX_LOG_LENGTH = 4000;
         @Override
-        protected void log(int priority, String tag, String message, Throwable t) {
+        protected void log(int priority, String tag, @NonNull String message, Throwable t) {
             if (priority == Log.VERBOSE || priority == Log.DEBUG || priority == Log.INFO) {
                 return;
             }

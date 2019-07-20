@@ -1,7 +1,8 @@
 package co.yodo.fare.ui.option.contract;
 
 import android.app.Activity;
-import android.support.v7.app.AlertDialog;
+
+import androidx.appcompat.app.AlertDialog;
 
 /**
  * Created by hei on 14/06/16.

@@ -3,10 +3,11 @@ package co.yodo.fare.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.IOException;
 
@@ -72,7 +73,7 @@ public class ErrorUtils {
      * @param context The application context
      * @param editText The edit text with the information
      */
-    public static void handleFieldError( Context context, TextInputEditText editText, int message ) {
+    public static void handleFieldError(Context context, TextInputEditText editText, int message ) {
         // The shake animation for wrong inputs and layout for error
         Animation aShake = AnimationUtils.loadAnimation( context, R.anim.shake );
         TextInputLayout layout = ( TextInputLayout ) editText.getParent().getParent();

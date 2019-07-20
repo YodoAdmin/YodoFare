@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import co.yodo.fare.ui.scanner.QRScannerFactory;
 
 /**
@@ -23,7 +25,7 @@ public class ScannerAdapter extends ArrayAdapter<QRScannerFactory.SupportedScann
     }
 
     @Override
-    public View getDropDownView( int position, View convertView, ViewGroup parent ) {
+    public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent ) {
         QRScannerFactory.SupportedScanner scanner = getItem( position );
         TextView textView = (TextView) super.getView( position, convertView, parent );
         textView.setText( ac.getString( scanner.getValue() ) );
@@ -31,8 +33,9 @@ public class ScannerAdapter extends ArrayAdapter<QRScannerFactory.SupportedScann
         return textView;
     }
 
+    @NonNull
     @Override
-    public View getView( int position, View convertView, ViewGroup parent ) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent ) {
         QRScannerFactory.SupportedScanner scanner = getItem( position );
         TextView textView = (TextView) super.getView( position, convertView, parent );
         textView.setText( ac.getString( scanner.getValue() ) );

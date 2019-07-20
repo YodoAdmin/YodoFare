@@ -10,8 +10,9 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -155,10 +156,8 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             return true;
         else if( isNewer && !isLessAccurate )
             return true;
-        else if( isNewer && !isSignificantlyLessAccurate && isFromSameProvider )
-            return true;
+        else return isNewer && !isSignificantlyLessAccurate && isFromSameProvider;
 
-        return false;
     }
 
     /** Checks whether two providers are the same */

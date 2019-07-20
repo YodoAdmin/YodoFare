@@ -1,12 +1,13 @@
 package co.yodo.fare.ui.scanner;
 
 import android.app.Activity;
-import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
+
+import androidx.appcompat.app.AlertDialog;
 
 import co.yodo.fare.R;
 import co.yodo.fare.helper.GUIUtils;

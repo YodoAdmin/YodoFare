@@ -7,11 +7,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SlidingPaneLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -21,6 +16,12 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.slidingpanelayout.widget.SlidingPaneLayout;
 
 import com.google.android.gms.common.ConnectionResult;
 
@@ -36,8 +37,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import co.yodo.fare.R;
-import co.yodo.fare.utils.ErrorUtils;
-import co.yodo.fare.utils.ImageUtils;
 import co.yodo.fare.YodoApplication;
 import co.yodo.fare.component.SKS;
 import co.yodo.fare.helper.BluetoothPrinterUtil;
@@ -56,10 +55,13 @@ import co.yodo.fare.ui.option.AboutOption;
 import co.yodo.fare.ui.option.BalanceOption;
 import co.yodo.fare.ui.scanner.QRScannerFactory;
 import co.yodo.fare.ui.scanner.contract.QRScanner;
-import co.yodo.restapi.network.ApiClient;
+import co.yodo.fare.utils.ErrorUtils;
+import co.yodo.fare.utils.ImageUtils;
+import co.yodo.restapi.YodoApi;
+import co.yodo.restapi.network.contract.RequestCallback;
 import co.yodo.restapi.network.model.ServerResponse;
-import co.yodo.restapi.network.request.AlternateRequest;
-import co.yodo.restapi.network.request.ExchangeRequest;
+import co.yodo.restapi.network.requests.AltExchangeRequest;
+import co.yodo.restapi.network.requests.ExchRetailRequest;
 import timber.log.Timber;
 
 public class FareActivity extends AppCompatActivity implements
@@ -72,10 +74,6 @@ public class FareActivity extends AppCompatActivity implements
     /** The application context object */
     @Inject
     Context context;
-
-    /** Manager for the server requests */
-    @Inject
-    ApiClient requestManager;
 
     /** Progress dialog for the requests */
     @Inject
@@ -428,34 +426,32 @@ public class FareActivity extends AppCompatActivity implements
 
             switch( method ) {
                 case YODO:
-                    requestManager.invoke(
-                        new ExchangeRequest(
-                                hardwareToken,
-                                client,
-                                total,
-                                "0.00",
-                                "0.00",
-                                location.getLatitude(),
-                                location.getLongitude(),
-                                PrefUtils.getMerchantCurrency()
-                        ), callback
+                    YodoApi.execute(
+                            new ExchRetailRequest(client,
+                                    total,
+                                    "0.00",
+                                    "0.00",
+                                    location.getLatitude(),
+                                    location.getLongitude(),
+                                    PrefUtils.getMerchantCurrency()
+                            ),
+                            callback
                     );
                     break;
 
                 case STATIC:
                 case HEART:
-                    requestManager.invoke(
-                        new AlternateRequest(
-                                String.valueOf( method.ordinal() ),
-                                hardwareToken,
-                                client,
-                                total,
-                                "0.00",
-                                "0.00",
-                                location.getLatitude(),
-                                location.getLongitude(),
-                                PrefUtils.getMerchantCurrency()
-                        ), callback
+                    YodoApi.execute(
+                            new AltExchangeRequest(String.valueOf(method.ordinal()),
+                                    client,
+                                    total,
+                                    "0.00",
+                                    "0.00",
+                                    location.getLatitude(),
+                                    location.getLongitude(),
+                                    PrefUtils.getMerchantCurrency()
+                            ),
+                            callback
                     );
                     break;
 
@@ -500,17 +496,14 @@ public class FareActivity extends AppCompatActivity implements
 
     @Override
     protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
-        switch( requestCode ) {
-            case REQUEST_CODE_LOCATION_SERVICES:
-                // The user didn't enable the GPS
-                if( !SystemUtils.isLocationEnabled( context ) )
-                    finish();
-                break;
+        if (requestCode == REQUEST_CODE_LOCATION_SERVICES) {// The user didn't enable the GPS
+            if (!SystemUtils.isLocationEnabled(context))
+                finish();
         }
     }
 
     @Override
-    public void onRequestPermissionsResult( int requestCode, @NonNull String permissions[], @NonNull int[] grantResults ) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults ) {
         switch( requestCode ) {
             case PERMISSIONS_REQUEST_CAMERA:
                 // If request is cancelled, the result arrays are empty.
@@ -536,7 +529,7 @@ public class FareActivity extends AppCompatActivity implements
         }
     }
 
-    private final ApiClient.RequestCallback callback = new ApiClient.RequestCallback() {
+    private final RequestCallback callback = new RequestCallback() {
         @Override
         public void onPrepare() {
             if( PrefUtils.isAdvertising( context ) ) {
@@ -546,7 +539,7 @@ public class FareActivity extends AppCompatActivity implements
         }
 
         @Override
-        public void onResponse( ServerResponse response ) {
+        public void onResponse(ServerResponse response) {
             progressManager.destroy();
             reset( null );
 
@@ -616,7 +609,7 @@ public class FareActivity extends AppCompatActivity implements
         }
 
         @Override
-        public void onError( Throwable error ) {
+        public void onError(Throwable error) {
             progressManager.destroy();
             ErrorUtils.handleApiError(
                     FareActivity.this,

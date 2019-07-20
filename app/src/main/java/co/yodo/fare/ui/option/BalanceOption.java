@@ -13,10 +13,12 @@ import co.yodo.fare.ui.dialog.BalanceDialog;
 import co.yodo.fare.ui.notification.AlertDialogHelper;
 import co.yodo.fare.ui.notification.ProgressDialogHelper;
 import co.yodo.fare.ui.option.contract.IRequestOption;
-import co.yodo.restapi.network.ApiClient;
+import co.yodo.restapi.YodoApi;
+import co.yodo.restapi.network.contract.RequestCallback;
 import co.yodo.restapi.network.model.Params;
 import co.yodo.restapi.network.model.ServerResponse;
-import co.yodo.restapi.network.request.QueryRequest;
+import co.yodo.restapi.network.requests.QueryHistoryBalanceRequest;
+import co.yodo.restapi.network.requests.QueryTodayBalanceRequest;
 
 /**
  * Created by hei on 21/06/16.
@@ -51,45 +53,41 @@ public class BalanceOption extends IRequestOption {
                         ProgressDialogHelper.ProgressDialogType.NORMAL
                 );
 
-                requestManager.invoke(
-                    new QueryRequest(
-                            hardwareToken,
-                            tempPip,
-                            QueryRequest.Record.HISTORY_BALANCE
-                    ),
-                    new ApiClient.RequestCallback() {
-                        @Override
-                        public void onPrepare() {
-                            if( PrefUtils.isAdvertising( activity ) ) {
-                                promotionManager.unpublish();
-                                isPublishing = true;
+                YodoApi.execute(
+                        new QueryHistoryBalanceRequest(tempPip),
+                        new RequestCallback() {
+                            @Override
+                            public void onPrepare() {
+                                if( PrefUtils.isAdvertising( activity ) ) {
+                                    promotionManager.unpublish();
+                                    isPublishing = true;
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onResponse( ServerResponse response ) {
-                            if( response.getCode().equals( ServerResponse.AUTHORIZED ) ) {
+                            @Override
+                            public void onResponse(ServerResponse response) {
+                                if( response.getCode().equals( ServerResponse.AUTHORIZED ) ) {
+                                    alertDialog.dismiss();
+                                    requestTodayBalance( response.getParams() );
+                                } else {
+                                    progressManager.destroy();
+                                    tilPip.setError( activity.getString( R.string.error_mip ) );
+                                }
+                            }
+
+                            @Override
+                            public void onError(Throwable error) {
                                 alertDialog.dismiss();
-                                requestTodayBalance( response.getParams() );
-                            } else {
                                 progressManager.destroy();
-                                tilPip.setError( activity.getString( R.string.error_mip ) );
+                                ErrorUtils.handleApiError( activity, error, true );
+
+                                // If it was publishing before the request
+                                if( isPublishing ) {
+                                    isPublishing = false;
+                                    promotionManager.publish();
+                                }
                             }
                         }
-
-                        @Override
-                        public void onError( Throwable error ) {
-                            alertDialog.dismiss();
-                            progressManager.destroy();
-                            ErrorUtils.handleApiError( activity, error, true );
-
-                            // If it was publishing before the request
-                            if( isPublishing ) {
-                                isPublishing = false;
-                                promotionManager.publish();
-                            }
-                        }
-                    }
                 );
             }
         };
@@ -120,60 +118,56 @@ public class BalanceOption extends IRequestOption {
      * @param totalParams The total balance, used to be displayed in dialog
      */
     private void requestTodayBalance( final Params totalParams ) {
-        requestManager.invoke(
-            new QueryRequest(
-                    hardwareToken,
-                    tempPip,
-                    QueryRequest.Record.TODAY_BALANCE
-            ), new ApiClient.RequestCallback() {
+        YodoApi.execute(
+                new QueryTodayBalanceRequest(tempPip),
+                new RequestCallback() {
                     @Override
                     public void onPrepare() {
-
                     }
 
                     @Override
-                public void onResponse( ServerResponse response ) {
-                    progressManager.destroy();
+                    public void onResponse( ServerResponse response ) {
+                        progressManager.destroy();
 
-                    // Sets all the balance data in the dialog
-                    BigDecimal todayBalance = BigDecimal.ZERO;
-                    BigDecimal todayCredits = new BigDecimal( response.getParams().getCredit() );
-                    BigDecimal todayDebits = new BigDecimal( response.getParams().getDebit() );
+                        // Sets all the balance data in the dialog
+                        BigDecimal todayBalance = BigDecimal.ZERO;
+                        BigDecimal todayCredits = new BigDecimal( response.getParams().getCredit() );
+                        BigDecimal todayDebits = new BigDecimal( response.getParams().getDebit() );
 
-                    todayBalance = todayBalance
-                            .add( todayCredits )
-                            .subtract( todayDebits );
+                        todayBalance = todayBalance
+                                .add( todayCredits )
+                                .subtract( todayDebits );
 
-                    BigDecimal historyBalance = BigDecimal.ZERO;
-                    BigDecimal historyCredits = new BigDecimal( totalParams.getCredit() );
-                    BigDecimal historyDebits = new BigDecimal( totalParams.getDebit() );
+                        BigDecimal historyBalance = BigDecimal.ZERO;
+                        BigDecimal historyCredits = new BigDecimal( totalParams.getCredit() );
+                        BigDecimal historyDebits = new BigDecimal( totalParams.getDebit() );
 
-                    historyBalance = historyBalance
-                            .add( historyCredits )
-                            .subtract( historyDebits );
+                        historyBalance = historyBalance
+                                .add( historyCredits )
+                                .subtract( historyDebits );
 
-                    new BalanceDialog.Builder( activity )
-                            .todayCredits( todayCredits.toString() )
-                            .todayDebits( todayDebits.toString() )
-                            .todayBalance( todayBalance.toString() )
-                            .historyCredits( historyCredits.toString() )
-                            .historyDebits( historyDebits.toString() )
-                            .historyBalance( historyBalance.toString() )
-                            .build();
+                        new BalanceDialog.Builder( activity )
+                                .todayCredits( todayCredits.toString() )
+                                .todayDebits( todayDebits.toString() )
+                                .todayBalance( todayBalance.toString() )
+                                .historyCredits( historyCredits.toString() )
+                                .historyDebits( historyDebits.toString() )
+                                .historyBalance( historyBalance.toString() )
+                                .build();
 
-                    // If it was publishing before the request
-                    if( isPublishing ) {
-                        isPublishing = false;
-                        promotionManager.publish();
+                        // If it was publishing before the request
+                        if( isPublishing ) {
+                            isPublishing = false;
+                            promotionManager.publish();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable error) {
+                        progressManager.destroy();
+                        ErrorUtils.handleApiError( activity, error, true );
                     }
                 }
-
-                @Override
-                public void onError( Throwable error ) {
-                    progressManager.destroy();
-                    ErrorUtils.handleApiError( activity, error, true );
-                }
-            }
         );
     }
 }

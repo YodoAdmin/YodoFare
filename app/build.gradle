@@ -1,16 +1,15 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'io.fabric'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 28
 
     defaultConfig {
         applicationId "co.yodo.fare"
         minSdkVersion 15
-        targetSdkVersion 25
+        targetSdkVersion 28
         versionCode 4
-        versionName "2.2.9"
+        versionName "2.3.0"
 
         vectorDrawables.useSupportLibrary = true
     }
@@ -24,6 +23,10 @@ android {
         maxProcessCount 4
         javaMaxHeapSize "2g"
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 repositories {
@@ -33,49 +36,57 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // -- Crashlytics --
+    implementation('com.crashlytics.sdk.android:crashlytics:2.9.1@aar') {
+        transitive = true
+    }
+
     // -- Android --
-    compile 'com.android.support:appcompat-v7:25.3.0'
-    compile 'com.android.support:design:25.3.0'
-    compile 'com.android.support:support-v4:25.3.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     // -- Google --
-    compile 'com.google.code.gson:gson:2.7'
-    compile 'com.google.android.gms:play-services-location:10.2.0'
-    compile 'com.google.android.gms:play-services-gcm:10.2.0'
-    compile 'com.google.android.gms:play-services-nearby:10.2.0'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.google.android.gms:play-services-gcm:17.0.0'
+    implementation 'com.google.android.gms:play-services-nearby:17.0.0'
     
     // -- Injection Views --
-    compile 'com.jakewharton:butterknife:8.5.1'
-    apt 'com.jakewharton:butterknife-compiler:8.5.1'
+    implementation 'com.jakewharton:butterknife:10.1.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
 
-    // -- Injection --
-    apt 'com.google.dagger:dagger-compiler:2.9'
-    compile 'com.google.dagger:dagger:2.9'
+    // -- Injection
+
+    implementation 'com.google.dagger:dagger:2.19'
     provided 'javax.annotation:jsr250-api:1.0'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.17'
 
     // -- Networking --
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile ('com.squareup.retrofit2:converter-simplexml:2.1.0') {
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation ('com.squareup.retrofit2:converter-simplexml:2.5.0') {
         exclude group: 'xpp3', module: 'xpp3'
         exclude group: 'stax', module: 'stax-api'
         exclude group: 'stax', module: 'stax'
     }
-    compile 'com.squareup.okhttp3:logging-interceptor:3.3.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.1'
 
     // -- Event Bus --
-    compile 'org.greenrobot:eventbus:3.0.0'
+    implementation 'org.greenrobot:eventbus:3.1.1'
 
     // -- Error Logger --
-    compile 'ch.acra:acra:4.8.5'
+    implementation 'ch.acra:acra:4.8.5'
 
     // -- Logging --
-    compile 'com.jakewharton.timber:timber:4.5.1'
+    implementation 'com.jakewharton.timber:timber:4.7.1'
 
     // -- Secure Preferences --
-    compile 'com.orhanobut:hawk:2.0.1'
+    implementation 'com.orhanobut:hawk:2.0.1'
 
     // -- Other libraries --
-    compile( name:'restapi-release', ext:'aar' )
-    compile( name:'ScanditBarcodeScanner', ext:'aar' )
+    implementation( name:'restapi-release', ext:'aar' )
+    implementation( name:'ScanditBarcodeScanner', ext:'aar' )
 }
