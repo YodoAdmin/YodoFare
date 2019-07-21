@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="ExtraTranslation">
 
     <!-- Main Strings -->
     <string name="app_name">YodoFare</string>
@@ -47,6 +48,7 @@
     <string name="exchange_balance">Balance:</string>
     <string name="exchange_extra">Extra:</string>
     <string name="exchange_error">Tamaño SKS inválido. El cliente puede necesitar actualizar la aplicación YodoPayment.</string>
+    <string name="transaction_error">Esta transacción no es soportada aún.</string>
 
     <!-- Balance Messages -->
     <string name="text.balance.title">Merchant Balance Report</string>

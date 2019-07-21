@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import co.yodo.fare.BuildConfig;
 import co.yodo.fare.R;
 import co.yodo.fare.YodoApplication;
 import co.yodo.fare.helper.GUIUtils;
@@ -48,6 +50,9 @@ public class RegistrationActivity extends AppCompatActivity {
     @BindView( R.id.text_activation_code )
     TextInputEditText tietActivationCode;
 
+    @BindView( R.id.tvVersion )
+    TextView tvVersion;
+
     /** Hardware Token */
     private String hardwareToken;
 
@@ -79,6 +84,8 @@ public class RegistrationActivity extends AppCompatActivity {
     }
 
     private void updateData() {
+        tvVersion.setText(BuildConfig.VERSION_NAME);
+
         // Gets the account identifier
         hardwareToken = PrefUtils.getHardwareToken();
         if( hardwareToken == null ) {

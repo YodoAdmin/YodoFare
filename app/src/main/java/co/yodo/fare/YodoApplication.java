@@ -1,18 +1,12 @@
 package co.yodo.fare;
 
 import android.app.Application;
-import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.crashlytics.android.Crashlytics;
 import com.orhanobut.hawk.Hawk;
-
-import org.acra.ACRA;
-import org.acra.ReportField;
-import org.acra.ReportingInteractionMode;
-import org.acra.annotation.ReportsCrashes;
-import org.acra.sender.HttpSender;
 
 import co.yodo.fare.injection.component.ApplicationComponent;
 import co.yodo.fare.injection.component.DaggerApplicationComponent;
@@ -20,31 +14,12 @@ import co.yodo.fare.injection.component.DaggerGraphComponent;
 import co.yodo.fare.injection.component.GraphComponent;
 import co.yodo.fare.injection.module.ApplicationModule;
 import co.yodo.restapi.YodoApi;
+import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
 
-@ReportsCrashes(
-                formUri = "http://198.101.209.120/MAB-LAB/report/report.php",
-                customReportContent = { ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.ANDROID_VERSION, ReportField.PHONE_MODEL, ReportField.CUSTOM_DATA, ReportField.STACK_TRACE, ReportField.LOGCAT },
-                formUriBasicAuthLogin = "yodo",
-                formUriBasicAuthPassword = "letryodo",
-                httpMethod = HttpSender.Method.POST,
-                reportType = HttpSender.Type.JSON,
-                mode = ReportingInteractionMode.TOAST,
-                resToastText = R.string.text_crash_toast
-)
 public class YodoApplication extends Application {
     /** Component that build the dependencies */
     private static GraphComponent component;
-
-    @Override
-    protected void attachBaseContext( Context base ) {
-        super.attachBaseContext( base );
-        ACRA.init( this );
-
-        // Sets the log flag and IP for the restapi
-        //ApiClient.IP = ApiClient.DEV_IP;
-        //AppConfig.DEBUG = co.yodo.fare.helper.AppConfig.DEBUG;
-    }
 
     @Override
     public void onCreate() {
@@ -59,12 +34,11 @@ public class YodoApplication extends Application {
                 .applicationComponent(appComponent)
                 .build();
 
-        // Init secure preferences
         Hawk.init(this).build();
 
-        // Init timber
+        Fabric.with(this, new Crashlytics());
+
         if (BuildConfig.DEBUG) {
-            // Debug
             Timber.plant(new Timber.DebugTree() {
                 // Adds the line number
                 @Override
@@ -73,13 +47,12 @@ public class YodoApplication extends Application {
                 }
             });
         } else {
-            // Release
             Timber.plant(new CrashReportingTree());
         }
 
         YodoApi.init(this)
                 .setLog(BuildConfig.DEBUG)
-                .server(YodoApi.DEMO_IP, "E")
+                .server(BuildConfig.URL, BuildConfig.TAG)
                 .build();
     }
 
@@ -87,10 +60,15 @@ public class YodoApplication extends Application {
     private static class CrashReportingTree extends Timber.Tree {
         /** The max size of a line */
         private static final int MAX_LOG_LENGTH = 4000;
+
         @Override
         protected void log(int priority, String tag, @NonNull String message, Throwable t) {
             if (priority == Log.VERBOSE || priority == Log.DEBUG || priority == Log.INFO) {
                 return;
+            }
+
+            if (priority == Log.ERROR && t != null) {
+                Crashlytics.logException(t);
             }
 
             if (message.length() < MAX_LOG_LENGTH) {

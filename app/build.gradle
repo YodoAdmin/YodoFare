@@ -8,8 +8,8 @@ android {
         applicationId "co.yodo.fare"
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 4
-        versionName "2.3.0"
+        versionCode 5
+        versionName "2.3.1"
 
         vectorDrawables.useSupportLibrary = true
     }
@@ -22,6 +22,21 @@ android {
     dexOptions {
         maxProcessCount 4
         javaMaxHeapSize "2g"
+    }
+
+    flavorDimensions "default"
+    productFlavors {
+        full {
+            buildConfigField "String", "URL", "\"http://23.111.76.216\""
+            buildConfigField "String", "TAG", "\"P\""
+        }
+
+        demo {
+            buildConfigField "String", "URL", "\"http://23.111.79.52\""
+            buildConfigField "String", "TAG", "\"E\""
+            applicationIdSuffix ".demo"
+            versionNameSuffix "-demo"
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -76,9 +91,6 @@ dependencies {
 
     // -- Event Bus --
     implementation 'org.greenrobot:eventbus:3.1.1'
-
-    // -- Error Logger --
-    implementation 'ch.acra:acra:4.8.5'
 
     // -- Logging --
     implementation 'com.jakewharton.timber:timber:4.7.1'

@@ -61,16 +61,13 @@ public class AboutOption extends IOption {
         messageView.setText( message  );
 
         // Create the onClick listener
-        emailView.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent( Intent.ACTION_SEND );
-                String[] recipients = { email };
-                intent.putExtra( Intent.EXTRA_EMAIL, recipients ) ;
-                intent.putExtra( Intent.EXTRA_SUBJECT, hardwareToken );
-                intent.setType( "text/html" );
-                activity.startActivity( Intent.createChooser( intent, "Send Email" ) );
-            }
+        emailView.setOnClickListener(v -> {
+            Intent intent = new Intent( Intent.ACTION_SEND );
+            String[] recipients = { email };
+            intent.putExtra( Intent.EXTRA_EMAIL, recipients ) ;
+            intent.putExtra( Intent.EXTRA_SUBJECT, hardwareToken );
+            intent.setType( "text/html" );
+            activity.startActivity( Intent.createChooser( intent, "Send Email" ) );
         });
 
         // Generate the AlertDialog
