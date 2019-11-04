@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     defaultConfig {
         applicationId "co.yodo.fare"
-        minSdkVersion 15
-        targetSdkVersion 28
-        versionCode 5
-        versionName "2.3.1"
+        minSdkVersion 19
+        targetSdkVersion 29
+        versionCode 7
+        versionName "2.4.0"
 
         vectorDrawables.useSupportLibrary = true
     }
@@ -59,7 +59,7 @@ dependencies {
     }
 
     // -- Android --
-    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
@@ -75,9 +75,8 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
 
     // -- Injection
-
     implementation 'com.google.dagger:dagger:2.19'
-    provided 'javax.annotation:jsr250-api:1.0'
+    compileOnly 'javax.annotation:jsr250-api:1.0'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.17'
 
     // -- Networking --

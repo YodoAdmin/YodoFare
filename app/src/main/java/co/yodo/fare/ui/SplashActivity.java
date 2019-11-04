@@ -55,6 +55,7 @@ public class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_RECOVER_PLAY_SERVICES) {
             if (resultCode == RESULT_OK) {
                 // Google play services installed
@@ -219,24 +220,29 @@ public class SplashActivity extends AppCompatActivity {
      */
     private void saveFares( Params params ) {
         // Elderly
-        PrefUtils.saveFare( context, AppConfig.SPREF_ELDERLY_ZONE_1, params.getElderlyZone1().getPrice() );
-        PrefUtils.saveFare( context, AppConfig.SPREF_ELDERLY_ZONE_2, params.getElderlyZone2().getPrice() );
-        PrefUtils.saveFare( context, AppConfig.SPREF_ELDERLY_ZONE_3, params.getElderlyZone3().getPrice() );
+        if (params.getElderlyZone1() != null) {
+            PrefUtils.saveFare(context, AppConfig.SPREF_ELDERLY_ZONE_1, params.getElderlyZone1().getPrice());
+            PrefUtils.saveFare(context, AppConfig.SPREF_ELDERLY_ZONE_2, params.getElderlyZone2().getPrice());
+            PrefUtils.saveFare(context, AppConfig.SPREF_ELDERLY_ZONE_3, params.getElderlyZone3().getPrice());
+        }
 
-        // Adults
-        PrefUtils.saveFare( context, AppConfig.SPREF_ADULT_ZONE_1, params.getAdultZone1().getPrice() );
-        PrefUtils.saveFare( context, AppConfig.SPREF_ADULT_ZONE_2, params.getAdultZone2().getPrice() );
-        PrefUtils.saveFare( context, AppConfig.SPREF_ADULT_ZONE_3, params.getAdultZone3().getPrice() );
+        if (params.getAdultZone1() != null) {
+            PrefUtils.saveFare(context, AppConfig.SPREF_ADULT_ZONE_1, params.getAdultZone1().getPrice());
+            PrefUtils.saveFare(context, AppConfig.SPREF_ADULT_ZONE_2, params.getAdultZone2().getPrice());
+            PrefUtils.saveFare(context, AppConfig.SPREF_ADULT_ZONE_3, params.getAdultZone3().getPrice());
+        }
 
-        // Students
-        PrefUtils.saveFare( context, AppConfig.SPREF_STUDENT_ZONE_1, params.getStudentZone1().getPrice() );
-        PrefUtils.saveFare( context, AppConfig.SPREF_STUDENT_ZONE_2, params.getStudentZone2().getPrice() );
-        PrefUtils.saveFare( context, AppConfig.SPREF_STUDENT_ZONE_3, params.getStudentZone3().getPrice() );
+        if (params.getStudentZone1() != null) {
+            PrefUtils.saveFare(context, AppConfig.SPREF_STUDENT_ZONE_1, params.getStudentZone1().getPrice());
+            PrefUtils.saveFare(context, AppConfig.SPREF_STUDENT_ZONE_2, params.getStudentZone2().getPrice());
+            PrefUtils.saveFare(context, AppConfig.SPREF_STUDENT_ZONE_3, params.getStudentZone3().getPrice());
+        }
 
-        // Child
-        PrefUtils.saveFare( context, AppConfig.SPREF_CHILD_ZONE_1, params.getChildZone1().getPrice() );
-        PrefUtils.saveFare( context, AppConfig.SPREF_CHILD_ZONE_2, params.getChildZone2().getPrice() );
-        PrefUtils.saveFare( context, AppConfig.SPREF_CHILD_ZONE_3, params.getChildZone3().getPrice() );
+        if (params.getChildZone1() != null) {
+            PrefUtils.saveFare(context, AppConfig.SPREF_CHILD_ZONE_1, params.getChildZone1().getPrice());
+            PrefUtils.saveFare(context, AppConfig.SPREF_CHILD_ZONE_2, params.getChildZone2().getPrice());
+            PrefUtils.saveFare(context, AppConfig.SPREF_CHILD_ZONE_3, params.getChildZone3().getPrice());
+        }
     }
 
     /**

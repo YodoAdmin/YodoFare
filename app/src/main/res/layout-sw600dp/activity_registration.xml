@@ -1,8 +1,8 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/colorBackground"
     android:orientation="vertical">
 
@@ -81,6 +81,13 @@
                 android:onClick="restart"
                 android:textStyle="bold"
                 android:text="@string/text.already.registered"/>
+
+            <TextView
+                android:id="@+id/tvVersion"
+                style="@style/RegistrationLayout"
+                android:layout_marginTop="24dp"
+                android:gravity="end"
+                tools:text="@string/version"/>
 
         </LinearLayout>
 

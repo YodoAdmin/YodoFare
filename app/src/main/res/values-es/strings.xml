@@ -17,7 +17,7 @@
 
     <!-- Registration Messages -->
     <string name="text.register.hint">Ingrese su código de activación. Debe estar registrado como merchant antes de la activación.</string>
-    <string name="text.register.contact">Contacto: support@yodo.co</string>
+    <string name="text.register.contact">Contacto: support@ayodo.org</string>
     <string name="text.pos.code.hint">Código de Activación</string>
     <string name="text.already.registered">Ya registrado? Reinicie</string>
 
@@ -39,7 +39,7 @@
 
     <!-- About Messages -->
     <string name="text.about.message">Porfavor use el siguiente correo para contactarnos. Haremos todo lo posible para responderle rápidamente. Nosotros no venderemos o distribuiremos la información que usted nos provee.</string>
-    <string name="text.about.email">support@yodo.co</string>
+    <string name="text.about.email">support@ayodo.org</string>
 
     <!-- Exchange Response -->
     <string name="exchange_code">Código:</string>
